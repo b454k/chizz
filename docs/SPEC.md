@@ -114,9 +114,22 @@ defaulting to 2.5.
 **Theme** — dark (default) or light. Applied as `data-theme` on the root element;
 the dark palette is the base and the light one restates only the colours that differ.
 
-Mode, seconds and theme are all kept on the device. The mode and duration are shown
-together on the drawing, recall and result screens, and in the share text
-(`Havuzdan · 2,5 sn`).
+**Difficulty is derived, not chosen.** The name is read back from the two settings and
+shown on the home screen as they are adjusted:
+
+| Mode | Seconds | Name |
+|---|---|---|
+| Yazarak | any | Zor |
+| Havuzdan | under 4 | Zor |
+| Havuzdan | 4 to under 7 | Orta |
+| Havuzdan | 7 and over | Kolay |
+
+Typing is hard at any speed — you have to produce the word, not recognise it — so only
+the pool is graded by the clock.
+
+Mode, seconds and theme are all kept on the device. The difficulty, mode and duration
+are shown together on the drawing, recall and result screens, and in the share text
+(`Zor · Havuzdan · 2,5 sn`).
 
 This replaced four fixed difficulties (`easy`, `medium`, `hard`, `impossible`), which
 conflated the two variables: `medium` and `hard` differed only in answer method while
@@ -300,7 +313,7 @@ no IP, no account.
 ### Score board
 
 On the result screen of a shared round, and on the drawer's `scores` screen, the board
-polls every 6 seconds while the screen is visible, pausing when the tab is hidden and
+polls every 2 seconds while the screen is visible, pausing when the tab is hidden and
 refreshing immediately on return. Your own row is inserted locally so it appears
 before KV's listing catches up.
 
@@ -346,7 +359,35 @@ Every access is wrapped in `try`/`catch`: Safari in private mode throws on
 `localStorage` rather than quietly doing nothing. A round that cannot be stored is
 still playable; it just will not survive a reload.
 
-## 15. Hosting
+## 15. Sound and zoom
+
+**Sound.** Three tones, synthesised with the Web Audio API rather than loaded, so the
+page still pulls nothing from outside: a beep on each of 3-2-1, a higher one as drawing
+starts, and a three-note rise when the score board appears. Browsers refuse to start
+audio without a user gesture, so the context is created and resumed when start is
+pressed, and on the first tap anywhere as a fallback for rounds reached through a link.
+Every call is wrapped and guarded on the context actually running; no audio never stops
+the game.
+
+**Zoom.** The page must not zoom at all: a stray double-tap while drawing zoomed in, and
+`user-scalable=no` then prevented pinching back out, leaving the player stuck. Four
+things together:
+
+- `touch-action: manipulation` on `html` and `body`
+- Safari's `gesturestart` / `gesturechange` / `gestureend` are all cancelled
+- a second finger anywhere but the drawing pad is treated as a pinch and cancelled
+- the second tap of a genuine double-tap is swallowed on `touchend`
+
+That last one matches on **time and position together**. Guarding on time alone also
+swallowed the second of two quick taps in different places, which is exactly how the
+word pool is played — cell, then chip, then cell.
+
+Separately, Safari zooms into any focused field whose text is under 16px, which is the
+other half of the same trap. Inputs inherit the 16px body font; the share fallback
+textarea did not, and it is focused and selected programmatically, so it zoomed without
+the player touching it.
+
+## 16. Hosting
 
 Cloudflare Pages, static assets from `public/`, Functions from `functions/`, one KV
 namespace bound as `GAMES`. (The namespace's own title in the dashboard is still

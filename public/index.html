@@ -3,6 +3,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Chizz</title>
+<!-- Inline so it costs no request and keeps the "nothing loaded from outside" rule. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23131418'/%3E%3Ctext x='32' y='34' font-family='Helvetica,Arial,sans-serif' font-size='46' font-weight='700' fill='%23ff5c3d' text-anchor='middle' dominant-baseline='central'%3Ec%3C/text%3E%3C/svg%3E">
 <style>
   :root{
     color-scheme:dark;
@@ -37,7 +39,7 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   /* manipulation keeps panning and pinch but kills double-tap zoom, which fired
      constantly while drawing fast. The pad itself stays touch-action:none. */
-  html{touch-action:manipulation;}
+  html, body{touch-action:manipulation;}
   /* A drag that starts on a label must not select text mid-round. Inputs opt back in. */
   body{-webkit-user-select:none; -ms-user-select:none; user-select:none;}
   input, textarea{-webkit-user-select:text; user-select:text;}
@@ -266,7 +268,7 @@
   #copyNote{color:var(--ok); font-weight:600; font-size:14px; text-align:center; min-height:20px; margin:2px 0 0;}
   #fallback{
     width:100%; margin-top:10px; border:2px solid var(--line); border-radius:12px; padding:10px;
-    font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre; display:none;
+    font:16px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre; display:none;
   }
   .btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px 0 16px;}
 
@@ -345,6 +347,10 @@
           <output id="secsOut"></output>
         </div>
         <input type="range" id="secs" min="1" max="10" step="0.5" data-tal="perWord">
+        <div class="srow">
+          <span class="lbl" data-t="difficulty"></span>
+          <output id="diffOut"></output>
+        </div>
         <div class="srow">
           <span class="lbl" data-t="theme"></span>
           <div class="seg" id="themes"></div>
@@ -660,6 +666,10 @@ const TEXT = {
   themeLight:       "Açık",
   modePool:         "Havuzdan",
   modeTyped:        "Yazarak",
+  diffEasy:         "Kolay",
+  diffMedium:       "Orta",
+  diffHard:         "Zor",
+  difficulty:       "Zorluk",
   totalTime:        "toplam",
   enterCode:        "4 haneli kodu gir.",
 
@@ -746,7 +756,9 @@ function applyText(){
   });
 }
 
-function diffName(){ return TEXT[modeOf().key] + " \u00b7 " + secsText(secs); }
+function diffName(){
+  return diffWord() + " \u00b7 " + TEXT[modeOf().key] + " \u00b7 " + secsText(secs);
+}
 
 function boardHeading(){
   const who = drawerName ? TEXT.drawingsOf.replace("{name}", drawerName) : TEXT.theseDrawings;
@@ -793,6 +805,18 @@ function clampSecs(v){
 }
 
 function secsText(v){ return String(v).replace(".", ",") + " sn"; }
+
+/* The difficulty is no longer chosen, it is read back from what was chosen. Typing
+   is hard at any speed -- you have to produce the word, not recognise it -- so only
+   the pool is graded by the clock. */
+function diffBand(){
+  if (modeId === "typed") return "diffHard";
+  if (secs < 4)  return "diffHard";
+  if (secs < 7)  return "diffMedium";
+  return "diffEasy";
+}
+
+function diffWord(){ return TEXT[diffBand()]; }
 
 function applyTheme(){
   document.documentElement.dataset.theme = theme;
@@ -962,13 +986,59 @@ function buildHome(){
 
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
+  $("diffOut").textContent = diffWord();
 }
 
 $("secs").addEventListener("input", function(){
   secs = clampSecs($("secs").value);
   $("secsOut").textContent = secsText(secs);
+  $("diffOut").textContent = diffWord();
 });
 $("secs").addEventListener("change", rememberSettings);
+
+/* --------------------------------------------------------------- sound --- */
+/* Tones are synthesised rather than loaded, so the page still pulls nothing from
+   outside. A browser will not let audio start without a gesture, so the context is
+   created and resumed on the first tap -- pressing start, in practice -- and every
+   later beep runs on that one permission. */
+let audio = null;
+
+function wakeAudio(){
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!audio) audio = new Ctx();
+    if (audio.state === "suspended") audio.resume();
+  } catch(e){ audio = null; }      // no audio is not a reason to stop the game
+}
+
+function tone(freq, startIn, length, peak){
+  if (!audio || audio.state !== "running") return;
+  try {
+    const t0 = audio.currentTime + startIn;
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, t0);
+    // Ramped rather than switched, so it does not click at either end.
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(peak, t0 + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
+    osc.connect(gain); gain.connect(audio.destination);
+    osc.start(t0); osc.stop(t0 + length + 0.02);
+  } catch(e){}
+}
+
+function beepCount(){ tone(660, 0, 0.12, 0.14); }            // 3, 2, 1
+function beepGo(){    tone(990, 0, 0.22, 0.17); }            // draw
+function beepScores(){                                        // the board is in
+  tone(523.25, 0,    0.16, 0.11);
+  tone(659.25, 0.13, 0.16, 0.11);
+  tone(783.99, 0.26, 0.30, 0.13);
+}
+
+// Any tap will do, in case the round was reached through a link rather than start.
+document.addEventListener("pointerdown", wakeAudio, { once: true });
 
 /* -------------------------------------------------------------- game flow --- */
 
@@ -1004,9 +1074,10 @@ function startGame(){
   const beat = function(){
     num.textContent = String(n);
     num.classList.remove("pop"); void num.offsetWidth; num.classList.add("pop");
+    beepCount();
     n--;
     if (n >= 1) cdTimer = setTimeout(beat, 1000);
-    else        cdTimer = setTimeout(startDrawPhase, 1000);
+    else        cdTimer = setTimeout(function(){ beepGo(); startDrawPhase(); }, 1000);
   };
   beat();
 }
@@ -1538,6 +1609,7 @@ function showBoard(){
   // A score needs a name to sit under. Without one the board is still readable,
   // it just has no row for this player until they add one.
   $("boardNameRow").hidden = !!myName;
+  beepScores();
   if (myName && !scoreSent){ scoreSent = true; sendScore(); }
   renderScores();
   fetchScores();
@@ -1593,6 +1665,10 @@ function fetchScores(){
 
 /* Refresh as friends finish. A read is a single get on the server side, so
    this poll is cheap. */
+// A read is a single KV get, and the free tier allows 100,000 a day, so a board
+// being watched for ten minutes costs about 240 of them. Six seconds was slow
+// enough that a friend finishing felt like nothing had happened.
+const POLL_MS = 2000;
 let boardTimer = null;
 
 function startBoardPoll(){
@@ -1603,14 +1679,14 @@ function startBoardPoll(){
     if (!visible){ stopBoardPoll(); return; }   // stop once the screen is left
     if (document.hidden) return;               // do not fetch while backgrounded
     fetchScores();
-  }, 6000);
+  }, POLL_MS);
 }
 
 function stopBoardPoll(){
   if (boardTimer){ clearInterval(boardTimer); boardTimer = null; }
 }
 
-// Coming back from another app should refresh at once, not wait 6 seconds.
+// Coming back from another app should refresh at once, not wait for the next tick.
 document.addEventListener("visibilitychange", function(){
   if (!document.hidden && boardTimer) fetchScores();
 });
@@ -1968,7 +2044,7 @@ $("joinCode").addEventListener("keydown", function(e){
 
 /* ------------------------------------------------------------------ wiring --- */
 
-$("start").onclick    = startGame;
+$("start").onclick    = function(){ wakeAudio(); startGame(); };
 $("toRecall").onclick = buildRecall;
 $("finish").onclick   = function(){ closeSheet(); closeModal(); buildResult(); };
 
@@ -1989,7 +2065,35 @@ $("share").onclick = function(){
 $("again").onclick = function(){ clearTimeout(cdTimer); clearUrl(); startGame(); };
 $("home2").onclick = function(){ clearTimeout(cdTimer); clearUrl(); closeSheet(); closeModal(); show("home"); };
 
-document.addEventListener("gesturestart", function(e){ e.preventDefault(); });
+/* iOS stopped honouring user-scalable=no years ago, so the meta tag alone leaves
+   double-tap zoom working. Worse, once it has zoomed there is no way back out,
+   because the same tag blocks pinching out again. Three things are needed:
+   touch-action:manipulation in the CSS, refusing Safari's own pinch gestures, and
+   swallowing the second tap of a double-tap before it counts as one. */
+["gesturestart", "gesturechange", "gestureend"].forEach(function(type){
+  document.addEventListener(type, function(e){ e.preventDefault(); }, { passive: false });
+});
+
+let lastTapAt = 0, lastTapX = 0, lastTapY = 0;
+document.addEventListener("touchend", function(e){
+  const t = e.changedTouches && e.changedTouches[0];
+  const now = Date.now();
+  const x = t ? t.clientX : 0, y = t ? t.clientY : 0;
+  // Time and place both, so tapping a cell and then a chip in quick succession is
+  // still two taps, while tapping the same spot twice is the zoom gesture and dies.
+  if (now - lastTapAt <= 350 && Math.abs(x - lastTapX) < 30 && Math.abs(y - lastTapY) < 30){
+    e.preventDefault();
+  }
+  lastTapAt = now; lastTapX = x; lastTapY = y;
+}, { passive: false });
+
+// A second finger anywhere but the pad is a pinch, never a drawing gesture.
+document.addEventListener("touchmove", function(e){
+  if (e.touches.length > 1 && e.target !== pad) e.preventDefault();
+}, { passive: false });
+
+// Safari also zooms when a form field is focused and the font is under 16px.
+document.addEventListener("dblclick", function(e){ e.preventDefault(); }, { passive: false });
 
 myName = savedName();             // the device already knows who is playing
 loadSettings();
