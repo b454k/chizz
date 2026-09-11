@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# environment / secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# cloudflare wrangler local state (contains account id and email)
+.wrangler/
+
+# claude code local settings
+.claude/settings.local.json
+
+# os junk
+.DS_Store
+Thumbs.db
+desktop.ini

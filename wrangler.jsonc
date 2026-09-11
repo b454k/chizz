@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "chizz",
+  "compatibility_date": "2026-09-07",
+
+  // Only this folder is uploaded to the site. functions/ stays at the root and
+  // Cloudflare Pages maps it to /api/... without serving it as a static asset.
+  "pages_build_output_dir": "public",
+
+  "kv_namespaces": [
+    {
+      "binding": "GAMES",
+      // Replace with the id printed by: wrangler kv namespace create GAMES
+      "id": "PUT_YOUR_KV_NAMESPACE_ID_HERE"
+    }
+  ]
+}

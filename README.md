@@ -1,0 +1,79 @@
+# Chizz
+
+A drawing and memory game that runs in the browser.
+**Play at [chizz.party](https://chizz.party)**
+
+You get 20 words, a couple of seconds each, and scribble something for every one.
+Then the drawings come back in a shuffled grid and you have to remember which was
+which. The words in a round are picked to share silhouettes — `fil` and `kanepe` are
+the same rough shape — so your own drawings turn against you.
+
+You can also send a round to a friend. They guess your drawings and land on a live
+score board for that round.
+
+The interface is in Turkish.
+
+> **Work in progress.** It works and people are playing it, but the difficulty
+> balance has not been tested on real players yet and there is no English edition.
+
+## How to play
+
+1. Pick a difficulty and press start
+2. Enter a name, max 5 characters
+3. Draw all 20 words — the timer advances on its own, there is no way back
+4. Either guess your own drawings, or send them to a friend
+5. Assign a word to each drawing, then finish
+
+Four difficulties. Time pressure and answer method are separated on purpose, so `medium`
+and `hard` give you the same seconds and differ only in how you answer:
+
+| Level | Per word | Answering |
+|---|---|---|
+| Easy | 4 s | Pick from a word pool |
+| Medium | 2.5 s | Pick from a word pool |
+| Hard | 2.5 s | Type it |
+| Impossible | 1.5 s | Type it |
+
+Typed answers forgive a one-character typo, so `kanepa` still counts for `kanepe`.
+
+## Running it locally
+
+Solo play needs nothing at all — open `public/index.html` in a browser.
+
+The duel and score board need the API, which means the Cloudflare toolchain:
+
+```bash
+npx wrangler pages dev
+```
+
+Then open `http://localhost:8788`. On Windows, `start.cmd` does the same thing on a
+double-click. If your project path is long, workerd may fail with `SQLITE_CANTOPEN`
+because the local state directory exceeds the 260-character path limit — pass
+`--persist-to C:/wr` to work around it.
+
+Deploying needs your own Cloudflare account, a KV namespace bound as `GAMES`, and its
+id in `wrangler.jsonc`. Full steps: [docs/DEPLOY.md](docs/DEPLOY.md).
+
+## Tech
+
+- One `public/index.html` — HTML, CSS and vanilla JavaScript in a single file. No
+  framework, no build step, no dependencies, nothing loaded from a CDN.
+- Drawings are stored as stroke coordinate arrays normalised to 0–1, never as images,
+  so they rescale cleanly into small grid cells. For transport they are quantised to
+  0–255 integers with near-duplicate points dropped.
+- Pointer events with `touch-action: none`, so it is drawable with a finger on a phone
+  without scrolling the page.
+- [Cloudflare Pages](https://pages.cloudflare.com/) for hosting, Pages Functions for
+  the API, Workers KV for storage. Saved rounds expire after 30 days.
+- No account, no login, no tracking, no `localStorage`. Stored data is the words, the
+  drawings, a difficulty and a 5-character name.
+
+## Docs
+
+- [docs/SPEC.md](docs/SPEC.md) — what the game actually does right now, written from
+  the code
+- [docs/DEPLOY.md](docs/DEPLOY.md) — hosting and deployment setup (Turkish)
+- [docs/CHANGELOG.md](docs/CHANGELOG.md)
+- `docs/chizz-original-spec.md` and `docs/chizz-v15-spec.md` — the original design
+  briefs, translated from Turkish and kept as historical documents. The code has moved
+  well past them; SPEC.md lists where they disagree.

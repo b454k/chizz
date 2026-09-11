@@ -1,0 +1,1596 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Chizz</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#131418;
+    --panel:#1b1d23;
+    --panel2:#23262e;
+    --ink:#f1f2f4;
+    --muted:#949aa5;
+    --line:#2f333c;
+    --accent:#ff5c3d;
+    --ok:#4ade80;
+    --no:#f87171;
+    --paper:#e8e5de;
+    --pen:#17181c;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  /* keep [hidden] winning over rules that set display:flex/block */
+  [hidden]{display:none !important;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overscroll-behavior:none;
+    -webkit-text-size-adjust:100%;
+  }
+  #app{
+    max-width:600px; margin:0 auto; height:100%;
+    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    display:flex; flex-direction:column;
+  }
+  .screen{display:none; flex:1; min-height:0; flex-direction:column;}
+  .screen.on{display:flex;}
+  #home, #send, #result{overflow-y:auto; -webkit-overflow-scrolling:touch;}
+
+  h1{font-size:34px; letter-spacing:-.02em; margin:24px 0 6px;}
+
+  button{font:inherit; color:inherit; background:none; border:none; padding:0; cursor:pointer;}
+  input{font:inherit; color:inherit;}
+
+  /* home screen: vertically centred and plain.
+     "safe centre": drops the centring when the viewport is short, otherwise the
+     top gets clipped with no way to scroll to it. */
+  #home{justify-content:center; justify-content:safe center;}
+  .hwrap{width:100%; max-width:340px; margin:0 auto; padding:28px 0; flex:none;}
+  #home h1{font-size:52px; text-align:center; margin:0 0 30px; letter-spacing:-.04em;}
+
+  .diffs{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .diff{
+    border:2px solid var(--line); border-radius:14px; padding:15px 8px; text-align:center;
+    background:var(--panel); text-transform:lowercase;
+  }
+  .diff.sel{border-color:var(--ink); background:var(--panel2);}
+  .diff b{display:block; font-size:16px;}
+
+  .primary{
+    display:block; width:100%; background:var(--ink); color:var(--bg); border-radius:14px;
+    padding:17px; font-size:18px; font-weight:700; text-align:center; margin:22px 0 0;
+  }
+  .primary:disabled{opacity:.28;}
+  .ghost{
+    display:block; width:100%; border:2px solid var(--line); border-radius:14px;
+    padding:14px; font-size:16px; font-weight:600; text-align:center;
+  }
+  .txt{
+    width:100%; border:2px solid var(--line); border-radius:14px; padding:14px 15px;
+    background:var(--panel); outline:none;
+  }
+  .txt:focus{border-color:var(--ink);}
+
+  /* joining with a code */
+  #joinRow{display:flex; gap:10px; margin-top:28px;}
+  #joinCode{
+    flex:1; text-align:center; text-transform:uppercase; letter-spacing:.22em;
+    font-weight:700; font-size:17px; padding:13px 10px;
+  }
+  #joinCode::placeholder{letter-spacing:normal; text-transform:none; font-weight:600; color:var(--muted);}
+  #joinGo{
+    width:auto; padding:13px 22px; border:2px solid var(--line); border-radius:14px;
+    font-weight:700; color:var(--muted);
+  }
+  #joinGo:active{background:var(--panel2);}
+  .err{color:var(--no); font-size:14px; font-weight:600; margin:10px 0 0; min-height:19px;}
+
+  /* countdown */
+  #countdown{align-items:center; justify-content:center;}
+  #cdNum{font-size:26vh; font-weight:800; line-height:1; letter-spacing:-.05em;}
+  #cdNum.pop{animation:pop .28s ease-out;}
+  @keyframes pop{from{transform:scale(.6); opacity:.2} to{transform:scale(1); opacity:1}}
+
+  /* draw */
+  #draw{padding-top:10px;}
+  .drawtop{display:flex; align-items:center; gap:12px;}
+  .headrow{display:flex; align-items:center; gap:10px;}
+  .back{
+    flex:none; width:36px; height:36px; border-radius:11px; border:2px solid var(--line);
+    color:var(--muted); font-size:18px; line-height:1; background:var(--panel);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .back:active{background:var(--panel2);}
+
+  /* leave-game confirmation */
+  #confirm{
+    position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
+    display:none; align-items:center; justify-content:center; padding:16px;
+  }
+  #confirm.on{display:flex;}
+  #confirmCard{
+    background:var(--panel); border-radius:18px; padding:20px; width:100%; max-width:360px;
+    box-shadow:0 20px 60px rgba(0,0,0,.28); text-align:center;
+  }
+  #confirmCard b{display:block; font-size:19px; margin-bottom:6px;}
+  #confirmCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
+  #confirmCard .primary{margin:14px 0 8px;}
+  #word{font-size:34px; font-weight:800; letter-spacing:-.02em; flex:1; min-width:0;
+        overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  #counter{font-variant-numeric:tabular-nums; color:var(--muted); font-weight:700; font-size:15px;}
+  #track{height:6px; background:var(--line); border-radius:99px; margin:10px 0 12px; overflow:hidden;}
+  #bar{height:100%; background:var(--accent); transform-origin:left center; transform:scaleX(1);}
+  #stage{flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding-bottom:14px;}
+  #pad{background:var(--paper); border:2px solid var(--line); border-radius:16px; touch-action:none; display:block;}
+
+  /* ara ekranlar */
+  .mid{align-items:center; justify-content:center; text-align:center;}
+  .mid h2{font-size:28px; margin:0 0 8px; letter-spacing:-.02em;}
+  .mid p{color:var(--muted); margin:0 0 26px;}
+  .mid .stack{width:100%; max-width:320px;}
+  .mid .stack .primary{margin:0 0 10px;}
+
+  /* recall + result */
+  .head{padding:16px 0 12px;}
+  .head h2{font-size:24px; margin:0; letter-spacing:-.02em;}
+  .head p{color:var(--muted); margin:4px 0 0; font-size:14px;}
+  .scroll{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  #result .scroll{flex:none; overflow:visible;}
+  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding-bottom:14px;}
+  @media (min-width:520px){ .grid{grid-template-columns:repeat(5,1fr);} }
+
+  .cell{position:relative; text-align:center;}
+  .box{
+    position:relative; width:100%; aspect-ratio:1/1; border:2px solid var(--line);
+    border-radius:12px; overflow:hidden; background:var(--paper);
+  }
+  .cell.sel .box{border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,77,46,.18);}
+  .cell.done .box{border-color:var(--ink);}
+  .cell.right .box{border-color:var(--ok);}
+  .cell.wrong .box{border-color:var(--no);}
+  .box canvas{position:absolute; inset:0; width:100%; height:100%;}
+  .cap{font-size:12px; line-height:1.25; margin-top:4px; min-height:15px; word-break:break-word;}
+  .cap .bad{color:var(--no); text-decoration:line-through;}
+  .cap .good{color:var(--ok); font-weight:700;}
+  .cap .pick{font-weight:700;}
+
+  .foot{border-top:1px solid var(--line); padding:10px 0 14px; display:flex; align-items:center; gap:12px;}
+  .foot .count{color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;}
+  .foot .primary{margin:0; flex:1; padding:15px;}
+
+  /* word pool (bottom sheet) */
+  #sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--panel);
+    border-top:1px solid var(--line); box-shadow:0 -10px 30px rgba(0,0,0,.10);
+    padding:12px 16px calc(16px + env(safe-area-inset-bottom));
+    transform:translateY(105%); transition:transform .16s ease-out; visibility:hidden;
+  }
+  #sheet.on{transform:translateY(0); visibility:visible;}
+  #sheet .row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  #sheet .row b{font-size:15px;}
+  #sheet .x{font-size:22px; line-height:1; color:var(--muted); padding:4px 8px;}
+  #chips{display:flex; flex-wrap:wrap; gap:8px; max-height:44vh; overflow-y:auto;}
+  .chip{border:2px solid var(--line); border-radius:99px; padding:10px 15px; font-size:15px; font-weight:600; background:var(--panel);}
+  .chip:active{background:var(--panel2);}
+
+  /* typed answer: a card near the top, so the keyboard cannot cover it */
+  #modal{
+    position:fixed; inset:0; bottom:auto; height:100%; z-index:30; background:rgba(0,0,0,.62);
+    display:none; justify-content:center; align-items:flex-end;
+  }
+  #modal.on{display:flex;}
+  #modalCard{
+    background:var(--panel); border-radius:20px 20px 0 0; width:100%; max-width:600px;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+    box-shadow:0 -14px 50px rgba(0,0,0,.45);
+  }
+  #modalPrev{
+    width:min(52vw, 200px); height:min(52vw, 200px); display:block; margin:0 auto 14px;
+    border:2px solid var(--line); border-radius:14px; background:var(--paper);
+    flex:none;
+  }
+  /* let the card scroll instead of overflowing when the keyboard shrinks the space */
+  #modalCard{max-height:100%; overflow-y:auto;}
+  #modalCard .primary{margin:12px 0 0;}
+  #modalSkip{display:block; width:100%; text-align:center; color:var(--muted); font-size:14px; font-weight:600; padding:12px 0 2px;}
+
+  /* result */
+  #score{font-size:42px; font-weight:800; letter-spacing:-.03em; margin:14px 0 2px; line-height:1.1;}
+  /* difficulty caption on the drawing and result screens: small, centred, faint */
+  .lvl{
+    text-align:center; font-size:11px; font-weight:700; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--muted); opacity:.45;
+    margin:10px 0 4px; flex:none;
+  }
+  #scoreSub{margin:10px 0 6px;}
+  #copyNote{color:var(--ok); font-weight:600; font-size:14px; text-align:center; min-height:20px; margin:2px 0 0;}
+  #fallback{
+    width:100%; margin-top:10px; border:2px solid var(--line); border-radius:12px; padding:10px;
+    font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre; display:none;
+  }
+  .btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px 0 16px;}
+
+  /* duel: send screen */
+  #send .wrap{margin:auto 0; padding:20px 0;}
+  #send h2{font-size:26px; margin:0 0 8px; letter-spacing:-.02em;}
+  #send p{color:var(--muted); margin:0 0 22px;}
+  #code{
+    font-size:44px; font-weight:800; letter-spacing:.14em; text-align:center;
+    border:2px dashed var(--line); border-radius:16px; padding:18px 10px; margin:0 0 14px;
+  }
+  #link{
+    display:block; width:100%; border:2px solid var(--line); border-radius:12px; padding:12px;
+    font:13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; word-break:break-all; text-align:center;
+    color:var(--muted); margin-bottom:12px;
+  }
+  .spin{color:var(--muted); font-weight:600; text-align:center; padding:10px 0;}
+
+  /* cell number - dark, because it sits on the paper */
+  .num{
+    position:absolute; top:3px; left:5px; font-size:11px; font-weight:700;
+    color:#a9a49a; font-variant-numeric:tabular-nums; pointer-events:none;
+  }
+
+  /* score tablosu */
+  #board{margin:18px 0 4px;}
+  #board h3{font-size:15px; margin:0 0 10px; color:var(--muted); font-weight:700;
+            letter-spacing:.06em; text-transform:uppercase;}
+  .brow{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px;
+    background:var(--panel); margin-bottom:6px;
+  }
+  .brow.me{background:var(--panel2); box-shadow:inset 0 0 0 2px var(--accent);}
+  .brow .rk{width:22px; color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;}
+  .brow .nm{flex:1; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .brow .sc{font-weight:800; font-variant-numeric:tabular-nums;}
+  #boardEmpty, #scoresEmpty{color:var(--muted); font-size:14px; padding:4px 0 8px;}
+  .bnote{color:var(--muted); font-size:12px; margin:8px 0 0;}
+  #nameRow{display:flex; gap:10px; margin-bottom:10px;}
+  #nameRow .txt{flex:1; text-align:center; font-weight:700; letter-spacing:.08em;}
+  #nameGo{width:auto; padding:14px 20px; border:2px solid var(--line); border-radius:14px; font-weight:700;}
+  #fallback{background:var(--panel); color:var(--ink);}
+  #modalPrev{background:var(--paper);}
+</style>
+
+<div id="app">
+
+  <!-- ============ ANA EKRAN ============ -->
+  <section class="screen on" id="home">
+    <div class="hwrap">
+      <h1>chizz</h1>
+      <div class="diffs" id="diffs"></div>
+      <button class="primary" id="start" data-t="start"></button>
+      <div id="joinRow">
+        <input class="txt" id="joinCode" maxlength="4" data-tph="codePlaceholder"
+               autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">
+        <button id="joinGo" data-t="join"></button>
+      </div>
+      <p class="err" id="joinErr"></p>
+    </div>
+  </section>
+
+  <!-- ============ AD SORMA ============ -->
+  <section class="screen mid" id="askName">
+    <div class="stack">
+      <h2 data-t="namePrompt"></h2>
+      <input class="txt" id="playerName" maxlength="5" data-tph="namePlaceholder"
+             autocorrect="off" spellcheck="false" enterkeyhint="go">
+      <button class="primary" id="nameNext" data-t="continue"></button>
+      <p class="err" id="nameErr"></p>
+    </div>
+  </section>
+
+  <!-- ============ COUNTDOWN ============ -->
+  <section class="screen" id="countdown">
+    <div id="cdNum">3</div>
+  </section>
+
+  <!-- ============ DRAWING ============ -->
+  <section class="screen" id="draw">
+    <p class="lvl" id="drawLevel"></p>
+    <div class="drawtop">
+      <button class="back" id="backDraw" data-tal="backToMenu">←</button>
+      <div id="word"></div>
+      <div id="counter">1 / 20</div>
+    </div>
+    <div id="track"><div id="bar"></div></div>
+    <div id="stage"><canvas id="pad"></canvas></div>
+  </section>
+
+  <!-- ============ ARA EKRAN ============ -->
+  <section class="screen mid" id="between">
+    <h2 data-t="drawingsDone"></h2>
+    <p data-t="whatNow"></p>
+    <div class="stack">
+      <button class="primary" id="toSend" data-t="sendToFriend"></button>
+      <button class="ghost" id="toRecall" data-t="guessMyself"></button>
+    </div>
+  </section>
+
+  <!-- ============ SEND ============ -->
+  <section class="screen" id="send">
+    <div class="wrap">
+      <div id="sendForm">
+        <h2 data-t="sendToFriend"></h2>
+        <p data-t="sendIntro"></p>
+        <button class="primary" id="sendGo" data-t="send"></button>
+        <p class="err" id="sendErr"></p>
+        <button class="ghost" id="sendBack" style="margin-top:10px" data-t="cancel"></button>
+      </div>
+
+      <div id="sendBusy" class="spin" hidden data-t="sending"></div>
+
+      <div id="sendDone" hidden>
+        <h2 data-t="ready"></h2>
+        <p data-t="shareCodeOrLink"></p>
+        <div id="code"></div>
+        <div id="link"></div>
+        <button class="primary" id="linkCopy" style="margin:0 0 10px" data-t="copyLink"></button>
+        <p id="linkNote" class="err" style="color:var(--ok)"></p>
+        <button class="ghost" id="toScores" style="margin-bottom:10px" data-t="watchScores"></button>
+        <button class="ghost" id="doneRecall" style="margin-bottom:10px" data-t="guessMineToo"></button>
+        <button class="ghost" id="doneHome" data-t="home"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LOADING (duel link) ============ -->
+  <section class="screen mid" id="loading">
+    <h2 id="loadTitle"></h2>
+    <p id="loadMsg"></p>
+    <div class="stack"><button class="ghost" id="loadHome" hidden data-t="backHome"></button></div>
+  </section>
+
+  <!-- ============ SCORE WATCH (for the drawer) ============ -->
+  <section class="screen" id="scores">
+    <div class="head">
+      <div class="headrow">
+        <button class="back" id="scoresBack" data-tal="back">←</button>
+        <h2 id="scoresTitle"></h2>
+      </div>
+      <p data-t="scoresNoteLive"></p>
+    </div>
+    <div class="scroll">
+      <p id="scoresEmpty" hidden data-t="nobodyFinished"></p>
+      <div id="scoresList"></div>
+    </div>
+  </section>
+
+  <!-- ============ TANIMA ============ -->
+  <section class="screen" id="recall">
+    <p class="lvl" id="recallLevel"></p>
+    <div class="head">
+      <div class="headrow">
+        <button class="back" id="backRecall" data-tal="backToMenu">←</button>
+        <h2 id="recallTitle"></h2>
+      </div>
+      <p id="recallHint"></p>
+    </div>
+    <div class="scroll"><div class="grid" id="recallGrid"></div></div>
+    <div class="foot">
+      <span class="count" id="assigned">0 / 20</span>
+      <button class="primary" id="finish" disabled data-t="finish"></button>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="result">
+    <p class="lvl" id="scoreSub"></p>
+    <div id="score"></div>
+    <div class="scroll"><div class="grid" id="resultGrid"></div></div>
+    <div style="padding-top:8px">
+      <div id="board" hidden>
+        <h3 id="boardTitle"></h3>
+        <p id="boardEmpty" hidden data-t="firstToPlay"></p>
+        <div id="boardList"></div>
+        <p class="bnote" data-t="scoresNoteResult"></p>
+      </div>
+      <button class="primary" id="share" style="margin:0 0 6px" data-t="share"></button>
+      <p id="copyNote"></p>
+      <textarea id="fallback" rows="7" readonly></textarea>
+      <div class="btnrow">
+        <button class="ghost" id="again" data-t="playAgain"></button>
+        <button class="ghost" id="home2" data-t="home"></button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="sheet">
+  <div class="row"><b id="sheetTitle" data-t="pickWord"></b><button class="x" id="sheetX">✕</button></div>
+  <div id="chips"></div>
+</div>
+
+<div id="confirm">
+  <div id="confirmCard">
+    <b data-t="leaveTitle"></b>
+    <p data-t="leaveBody"></p>
+    <button class="primary" id="confirmStay" data-t="stay"></button>
+    <button class="ghost" id="confirmLeave" data-t="leave"></button>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="modalCard">
+    <canvas id="modalPrev" width="420" height="420"></canvas>
+    <form id="modalForm">
+      <input class="txt" id="modalInput" maxlength="30" data-tph="whatIsThis"
+             autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <button class="primary" type="submit" data-t="save"></button>
+    </form>
+    <button id="modalSkip" data-t="leaveBlank"></button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------- data --- */
+
+const SETS = [
+  { id:"set-01",   // yuvarlak / köşeli
+    familyA:["top","elma","güneş","saat","tekerlek","balon","portakal","tabak","ay","yüzük"],
+    familyB:["kutu","ev","televizyon","kitap","pencere","buzdolabı","valiz","telefon","kapı","çanta"] },
+  { id:"set-02",   // yatık kütle / dikey uzun
+    familyA:["fil","kanepe","inek","masa","otobüs","tren","timsah","köprü","araba","ayı"],
+    familyB:["ağaç","insan","lamba","şişe","kule","şemsiye","mum","zürafa","kaktüs","süpürge"] },
+  { id:"set-03",   // üçgen tepeli / uzun ince çubuk
+    familyA:["dağ","çadır","çam","pizza","dondurma","şapka","roket","yelkenli","çatı","huni"],
+    familyB:["kalem","kaşık","anahtar","çekiç","diş fırçası","balık","kılıç","tarak","cetvel","sosis"] },
+  { id:"set-04",   // kıvrımlı / düz çizgili
+    familyA:["bulut","kalp","yılan","ahtapot","çiçek","el","damla","dalga","kedi","kurdele"],
+    familyB:["merdiven","çit","bayrak","tuğla","tabela","raf","çerçeve","klavye","ütü","gözlük"] },
+  { id:"set-05",   // kanatlı / saplı-tutamaklı
+    familyA:["kuş","uçak","kelebek","arı","uçurtma","yarasa","helikopter","sinek","kuğu","tavuk"],
+    familyB:["fincan","kova","tencere","sepet","çaydanlık","tava","kupa","sürahi","cezve","kilit"] },
+  { id:"set-06",   // yuvarlak / yatık kütle
+    familyA:["karpuz","düğme","para","simit","göz","kavun","zil","nar","top","saat"],
+    familyB:["at","koyun","kaplumbağa","bank","kamyon","domuz","köpek","yatak","piyano","sehpa"] },
+  { id:"set-07",   // dikey uzun / köşeli
+    familyA:["direk","fener","baca","minare","sütun","vazo","termos","ağaç","lamba","şişe"],
+    familyB:["tuğla","çerçeve","sandık","zarf","dolap","tablet","klavye","çamaşır makinesi","kitap","kapı"] },
+  { id:"set-08",   // uzun ince çubuk / ışınsal-yıldız
+    familyA:["çatal","bıçak","tornavida","fırça","muz","havuç","kürek","flüt","kalem","kaşık"],
+    familyB:["yıldız","kar tanesi","çark","pusula","örümcek","denizyıldızı","ateş","patlama","palmiye","çiçek"] },
+  { id:"set-09",   // kıvrımlı / düz çizgili
+    familyA:["tırtıl","salyangoz","ayak","duman","ip","sarmaşık","yılan","bulut","el","kedi"],
+    familyB:["demiryolu","kafes","ızgara","fermuar","merdiven","çit","bayrak","raf","ütü","gözlük"] },
+  { id:"set-10",   // üçgen tepeli / kanatlı
+    familyA:["piramit","elmas","ok","uçurtma","dağ","çadır","çam","şapka","roket","huni"],
+    familyB:["kuş","uçak","kelebek","arı","yarasa","helikopter","sinek","kuğu","tavuk","melek"] },
+  { id:"set-11",   // yuvarlak / koseli
+    familyA:["kiraz","üzüm","limon","mandalina","çilek","misket","madalya","soğan","domates","şeftali"],
+    familyB:["cüzdan","radyo","fırın","defter","kumbara","bilgisayar","ekran","hoparlör","klima","kasa"] },
+  { id:"set-12",   // dikey / yatik
+    familyA:["gökdelen","bambu","mısır","selvi","baston","ampul","abajur","musluk","çeşme","heykel"],
+    familyB:["gemi","tekne","denizaltı","balina","hipopotam","gergedan","deve","eşek","tilki","kurt"] },
+  { id:"set-13",   // ucgen / cubuk
+    familyA:["külah","yelken","gönye","volkan","tepe","dilim","buzdağı","taç","fes","kama"],
+    familyB:["pipet","kürdan","tebeşir","sopa","değnek","olta","mızrak","şiş","maşa","spatula"] },
+  { id:"set-14",   // kivrimli / duz
+    familyA:["kuyruk","solucan","dudak","kulak","burun","kaş","bıyık","saç","yaprak","gül"],
+    familyB:["barkod","takvim","satranç tahtası","dama tahtası","jaluzi","panjur","hasır","ağ","file","örgü"] },
+  { id:"set-15",   // kanatli / sapli
+    familyA:["güvercin","karga","kartal","baykuş","papağan","leylek","martı","ördek","kaz","horoz"],
+    familyB:["bardak","kavanoz","süzgeç","matara","demlik","ibrik","güğüm","kapı kolu","balta","kazma"] },
+  { id:"set-16",   // isinsal / oval
+    familyA:["fırıldak","pervane","vantilatör","jant","hedef tahtası","karahindiba","kirpi","havai fişek","yelpaze","örümcek ağı"],
+    familyB:["yumurta","patates","zeytin","badem","avokado","fıstık","fasulye","hindistan cevizi","rugby topu","kapsül"] },
+  { id:"set-17",   // kubbeli / halka
+    familyA:["gökkuşağı","tünel","iglo","mantar","kubbe","paraşüt","kask","miğfer","kase","çanak"],
+    familyB:["halka","çörek","can simidi","bilezik","kelepçe","zincir","lastik","anahtarlık","hula hoop","çember"] },
+  { id:"set-18",   // yuvarlak / cubuk
+    familyA:["erik","kayısı","ceviz","fındık","greyfurt","balkabağı","davul","tef","küre","dünya"],
+    familyB:["cımbız","çivi","vida","iğne","kibrit","salatalık","kereviz","baget","matkap","testere"] },
+  { id:"set-19",   // koseli / kivrimli
+    familyA:["yastık","havlu","battaniye","halı","tablo","poster","pano","mendil","kartpostal","asansör"],
+    familyB:["lale","papatya","fiyonk","düğüm","kanca","soru işareti","şimşek","nehir","tüy","yumak"] },
+  { id:"set-20",   // dikey / yuvarlak
+    familyA:["termometre","saksı","şelale","deniz feneri","elektrik direği","trafik lambası","vinç","anten","duş","kolon"],
+    familyB:["nohut","bezelye","rozet","kurabiye","elma","güneş","tekerlek","balon","portakal","tabak"] },
+  { id:"set-21",   // yatik / ucgen
+    familyA:["aslan","kaplan","zebra","minibüs","traktör","vagon","karavan","sedye","komodin","kertenkele"],
+    familyB:["peynir","kek","börek","kravat","diş","alev","pizza","dondurma","yelkenli","çatı"] },
+  { id:"set-22",   // sapli / duz
+    familyA:["tırmık","çapa","el arabası","sırt çantası","kepçe","rende","tirbuşon","pompa","raket","lolipop"],
+    familyB:["nota","porte","çamaşır ipi","parmaklık","kalorifer","zebra geçidi","tel örgü","tırabzan","korkuluk","tabela"] },
+  { id:"set-23",   // oval / koseli
+    familyA:["hap","tohum","çekirdek","kozalak","gözyaşı","çakıl","patlıcan","armut","kabak","sabun"],
+    familyB:["çekmece","koli","bavul","pil","peçete","dosya","kutu","ev","televizyon","pencere"] },
+  { id:"set-24",   // halka / dikey
+    familyA:["tasma","kolye","küpe","deniz simidi","kulp","halat","daire","paket lastiği","kemer tokası","bileklik"],
+    familyB:["asa","insan","kule","şemsiye","mum","zürafa","kaktüs","süpürge","direk","fener"] },
+  { id:"set-25",   // kanatli / yatik
+    familyA:["yusufçuk","uğur böceği","çekirge","ateş böceği","peri","planör","şahin","pelikan","flamingo","tavus kuşu"],
+    familyB:["fok","koltuk","kayık","sal","feribot","fil","kanepe","inek","masa","otobüs"] },
+  { id:"set-26",   // isinsal / cubuk
+    familyA:["rüzgar gülü","deniz kestanesi","dişli","kestane","yıldız","kar tanesi","çark","pusula","örümcek","denizyıldızı"],
+    familyB:["makas","pense","sigara","biber","anahtar","çekiç","diş fırçası","balık","kılıç","tarak"] },
+  { id:"set-27",   // kubbeli / kivrimli
+    familyA:["hilal","denizanası","at nalı","mıknatıs","hamak","salıncak","yay","çan","tas","gökkuşağı"],
+    familyB:["hortum","beyin","çengel","virgül","kalp","ahtapot","damla","dalga","kurdele","tırtıl"] },
+  { id:"set-28",   // oval / duz
+    familyA:["mercimek","tespih","yumurta","patates","zeytin","badem","avokado","fıstık","fasulye","hindistan cevizi"],
+    familyB:["demiryolu","kafes","ızgara","fermuar","barkod","takvim","satranç tahtası","dama tahtası","jaluzi","panjur"] },
+  { id:"set-29",   // yuvarlak / ucgen
+    familyA:["ay","yüzük","karpuz","düğme","para","simit","göz","kavun","zil","nar"],
+    familyB:["piramit","elmas","ok","külah","yelken","gönye","volkan","tepe","dilim","buzdağı"] },
+  { id:"set-30",   // sapli / kanatli
+    familyA:["mikrofon","ayna","fincan","kova","tencere","sepet","çaydanlık","tava","kupa","sürahi"],
+    familyB:["serçe","kırlangıç","melek","güvercin","karga","kartal","baykuş","papağan","leylek","martı"] }
+];
+
+const DIFFS = [
+  { id:"easy",    key:"diffEasy",       ms:4000, mode:"pool"  },
+  { id:"medium",     key:"diffMedium",     ms:2500, mode:"pool"  },
+  { id:"hard",      key:"diffHard",       ms:2500, mode:"typed" },
+  { id:"impossible", key:"diffImpossible", ms:1500, mode:"typed" }
+];
+
+/* =========================================================================
+   GAME TEXT — Turkish.
+   The only Turkish in the codebase, alongside the word sets above. Every
+   string the player sees lives here; nothing else in the file is localised.
+   Markup carries keys instead of text: data-t (textContent),
+   data-tph (placeholder), data-tal (aria-label). {name} and {n} are slots.
+   Translating the interface means replacing this table and the word sets.
+   ========================================================================= */
+const TEXT = {
+  start:            "başla",
+  join:             "katıl",
+  codePlaceholder:  "kod",
+  namePrompt:       "adın?",
+  namePlaceholder:  "en fazla 5 harf",
+  continue:         "devam",
+  enterName:        "bir ad yaz.",
+  enterCode:        "4 haneli kodu gir.",
+
+  backToMenu:       "Ana menüye dön",
+  back:             "Geri",
+  home:             "Ana ekran",
+  backHome:         "Ana ekrana dön",
+
+  drawingsDone:     "20 çizim tamam.",
+  whatNow:          "Şimdi ne olsun?",
+  sendToFriend:     "Arkadaşına gönder",
+  guessMyself:      "Kendim tahmin edeyim",
+  guessMineToo:     "Kendim de tahmin edeyim",
+
+  sendIntro:        "Çizimlerini o tahmin etsin. Kayıt 30 gün sonra kendiliğinden silinir.",
+  send:             "Gönder",
+  cancel:           "Vazgeç",
+  sending:          "Gönderiliyor…",
+  ready:            "Hazır.",
+  shareCodeOrLink:  "Kodu veya linki arkadaşına yolla.",
+  copyLink:         "Linki kopyala",
+  watchScores:      "Skorları izle",
+  linkCopied:       "Link kopyalandı ✓",
+  linkCopyFailed:   "Kopyalanamadı, linki elle seç.",
+  sendFailed:       "Gönderilemedi, tekrar dene.",
+
+  loadingDrawings:  "Çizimler yükleniyor…",
+  codeInvalid:      "Bu kod geçersiz veya süresi dolmuş",
+  fetchFailed:      "Çizimler getirilemedi",
+  checkConnection:  "İnternet bağlantını kontrol et.",
+
+  whichWasWhich:    "Hangisi neydi?",
+  whatDidDraw:      "{name} ne çizmiş?",
+  whatWasDrawn:     "Ne çizilmiş?",
+  hintTyped:        "Bir çizime dokun, cevabını yaz.",
+  hintPool:         "Bir çizime dokun, kelimesini seç. Tekrar dokunmak geri alır.",
+  pickWord:         "Kelime seç",
+  whatIsThis:       "Bu ne?",
+  save:             "Kaydet",
+  leaveBlank:       "Boş bırak",
+  finish:           "Bitir",
+
+  leaveTitle:       "Oyundan çıkılsın mı?",
+  leaveBody:        "Çizimlerin ve cevapların kaybolur.",
+  stay:             "Oyuna dön",
+  leave:            "Çık",
+
+  outOf:            "{n}'de {score}",
+  inDrawingsOf:     "{name}'ın çizimlerinde ",
+  inTheseDrawings:  "Bu çizimlerde ",
+  drawingsOf:       "{name}'ın çizimleri",
+  theseDrawings:    "Bu çizimler",
+  scores:           "Skorlar",
+  scoresSuffix:     " · skorlar",
+  scoresNoteLive:   "Bitirme sırasına göre. Arkadaşların bitirdikçe kendiliğinden güncellenir.",
+  scoresNoteResult: "Bitirme sırasına göre. Arkadaşların bitirdikçe burada beliriyor.",
+  nobodyFinished:   "Henüz kimse bitirmedi.",
+  firstToPlay:      "Bu çizimleri ilk oynayan sensin.",
+
+  diffEasy:         "Kolay",
+  diffMedium:       "Orta",
+  diffHard:         "Zor",
+  diffImpossible:   "İmkansız",
+
+  share:            "Paylaş",
+  copied:           "Panoya kopyalandı ✓",
+  copyFailedSelect: "Kopyalanamadı — aşağıdaki metni seç:",
+  difficultyLabel:  "Zorluk: ",
+  playAgain:        "Tekrar oyna",
+  youDrawToo:       "Sen de çiz"
+};
+
+// Fill every element that carries a text key.
+function applyText(){
+  document.querySelectorAll("[data-t]").forEach(function(el){
+    const v = TEXT[el.getAttribute("data-t")];
+    if (v != null) el.textContent = v;
+  });
+  document.querySelectorAll("[data-tph]").forEach(function(el){
+    const v = TEXT[el.getAttribute("data-tph")];
+    if (v != null) el.setAttribute("placeholder", v);
+  });
+  document.querySelectorAll("[data-tal]").forEach(function(el){
+    const v = TEXT[el.getAttribute("data-tal")];
+    if (v != null) el.setAttribute("aria-label", v);
+  });
+}
+
+function diffName(){ return TEXT[diffOf().key]; }
+
+function boardHeading(){
+  const who = drawerName ? TEXT.drawingsOf.replace("{name}", drawerName) : TEXT.theseDrawings;
+  return who + TEXT.scoresSuffix;
+}
+
+const PEN = "#17181c";          // pen colour on the paper
+const N = 20;
+const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+/* --------------------------------------------------------------- status --- */
+
+let diffId   = "medium";
+let setId    = null;      // chosen at random when a round starts
+let lastSetId = null;     // never draw the same set twice in a row
+
+let words    = [];        // the shuffled 20 words; index = drawing index
+let drawings = [];        // drawings[i] = [[{x,y},...], ...]  0-1 normalize
+let order    = [];        // order[pos] = index of the drawing shown at grid pos
+let picks    = [];        // picks[pos] = chosen or typed answer, or null
+let selPos   = -1;
+let score    = 0;
+
+let role      = "solo";    // "solo" | "drawer" | "guesser"
+let drawerName  = "";        // name of whoever drew the round, in a duel
+let lastCode   = "";        // code of the shared round; keys the score board
+let myName  = "";        // player name; asked up front, kept between rounds
+let scores  = [];        // [{name, score}] — sunucudan gelen tablo
+let scoreSent = false;   // has this round's score been posted yet
+
+const $ = function(id){ return document.getElementById(id); };
+const diffOf = function(){ return DIFFS.find(function(d){ return d.id === diffId; }); };
+const setOf  = function(){ return SETS.find(function(s){ return s.id === setId; }); };
+
+function shuffle(a){
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function show(id){
+  const list = document.querySelectorAll(".screen");
+  for (let i = 0; i < list.length; i++) list[i].classList.toggle("on", list[i].id === id);
+  // stop polling on any screen other than the score board
+  if (id !== "result" && id !== "scores" && typeof stopBoardPoll === "function") stopBoardPoll();
+}
+
+/* ------------------------------------------------- cevap normalizasyonu --- */
+
+const TURKISH_FOLD = { "ç":"c","ğ":"g","ı":"i","ö":"o","ş":"s","ü":"u","â":"a","î":"i","û":"u","ê":"e" };
+
+let PUNCTUATION;
+try { PUNCTUATION = new RegExp("[^\\p{L}\\p{N}\\s]", "gu"); }
+catch (e){ PUNCTUATION = /[^a-z0-9\s]/g; }
+
+function norm(s){
+  s = String(s == null ? "" : s);
+  s = s.toLocaleLowerCase("tr");
+  s = s.replace(/̇/g, "");                     // combining dot left by lowercasing "İ"
+  s = s.replace(/[çğıöşüâîûê]/g, function(ch){ return TURKISH_FOLD[ch] || ch; });
+  s = s.replace(PUNCTUATION, " ");
+  s = s.replace(/\s+/g, " ").trim();
+  return s;
+}
+
+// Levenshtein mesafesi <= 1 mi
+function withinOneEdit(a, b){
+  if (a === b) return true;
+  const la = a.length, lb = b.length;
+  if (Math.abs(la - lb) > 1) return false;
+  if (la === lb){
+    let d = 0;
+    for (let i = 0; i < la; i++) if (a[i] !== b[i] && ++d > 1) return false;
+    return true;
+  }
+  const kisa = la < lb ? a : b, uzun = la < lb ? b : a;
+  let i = 0, j = 0, d = 0;
+  while (i < kisa.length && j < uzun.length){
+    if (kisa[i] === uzun[j]){ i++; j++; }
+    else { if (++d > 1) return false; j++; }
+  }
+  return true;
+}
+
+function isCorrect(cevap, kelime){
+  const a = norm(cevap);
+  if (!a) return false;                 // a blank answer is always wrong
+  return withinOneEdit(a, norm(kelime));
+}
+
+/* ---------------------------------------------------------- ana ekran --- */
+
+function buildHome(){
+  const box = $("diffs");
+  box.innerHTML = "";
+  DIFFS.forEach(function(d){
+    const b = document.createElement("button");
+    b.className = "diff" + (d.id === diffId ? " sel" : "");
+    b.innerHTML = "<b></b>";
+    b.querySelector("b").textContent = TEXT[d.key];
+    b.onclick = function(){ diffId = d.id; buildHome(); };
+    box.appendChild(b);
+  });
+}
+
+/* -------------------------------------------------------------- game flow --- */
+
+let cdTimer = null;
+
+function randomSet(){
+  const havuz = SETS.filter(function(s){ return s.id !== lastSetId; });
+  return havuz[Math.floor(Math.random() * havuz.length)];
+}
+
+function startGame(){
+  const s = randomSet();
+  setId = s.id;
+  lastSetId = s.id;
+
+  role      = "solo";
+  drawerName  = "";
+  lastCode   = "";
+  scores  = [];
+  scoreSent = false;
+  words    = shuffle(s.familyA.concat(s.familyB));
+  drawings = words.map(function(){ return []; });
+  order    = shuffle(words.map(function(_, i){ return i; }));
+  picks    = new Array(N).fill(null);
+  selPos   = -1;
+  closeSheet(); closeModal();
+
+  show("countdown");
+  let n = 3;
+  const num = $("cdNum");
+  const beat = function(){
+    num.textContent = String(n);
+    num.classList.remove("pop"); void num.offsetWidth; num.classList.add("pop");
+    n--;
+    if (n >= 1) cdTimer = setTimeout(beat, 1000);
+    else        cdTimer = setTimeout(startDrawPhase, 1000);
+  };
+  beat();
+}
+
+/* ----------------------------------------------------------- drawing phase --- */
+
+const pad = $("pad");
+const pctx = pad.getContext("2d");
+
+let padSize = 0;
+let strokes = [];
+let cur = null;
+let drawing = false;
+let idx = 0;
+let wordStart = 0;
+let raf = 0;
+
+function sizePad(){
+  const stage = $("stage");
+  const size = Math.max(160, Math.floor(Math.min(stage.clientWidth, stage.clientHeight)));
+  if (size === padSize) return;
+  padSize = size;
+  const dpr = window.devicePixelRatio || 1;
+  pad.style.width  = size + "px";
+  pad.style.height = size + "px";
+  pad.width  = Math.round(size * dpr);
+  pad.height = Math.round(size * dpr);
+  pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  paintPad();
+}
+
+function penWidth(){ return Math.max(3, padSize * 0.011); }
+
+function paintPad(){
+  pctx.clearRect(0, 0, padSize, padSize);
+  paintStrokes(pctx, strokes, padSize, penWidth());
+}
+
+function paintStrokes(ctx, list, size, lw){
+  ctx.lineWidth = lw;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = PEN;
+  ctx.fillStyle = PEN;
+  for (let k = 0; k < list.length; k++){
+    const s = list[k];
+    if (!s || !s.length) continue;
+    if (s.length === 1){
+      ctx.beginPath();
+      ctx.arc(s[0].x * size, s[0].y * size, lw / 2, 0, Math.PI * 2);
+      ctx.fill();
+      continue;
+    }
+    ctx.beginPath();
+    ctx.moveTo(s[0].x * size, s[0].y * size);
+    for (let i = 1; i < s.length; i++) ctx.lineTo(s[i].x * size, s[i].y * size);
+    ctx.stroke();
+  }
+}
+
+function padPoint(e){
+  const r = pad.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width;
+  const y = (e.clientY - r.top)  / r.height;
+  return { x: Math.min(1, Math.max(0, x)), y: Math.min(1, Math.max(0, y)) };
+}
+
+pad.addEventListener("pointerdown", function(e){
+  if (!$("draw").classList.contains("on")) return;
+  e.preventDefault();
+  try { pad.setPointerCapture(e.pointerId); } catch(err){}
+  drawing = true;
+  cur = [padPoint(e)];
+  strokes.push(cur);
+  paintPad();
+});
+
+pad.addEventListener("pointermove", function(e){
+  if (!drawing) return;
+  e.preventDefault();
+  // getCoalescedEvents sometimes returns an empty array; fall back to the event
+  let evts = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+  if (!evts || !evts.length) evts = [e];
+  const lw = penWidth();
+  pctx.lineWidth = lw; pctx.lineCap = "round"; pctx.lineJoin = "round"; pctx.strokeStyle = PEN;
+  for (let i = 0; i < evts.length; i++){
+    const p = padPoint(evts[i]);
+    const prev = cur[cur.length - 1];
+    if (Math.abs(p.x - prev.x) + Math.abs(p.y - prev.y) < 0.0015) continue;
+    pctx.beginPath();
+    pctx.moveTo(prev.x * padSize, prev.y * padSize);
+    pctx.lineTo(p.x * padSize, p.y * padSize);
+    pctx.stroke();
+    cur.push(p);
+  }
+});
+
+function endStroke(e){
+  if (!drawing) return;
+  if (e) e.preventDefault();
+  drawing = false;
+  cur = null;
+}
+pad.addEventListener("pointerup", endStroke);
+pad.addEventListener("pointercancel", endStroke);
+pad.addEventListener("pointerleave", endStroke);
+
+function startDrawPhase(){
+  show("draw");
+  padSize = 0;
+  sizePad();            // layout is ready after show(), so measure synchronously
+  startWord(0);
+}
+
+function startWord(i){
+  idx = i;
+  strokes = [];
+  cur = null; drawing = false;
+  paintPad();
+  $("drawLevel").textContent = diffName();
+  $("word").textContent = words[i];
+  $("counter").textContent = (i + 1) + " / " + N;
+  $("bar").style.transform = "scaleX(1)";
+  wordStart = performance.now();
+  raf = requestAnimationFrame(tick);
+}
+
+function tick(){
+  const ms = diffOf().ms;
+  const el = performance.now() - wordStart;
+  $("bar").style.transform = "scaleX(" + Math.max(0, 1 - el / ms) + ")";
+  if (el >= ms){ nextWord(); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function nextWord(){
+  cancelAnimationFrame(raf);
+  drawing = false; cur = null;
+  drawings[idx] = strokes.filter(function(s){ return s && s.length; });   // empty drawing = []
+  if (idx + 1 < N) startWord(idx + 1);
+  else show("between");
+}
+
+// rAF stops while the tab is in the background. Push wordStart forward by the
+// hidden duration so the player does not lose the rest of the word.
+let hiddenAt = 0;
+document.addEventListener("visibilitychange", function(){
+  if (pausedAt) return;              // already paused by the leave confirmation
+  if (document.hidden) hiddenAt = performance.now();
+  else if (hiddenAt){ wordStart += performance.now() - hiddenAt; hiddenAt = 0; }
+});
+
+/* --------------------------------------------------- leave confirmation --- */
+
+let pausedAt = 0;
+
+function pauseTimer(){
+  if (!$("draw").classList.contains("on") || pausedAt) return;
+  cancelAnimationFrame(raf);
+  pausedAt = performance.now();          // freeze the timer while the dialog is open
+}
+
+function resumeTimer(){
+  // do nothing unless we actually paused, or a second rAF loop starts and time runs twice as fast
+  if (!pausedAt || !$("draw").classList.contains("on")) return;
+  wordStart += performance.now() - pausedAt;
+  pausedAt = 0;
+  raf = requestAnimationFrame(tick);
+}
+
+function askExit(){
+  pauseTimer();
+  $("confirm").classList.add("on");
+}
+
+function cancelExit(){
+  $("confirm").classList.remove("on");
+  resumeTimer();
+}
+
+function confirmExit(){
+  $("confirm").classList.remove("on");
+  cancelAnimationFrame(raf);
+  clearTimeout(cdTimer);
+  pausedAt = 0;
+  drawing = false; cur = null;
+  closeSheet(); closeModal();
+  clearUrl();
+  show("home");
+}
+
+$("backDraw").onclick    = askExit;
+$("backRecall").onclick  = askExit;
+$("confirmStay").onclick = cancelExit;
+$("confirmLeave").onclick = confirmExit;
+$("confirm").onclick = function(e){ if (e.target === $("confirm")) cancelExit(); };
+
+window.addEventListener("resize", function(){
+  if ($("draw").classList.contains("on")){
+    const keep = strokes;
+    padSize = 0; sizePad(); strokes = keep; paintPad();
+  }
+  const cvs = document.querySelectorAll(".grid canvas");
+  for (let i = 0; i < cvs.length; i++) paintCell(cvs[i]);
+});
+
+/* ----------------------------------------------------------- recall screen --- */
+
+function paintCell(cv){
+  const size = cv.clientWidth;
+  if (!size) return;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width  = Math.round(size * dpr);
+  cv.height = Math.round(size * dpr);
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, size, size);
+  paintStrokes(ctx, drawings[Number(cv.dataset.di)] || [], size, Math.max(1.5, size * 0.028));
+}
+
+function paintAll(gridId){
+  const cvs = $(gridId).querySelectorAll("canvas");
+  for (let i = 0; i < cvs.length; i++) paintCell(cvs[i]);
+}
+
+// If the grid is built before layout exists (a background tab, width 0) the
+// drawings paint at the wrong size and never repaint. Repaint once a cell has one.
+const gridRO = typeof ResizeObserver !== "undefined"
+  ? new ResizeObserver(function(girisler){
+      for (let i = 0; i < girisler.length; i++) paintCell(girisler[i].target);
+    })
+  : null;
+
+function resetGridObserver(){ if (gridRO) gridRO.disconnect(); }
+
+function makeCell(pos, di){
+  const cell = document.createElement("div");
+  cell.className = "cell";
+  cell.dataset.pos = pos;
+  const box = document.createElement("div");
+  box.className = "box";
+  const cv = document.createElement("canvas");
+  cv.dataset.di = di;
+  const num = document.createElement("span");
+  num.className = "num";
+  num.textContent = pos + 1;      // grid order is shuffled, so the number gives nothing away
+  box.appendChild(cv);
+  box.appendChild(num);
+  if (gridRO) gridRO.observe(cv);
+  const cap = document.createElement("div");
+  cap.className = "cap";
+  cell.appendChild(box); cell.appendChild(cap);
+  return cell;
+}
+
+function buildRecall(){
+  const g = $("recallGrid");
+  resetGridObserver();
+  g.innerHTML = "";
+  order.forEach(function(di, pos){
+    const cell = makeCell(pos, di);
+    cell.onclick = function(){ onCellTap(pos); };
+    g.appendChild(cell);
+  });
+  $("recallLevel").textContent = diffName();
+  $("recallTitle").textContent = role === "guesser"
+    ? (drawerName ? TEXT.whatDidDraw.replace("{name}", drawerName) : TEXT.whatWasDrawn)
+    : TEXT.whichWasWhich;
+  $("recallHint").textContent = diffOf().mode === "typed"
+    ? TEXT.hintTyped
+    : TEXT.hintPool;
+  closeSheet(); closeModal();
+  refreshRecall();
+  show("recall");
+  paintAll("recallGrid");
+}
+
+function onCellTap(pos){
+  if (diffOf().mode === "typed"){ selPos = pos; openModal(pos); refreshRecall(); return; }
+  if (picks[pos]){                       // tapping an assigned cell releases the word
+    picks[pos] = null; selPos = -1; closeSheet(); refreshRecall(); return;
+  }
+  selPos = pos;
+  openSheet(pos);
+  refreshRecall();
+}
+
+function answeredCount(){
+  return picks.filter(function(p){ return p && String(p).trim(); }).length;
+}
+
+function refreshRecall(){
+  const g = $("recallGrid");
+  order.forEach(function(di, pos){
+    const cell = g.children[pos];
+    if (!cell) return;
+    const dolu = !!(picks[pos] && String(picks[pos]).trim());
+    cell.classList.toggle("sel", pos === selPos);
+    cell.classList.toggle("done", dolu);
+    const cap = cell.querySelector(".cap");
+    cap.innerHTML = "";
+    if (dolu){
+      const s = document.createElement("span");
+      s.className = "pick";
+      s.textContent = picks[pos];
+      cap.appendChild(s);
+    }
+  });
+  const n = answeredCount();
+  $("assigned").textContent = n + " / " + N;
+  // any mode can be finished early; anything left blank counts as wrong
+  $("finish").disabled = false;
+}
+
+/* kelime havuzu */
+function openSheet(pos){
+  const used = {};
+  picks.forEach(function(w){ if (w) used[w] = true; });
+  const pool = words.filter(function(w){ return !used[w]; })
+                    .sort(function(a, b){ return a.localeCompare(b, "tr"); });
+  $("sheetTitle").textContent = "Bu ne?";
+  const box = $("chips");
+  box.innerHTML = "";
+  pool.forEach(function(w){
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = w;
+    b.onclick = function(){ picks[pos] = w; selPos = -1; closeSheet(); refreshRecall(); };
+    box.appendChild(b);
+  });
+  $("sheet").classList.add("on");
+  $("recallGrid").style.paddingBottom = ($("sheet").offsetHeight + 20) + "px";
+}
+
+function closeSheet(){
+  $("sheet").classList.remove("on");
+  $("recallGrid").style.paddingBottom = "14px";
+}
+
+$("sheetX").onclick = function(){ selPos = -1; closeSheet(); refreshRecall(); };
+
+/* yazarak cevap */
+function openModal(pos){
+  const cv = $("modalPrev");
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  paintStrokes(ctx, drawings[order[pos]] || [], cv.width, Math.max(3, cv.width * 0.025));
+  const inp = $("modalInput");
+  inp.value = picks[pos] || "";
+  $("modal").classList.add("on");
+  modalYerlestir();
+  // Focus must happen synchronously inside the tap handler for the keyboard to
+  // open: setTimeout breaks the user-gesture chain and iOS ignores it.
+  inp.focus();
+  inp.select();
+  setTimeout(modalYerlestir, 60);
+}
+
+function closeModal(){
+  $("modal").classList.remove("on");
+  $("modal").style.height = "";
+  $("modal").style.top = "";
+}
+
+// Keep the sheet above the keyboard by sitting it on the visual viewport.
+function modalYerlestir(){
+  const m = $("modal");
+  if (!m.classList.contains("on") || !window.visualViewport) return;
+  m.style.height = window.visualViewport.height + "px";
+  m.style.top = window.visualViewport.offsetTop + "px";
+}
+if (window.visualViewport){
+  window.visualViewport.addEventListener("resize", modalYerlestir);
+  window.visualViewport.addEventListener("scroll", modalYerlestir);
+}
+
+function saveModal(val){
+  if (selPos >= 0) picks[selPos] = String(val || "").trim();
+  selPos = -1;
+  closeModal();
+  refreshRecall();
+}
+
+$("modalForm").onsubmit = function(e){ e.preventDefault(); saveModal($("modalInput").value); };
+$("modalSkip").onclick  = function(){ saveModal(""); };
+$("modal").onclick      = function(e){ if (e.target === $("modal")){ selPos = -1; closeModal(); refreshRecall(); } };
+
+/* ----------------------------------------------------------- result screen --- */
+
+function buildResult(){
+  score = 0;
+  order.forEach(function(di, pos){ if (isCorrect(picks[pos], words[di])) score++; });
+
+  $("score").textContent = role === "guesser"
+    ? ((drawerName ? TEXT.inDrawingsOf.replace("{name}", drawerName) : TEXT.inTheseDrawings) + score + "/" + N)
+    : TEXT.outOf.replace("{n}", N).replace("{score}", score);
+  $("scoreSub").textContent = diffName();
+  $("copyNote").textContent = "";
+  $("fallback").style.display = "none";
+
+  const g = $("resultGrid");
+  resetGridObserver();
+  g.innerHTML = "";
+  order.forEach(function(di, pos){
+    const cell = makeCell(pos, di);
+    const ok = isCorrect(picks[pos], words[di]);
+    cell.classList.add(ok ? "right" : "wrong");
+    const cap = cell.querySelector(".cap");
+    if (ok){
+      const s = document.createElement("span");
+      s.className = "good";
+      s.textContent = words[di];
+      cap.appendChild(s);
+    } else {
+      const bad = document.createElement("span");
+      bad.className = "bad";
+      bad.textContent = (picks[pos] && String(picks[pos]).trim()) ? picks[pos] : "—";
+      const good = document.createElement("span");
+      good.className = "good";
+      good.textContent = words[di];
+      cap.appendChild(bad);
+      cap.appendChild(document.createElement("br"));
+      cap.appendChild(good);
+    }
+    g.appendChild(cell);
+  });
+
+  $("again").textContent = role === "guesser" ? TEXT.youDrawToo : TEXT.playAgain;
+  showBoard();
+  show("result");
+  paintAll("resultGrid");
+}
+
+/* ------------------------------------------------------- score tablosu --- */
+
+function sameName(a, b){
+  return norm(a) === norm(b);          // same rule as the server's name key
+}
+
+function showBoard(){
+  $("board").hidden = !lastCode;              // the board only exists for shared rounds
+  if (!lastCode) return;
+  $("boardTitle").textContent = boardHeading();
+  // The name was taken up front, so the score posts itself without asking again.
+  if (!scoreSent){ scoreSent = true; sendScore(); }
+  renderScores();
+  fetchScores();
+  startBoardPoll();
+}
+
+function renderScores(){
+  // The server returns finishing order; do not re-sort.
+  const liste = scores.slice();
+  // Always show your own row: KV listing is eventually consistent, so a score
+  // just written may not be in the list yet.
+  if (myName && !liste.some(function(s){ return sameName(s.name, myName); })){
+    liste.push({ name: myName, score: score });
+  }
+
+  const kutular = [$("boardList"), $("scoresList")];
+  kutular.forEach(function(box){
+    if (!box) return;
+    box.innerHTML = "";
+    liste.forEach(function(s, i){
+      const row = document.createElement("div");
+      row.className = "brow" + (myName && sameName(s.name, myName) ? " me" : "");
+      const rk = document.createElement("span"); rk.className = "rk"; rk.textContent = (i + 1) + ".";
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = s.name;
+      const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = s.score + "/" + N;
+      row.appendChild(rk); row.appendChild(nm); row.appendChild(sc);
+      box.appendChild(row);
+    });
+  });
+  const bos = liste.length === 0;
+  if ($("boardEmpty"))  $("boardEmpty").hidden  = !bos;
+  if ($("scoresEmpty")) $("scoresEmpty").hidden = !bos;
+}
+
+function fetchScores(){
+  if (!lastCode) return;
+  api("/api/scores/" + encodeURIComponent(lastCode)).then(function(r){
+    if (r.ok && r.data && Array.isArray(r.data.scores)){ scores = r.data.scores; renderScores(); }
+  }).catch(function(){ /* if the board fails, your own row still shows */ });
+}
+
+/* Refresh as friends finish. A read is a single get on the server side, so
+   this poll is cheap. */
+let boardTimer = null;
+
+function startBoardPoll(){
+  stopBoardPoll();
+  if (!lastCode) return;
+  boardTimer = setInterval(function(){
+    const visible = $("result").classList.contains("on") || $("scores").classList.contains("on");
+    if (!visible){ stopBoardPoll(); return; }   // stop once the screen is left
+    if (document.hidden) return;               // do not fetch while backgrounded
+    fetchScores();
+  }, 6000);
+}
+
+function stopBoardPoll(){
+  if (boardTimer){ clearInterval(boardTimer); boardTimer = null; }
+}
+
+// Coming back from another app should refresh at once, not wait 6 seconds.
+document.addEventListener("visibilitychange", function(){
+  if (!document.hidden && boardTimer) fetchScores();
+});
+
+/* the drawer watching the scores on their own link */
+function openScoresScreen(){
+  $("scoresTitle").textContent = boardHeading();
+  renderScores();
+  fetchScores();
+  show("scores");
+  startBoardPoll();
+}
+
+$("toScores").onclick  = openScoresScreen;
+$("scoresBack").onclick = function(){ stopBoardPoll(); show("send"); };
+
+function sendScore(){
+  if (!lastCode || !myName) return;
+  renderScores();                                 // show your own row without waiting
+  api("/api/scores/" + encodeURIComponent(lastCode), {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: myName, score: score })
+  }).then(function(r){
+    if (r.ok && r.data && Array.isArray(r.data.scores)){ scores = r.data.scores; renderScores(); }
+  }).catch(function(){ /* already shown locally, fail quietly */ });
+}
+
+/* ---------------------------------------------------------- name sorma --- */
+
+let afterNameFn = null;
+
+function askForName(sonra){
+  afterNameFn = sonra;
+  $("playerName").value = myName || "";     // one tap is enough on the second round
+  $("nameErr").textContent = "";
+  show("askName");
+  setTimeout(function(){ $("playerName").focus(); }, 50);
+}
+
+function confirmName(){
+  const name = $("playerName").value.trim().slice(0, 5);
+  if (!name){ $("nameErr").textContent = TEXT.enterName; $("playerName").focus(); return; }
+  myName = name;
+  const devam = afterNameFn;
+  afterNameFn = null;
+  if (devam) devam();
+}
+
+$("nameNext").onclick = confirmName;
+$("playerName").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); confirmName(); }
+});
+
+function shareText(){
+  let rows = "";
+  order.forEach(function(di, pos){
+    rows += (isCorrect(picks[pos], words[di]) ? "🟩" : "🟥");
+    if (pos % 5 === 4 && pos !== N - 1) rows += "\n";
+  });
+  // The set is never named in the share text, so it cannot leak which words came up.
+  const head = role === "guesser" && drawerName
+    ? "Chizz 🎨 " + TEXT.drawingsOf.replace("{name}", drawerName)
+    : "Chizz 🎨";
+  return head + "\n" + TEXT.difficultyLabel + diffName() + "\n" + score + "/" + N + "\n\n" + rows;
+}
+
+function copyText(t){
+  return new Promise(function(resolve){
+    if (navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(t).then(
+        function(){ resolve(true); },
+        function(){ resolve(legacyCopy(t)); }
+      );
+      return;
+    }
+    resolve(legacyCopy(t));
+  });
+}
+
+function legacyCopy(t){
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = t;
+    ta.style.position = "fixed"; ta.style.top = "0"; ta.style.left = "0"; ta.style.opacity = "0";
+    ta.setAttribute("readonly", "readonly");
+    document.body.appendChild(ta);
+    ta.focus(); ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return ok;
+  } catch(err){ return false; }
+}
+
+/* ------------------------------------------------------------------ duel --- */
+
+// round to 0-255 integers and drop consecutive points closer than 2 units
+function encodeDrawings(list){
+  return list.map(function(strokeList){
+    const out = [];
+    (strokeList || []).forEach(function(st){
+      if (!st || !st.length) return;
+      const pts = [];
+      let last = null;
+      for (let i = 0; i < st.length; i++){
+        const x = Math.round(Math.min(1, Math.max(0, st[i].x)) * 255);
+        const y = Math.round(Math.min(1, Math.max(0, st[i].y)) * 255);
+        if (last){
+          const dx = x - last[0], dy = y - last[1];
+          if (dx * dx + dy * dy < 4){ continue; }
+        }
+        pts.push([x, y]); last = [x, y];
+      }
+      // keep the last point so the stroke end survives
+      const sonX = Math.round(Math.min(1, Math.max(0, st[st.length - 1].x)) * 255);
+      const sonY = Math.round(Math.min(1, Math.max(0, st[st.length - 1].y)) * 255);
+      if (!pts.length || pts[pts.length - 1][0] !== sonX || pts[pts.length - 1][1] !== sonY){
+        pts.push([sonX, sonY]);
+      }
+      out.push(pts);
+    });
+    return out;
+  });
+}
+
+function decodeDrawings(raw){
+  if (!Array.isArray(raw)) return [];
+  return raw.map(function(strokeList){
+    if (!Array.isArray(strokeList)) return [];
+    return strokeList.map(function(st){
+      if (!Array.isArray(st)) return [];
+      return st.map(function(p){
+        return { x: (Number(p[0]) || 0) / 255, y: (Number(p[1]) || 0) / 255 };
+      });
+    }).filter(function(st){ return st.length; });
+  });
+}
+
+function api(yol, opts){
+  const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const t = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 12000);
+  const o = opts || {};
+  if (ctrl) o.signal = ctrl.signal;
+  return fetch(yol, o).then(function(r){
+    clearTimeout(t);
+    return r.json().catch(function(){ return {}; }).then(function(j){
+      return { ok: r.ok, status: r.status, data: j };
+    });
+  }, function(e){ clearTimeout(t); throw e; });
+}
+
+function sendShow(which){
+  $("sendForm").hidden = which !== "form";
+  $("sendBusy").hidden = which !== "busy";
+  $("sendDone").hidden = which !== "done";
+}
+
+$("toSend").onclick = function(){
+  $("sendErr").textContent = "";
+  $("linkNote").textContent = "";
+  sendShow("form");
+  show("send");
+};
+
+$("sendBack").onclick = function(){ show("between"); };
+$("doneHome").onclick = function(){ show("home"); };
+$("doneRecall").onclick = function(){ buildRecall(); };
+
+$("sendGo").onclick = function(){
+  const name = myName;          // taken up front
+  sendShow("busy");
+  api("/api/save", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      setId: setId,
+      difficulty: diffId,
+      name: name,
+      words: words,
+      drawings: encodeDrawings(drawings)
+    })
+  }).then(function(r){
+    if (!r.ok || !r.data || !r.data.code) throw new Error("kaydedilemedi");
+    lastCode = r.data.code;
+    drawerName = name;
+    $("code").textContent = lastCode;
+    $("link").textContent = gameLink(lastCode);
+    sendShow("done");
+  }).catch(function(){
+    // the drawings are still in memory, nothing lost
+    $("sendErr").textContent = TEXT.sendFailed;
+    sendShow("form");
+  });
+};
+
+// A link sent to a friend must always point at the public address. One generated
+// while playing on localhost, or from a file:// copy, will not open for them.
+// When the domain changes, this is the ONLY line to edit.
+const PUBLIC_BASE_URL = "https://chizz.party";
+
+function gameLink(code){
+  // Local, file:// and the old pages.dev address must not be used as the link
+  // base: the first two never open for the recipient, and pages.dev is filtered
+  // by some networks. Fall back to the canonical address in all three cases.
+  const nonCanonical = location.protocol === "file:" ||
+                       !location.hostname ||
+                       /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[?::1\]?)$/i.test(location.hostname) ||
+                       /\.pages\.dev$/i.test(location.hostname);
+  const base = nonCanonical
+    ? PUBLIC_BASE_URL
+    : location.origin + location.pathname.replace(/index\.html$/i, "");
+  return base.replace(/\/+$/, "") + "/?o=" + code;
+}
+
+$("linkCopy").onclick = function(){
+  copyText(gameLink(lastCode)).then(function(ok){
+    $("linkNote").style.color = ok ? "var(--ok)" : "var(--no)";
+    $("linkNote").textContent = ok ? TEXT.linkCopied : TEXT.linkCopyFailed;
+  });
+};
+
+function loadGame(code){
+  code = String(code || "").toUpperCase();
+  show("loading");
+  $("loadTitle").textContent = TEXT.loadingDrawings;
+  $("loadMsg").textContent = "";
+  $("loadHome").hidden = true;
+
+  api("/api/game/" + encodeURIComponent(code)).then(function(r){
+    if (r.status === 404) throw new Error("notfound");
+    if (!r.ok) throw new Error("error");
+    const v = r.data || {};
+    const loadedWords = v.words, loadedDrawings = decodeDrawings(v.drawings);
+    if (!Array.isArray(loadedWords) || loadedWords.length !== N || loadedDrawings.length !== N) throw new Error("malformed");
+
+    setId    = v.setId && SETS.some(function(s){ return s.id === v.setId; }) ? v.setId : SETS[0].id;
+    diffId   = DIFFS.some(function(d){ return d.id === v.difficulty; }) ? v.difficulty : "medium";
+    role      = "guesser";
+    lastCode   = code;
+    scores  = [];
+    scoreSent = false;
+    drawerName  = typeof v.name === "string" ? v.name.slice(0, 5) : "";
+    words    = loadedWords;
+    drawings = loadedDrawings;
+    order    = shuffle(words.map(function(_, i){ return i; }));
+    picks    = new Array(N).fill(null);
+    selPos   = -1;
+    buildHome();
+    askForName(buildRecall);          // the friend names themselves before playing too
+  }).catch(function(e){
+    $("loadTitle").textContent = e && e.message === "notfound"
+      ? TEXT.codeInvalid
+      : TEXT.fetchFailed;
+    $("loadMsg").textContent = e && e.message === "notfound" ? "" : TEXT.checkConnection;
+    $("loadHome").hidden = false;
+  });
+}
+
+$("loadHome").onclick = function(){ clearUrl(); show("home"); };
+
+function clearUrl(){
+  try { history.replaceState(null, "", location.pathname); } catch(e){}
+}
+
+$("joinGo").onclick = function(){
+  const code = $("joinCode").value.trim().toUpperCase();
+  const valid = code.length === 4 && code.split("").every(function(c){ return CODE_ALPHABET.indexOf(c) >= 0; });
+  if (!valid){ $("joinErr").textContent = TEXT.enterCode; return; }
+  $("joinErr").textContent = "";
+  loadGame(code);
+};
+
+$("joinCode").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); $("joinGo").click(); }
+});
+
+/* ------------------------------------------------------------------ wiring --- */
+
+$("start").onclick    = function(){ askForName(startGame); };
+$("toRecall").onclick = buildRecall;
+$("finish").onclick   = function(){ closeSheet(); closeModal(); buildResult(); };
+
+$("share").onclick = function(){
+  const t = shareText();
+  copyText(t).then(function(ok){
+    if (ok){
+      $("copyNote").textContent = TEXT.copied;
+      setTimeout(function(){ $("copyNote").textContent = ""; }, 2200);
+    } else {
+      $("copyNote").textContent = TEXT.copyFailedSelect;
+      const fb = $("fallback");
+      fb.value = t; fb.style.display = "block"; fb.focus(); fb.select();
+    }
+  });
+};
+
+$("again").onclick = function(){ clearTimeout(cdTimer); clearUrl(); askForName(startGame); };
+$("home2").onclick = function(){ clearTimeout(cdTimer); clearUrl(); closeSheet(); closeModal(); show("home"); };
+
+document.addEventListener("gesturestart", function(e){ e.preventDefault(); });
+
+applyText();
+buildHome();
+
+// did we arrive through a duel link?
+(function(){
+  const m = /[?&]o=([^&]+)/.exec(location.search || "");
+  if (m) loadGame(decodeURIComponent(m[1]));
+})();
+})();
+</script>
