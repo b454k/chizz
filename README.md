@@ -13,26 +13,23 @@ score board for that round.
 
 The interface is in Turkish.
 
-> **Work in progress.** It works and people are playing it, but the difficulty
-> balance has not been tested on real players yet and there is no English edition.
+> **Work in progress.** It works and people are playing it, but the timing
+> defaults have not been tested on real players yet and there is no English edition.
 
 ## How to play
 
-1. Pick a difficulty and press start
-2. Enter a name, max 5 characters
-3. Draw all 20 words — the timer advances on its own, there is no way back
-4. Either guess your own drawings, or send them to a friend
-5. Assign a word to each drawing, then finish
+1. Pick a mode, set the seconds per word if you want, and press start
+2. Draw all 20 words — the timer advances on its own, there is no way back
+3. Either guess your own drawings, or send them to a friend
+4. Assign a word to each drawing, then finish
 
-Four difficulties. Time pressure and answer method are separated on purpose, so `medium`
-and `hard` give you the same seconds and differ only in how you answer:
+Nothing is asked before you start. A name is only needed to send a round to someone
+or to take a place on a score board, so it is asked at those points and nowhere else.
 
-| Level | Per word | Answering |
-|---|---|---|
-| Easy | 4 s | Pick from a word pool |
-| Medium | 2.5 s | Pick from a word pool |
-| Hard | 2.5 s | Type it |
-| Impossible | 1.5 s | Type it |
+Two modes, and the clock set separately. Answering is either picking from a pool of the
+remaining words or typing the word yourself; the time per word is a slider from 1 to 10
+seconds, defaulting to 2.5. There is also a dark or light theme. All of it is remembered
+on the device.
 
 Typed answers forgive a one-character typo, so `kanepa` still counts for `kanepe`.
 
@@ -65,8 +62,9 @@ id in `wrangler.jsonc`. Full steps: [docs/DEPLOY.md](docs/DEPLOY.md).
   without scrolling the page.
 - [Cloudflare Pages](https://pages.cloudflare.com/) for hosting, Pages Functions for
   the API, Workers KV for storage. Saved rounds expire after 30 days.
-- No account, no login, no tracking, no `localStorage`. Stored data is the words, the
-  drawings, a difficulty and a 5-character name.
+- No account, no login, no tracking. Stored on the server: the words, the drawings, the
+  mode, the seconds per word and a name of up to 10 characters. Stored in the browser:
+  your name, your settings, and rounds in progress so a reload does not lose your game.
 
 ## Docs
 

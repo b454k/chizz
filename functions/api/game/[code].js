@@ -1,7 +1,15 @@
-// GET /api/game/A7K2  ->  { setId, difficulty, name, words, drawings }
+// GET /api/game/A7K2  ->  { setId, mode, seconds, name, words, drawings }
 // 404 when the code is unknown or has expired.
 
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
+
+// What the four fixed difficulties meant, for rounds saved before modes existed.
+const LEGACY_DIFFS = {
+  easy:       { mode: "pool",  seconds: 4 },
+  medium:     { mode: "pool",  seconds: 2.5 },
+  hard:       { mode: "typed", seconds: 2.5 },
+  impossible: { mode: "typed", seconds: 1.5 }
+};
 
 function json(data, status) {
   return new Response(JSON.stringify(data), {
@@ -19,6 +27,12 @@ function withLegacyFields(record) {
   if (record.drawings === undefined && Array.isArray(record.cizimler)) record.drawings = record.cizimler;
   if (record.difficulty === undefined && typeof record.zorluk === "string") record.difficulty = record.zorluk;
   if (record.name === undefined && typeof record.takmaAd === "string") record.name = record.takmaAd;
+  // Rounds saved before modes existed carry a difficulty name instead. The client
+  // maps it too; doing it here as well means one shape reaches every reader.
+  if (record.mode === undefined) {
+    const legacy = LEGACY_DIFFS[record.difficulty];
+    if (legacy) { record.mode = legacy.mode; record.seconds = legacy.seconds; }
+  }
   return record;
 }
 

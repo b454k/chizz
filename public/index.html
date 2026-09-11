@@ -18,7 +18,29 @@
     --paper:#e8e5de;
     --pen:#17181c;
   }
+  /* Chosen in settings and kept on the device. The dark palette above is the
+     default; this only has to restate the colours that actually differ. */
+  :root[data-theme="light"]{
+    color-scheme:light;
+    --bg:#f5f4f0;
+    --panel:#ffffff;
+    --panel2:#eae7e0;
+    --ink:#16181d;
+    --muted:#6b7280;
+    --line:#d8d4cb;
+    --accent:#d8431f;
+    --ok:#15803d;
+    --no:#b91c1c;
+    --paper:#ffffff;
+    --pen:#17181c;
+  }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  /* manipulation keeps panning and pinch but kills double-tap zoom, which fired
+     constantly while drawing fast. The pad itself stays touch-action:none. */
+  html{touch-action:manipulation;}
+  /* A drag that starts on a label must not select text mid-round. Inputs opt back in. */
+  body{-webkit-user-select:none; -ms-user-select:none; user-select:none;}
+  input, textarea{-webkit-user-select:text; user-select:text;}
   /* keep [hidden] winning over rules that set display:flex/block */
   [hidden]{display:none !important;}
   html,body{height:100%;}
@@ -55,6 +77,36 @@
     background:var(--panel); text-transform:lowercase;
   }
   .diff.sel{border-color:var(--ink); background:var(--panel2);}
+
+  /* settings on the home screen */
+  .settings{
+    border:2px solid var(--line); border-radius:14px; padding:14px 15px; margin:0 0 14px;
+  }
+  .srow{display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:34px;}
+  .srow + .srow{margin-top:10px;}
+  .srow .lbl{font-size:14px; font-weight:600; color:var(--muted);}
+  .srow output{font-size:15px; font-weight:800; font-variant-numeric:tabular-nums;}
+  #secs{
+    width:100%; margin:8px 0 2px; accent-color:var(--accent);
+    background:transparent; touch-action:manipulation;
+  }
+  .seg{display:flex; gap:6px;}
+  .seg button{
+    border:2px solid var(--line); border-radius:10px; padding:7px 12px;
+    font-size:14px; font-weight:700; color:var(--muted);
+  }
+  .seg button.sel{border-color:var(--ink); color:var(--ink); background:var(--panel2);}
+
+  /* a primary button that is not ready to be pressed yet, but still takes a tap
+     so it can say why */
+  .primary.off{opacity:.45;}
+
+  /* name asked at the point it is needed, rather than before the game */
+  .namerow{display:flex; gap:8px; align-items:flex-start; margin:0 0 10px;}
+  .namerow .txt{margin:0;}
+  .namerow button{
+    flex:none; border:2px solid var(--line); border-radius:14px; padding:14px 18px; font-weight:700;
+  }
   .diff b{display:block; font-size:16px;}
 
   .primary{
@@ -170,7 +222,14 @@
   #sheet .row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
   #sheet .row b{font-size:15px;}
   #sheet .x{font-size:22px; line-height:1; color:var(--muted); padding:4px 8px;}
-  #chips{display:flex; flex-wrap:wrap; gap:8px; max-height:44vh; overflow-y:auto;}
+  /* The grid cell is ~76px wide, far too small to recognise a scribble by. Show the
+     drawing at something near the size it was drawn at while the word is chosen. */
+  #sheetPrev{
+    width:min(56vw, 30vh, 240px); height:min(56vw, 30vh, 240px); display:block;
+    margin:0 auto 12px; border:2px solid var(--line); border-radius:14px;
+    background:var(--paper); flex:none;
+  }
+  #chips{display:flex; flex-wrap:wrap; gap:8px; max-height:32vh; overflow-y:auto;}
   .chip{border:2px solid var(--line); border-radius:99px; padding:10px 15px; font-size:15px; font-weight:600; background:var(--panel);}
   .chip:active{background:var(--panel2);}
 
@@ -186,7 +245,7 @@
     box-shadow:0 -14px 50px rgba(0,0,0,.45);
   }
   #modalPrev{
-    width:min(52vw, 200px); height:min(52vw, 200px); display:block; margin:0 auto 14px;
+    width:min(74vw, 38vh, 320px); height:min(74vw, 38vh, 320px); display:block; margin:0 auto 14px;
     border:2px solid var(--line); border-radius:14px; background:var(--paper);
     flex:none;
   }
@@ -210,6 +269,24 @@
     font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre; display:none;
   }
   .btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px 0 16px;}
+
+  /* tap a finished drawing to see it full size */
+  #zoom{
+    position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.72);
+    display:none; justify-content:center; align-items:center; padding:20px;
+  }
+  #zoom.on{display:flex;}
+  #zoomCard{width:100%; max-width:520px; text-align:center;}
+  #zoomPrev{
+    width:min(84vw, 58vh, 460px); height:min(84vw, 58vh, 460px); display:block;
+    margin:0 auto 14px; border:2px solid var(--line); border-radius:16px;
+    background:var(--paper);
+  }
+  #zoomCap{font-size:16px; font-weight:600; margin:0 0 16px; min-height:22px;}
+  #zoomCap .bad{color:var(--no); text-decoration:line-through; margin-right:8px;}
+  #zoomCap .good{color:var(--ok); font-weight:700;}
+  #zoomClose{max-width:220px; margin:0 auto;}
+  .cell.tappable{cursor:pointer;}
 
   /* duel: send screen */
   #send .wrap{margin:auto 0; padding:20px 0;}
@@ -243,6 +320,7 @@
   .brow.me{background:var(--panel2); box-shadow:inset 0 0 0 2px var(--accent);}
   .brow .rk{width:22px; color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;}
   .brow .nm{flex:1; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .brow .tm{color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; margin-right:10px;}
   .brow .sc{font-weight:800; font-variant-numeric:tabular-nums;}
   #boardEmpty, #scoresEmpty{color:var(--muted); font-size:14px; padding:4px 0 8px;}
   .bnote{color:var(--muted); font-size:12px; margin:8px 0 0;}
@@ -259,7 +337,20 @@
   <section class="screen on" id="home">
     <div class="hwrap">
       <h1>chizz</h1>
-      <div class="diffs" id="diffs"></div>
+      <div class="diffs" id="modes"></div>
+
+      <div class="settings">
+        <div class="srow">
+          <span class="lbl" data-t="perWord"></span>
+          <output id="secsOut"></output>
+        </div>
+        <input type="range" id="secs" min="1" max="10" step="0.5" data-tal="perWord">
+        <div class="srow">
+          <span class="lbl" data-t="theme"></span>
+          <div class="seg" id="themes"></div>
+        </div>
+      </div>
+
       <button class="primary" id="start" data-t="start"></button>
       <div id="joinRow">
         <input class="txt" id="joinCode" maxlength="4" data-tph="codePlaceholder"
@@ -267,17 +358,6 @@
         <button id="joinGo" data-t="join"></button>
       </div>
       <p class="err" id="joinErr"></p>
-    </div>
-  </section>
-
-  <!-- ============ AD SORMA ============ -->
-  <section class="screen mid" id="askName">
-    <div class="stack">
-      <h2 data-t="namePrompt"></h2>
-      <input class="txt" id="playerName" maxlength="5" data-tph="namePlaceholder"
-             autocorrect="off" spellcheck="false" enterkeyhint="go">
-      <button class="primary" id="nameNext" data-t="continue"></button>
-      <p class="err" id="nameErr"></p>
     </div>
   </section>
 
@@ -314,7 +394,9 @@
       <div id="sendForm">
         <h2 data-t="sendToFriend"></h2>
         <p data-t="sendIntro"></p>
-        <button class="primary" id="sendGo" data-t="send"></button>
+        <input class="txt" id="sendName" maxlength="10" data-tph="namePlaceholder"
+               autocorrect="off" spellcheck="false" enterkeyhint="go" style="margin-bottom:10px">
+        <button class="primary off" id="sendGo" data-t="send"></button>
         <p class="err" id="sendErr"></p>
         <button class="ghost" id="sendBack" style="margin-top:10px" data-t="cancel"></button>
       </div>
@@ -383,12 +465,18 @@
       <div id="board" hidden>
         <h3 id="boardTitle"></h3>
         <p id="boardEmpty" hidden data-t="firstToPlay"></p>
+        <div class="namerow" id="boardNameRow" hidden>
+          <input class="txt" id="boardName" maxlength="10" data-tph="namePlaceholder"
+                 autocorrect="off" spellcheck="false" enterkeyhint="go">
+          <button id="boardJoin" data-t="joinBoard"></button>
+        </div>
         <div id="boardList"></div>
         <p class="bnote" data-t="scoresNoteResult"></p>
       </div>
       <button class="primary" id="share" style="margin:0 0 6px" data-t="share"></button>
       <p id="copyNote"></p>
       <textarea id="fallback" rows="7" readonly></textarea>
+      <button class="ghost" id="inviteFriends" hidden style="margin:0 0 10px" data-t="sendToFriend"></button>
       <div class="btnrow">
         <button class="ghost" id="again" data-t="playAgain"></button>
         <button class="ghost" id="home2" data-t="home"></button>
@@ -400,6 +488,7 @@
 
 <div id="sheet">
   <div class="row"><b id="sheetTitle" data-t="pickWord"></b><button class="x" id="sheetX">✕</button></div>
+  <canvas id="sheetPrev" width="480" height="480"></canvas>
   <div id="chips"></div>
 </div>
 
@@ -421,6 +510,14 @@
       <button class="primary" type="submit" data-t="save"></button>
     </form>
     <button id="modalSkip" data-t="leaveBlank"></button>
+  </div>
+</div>
+
+<div id="zoom">
+  <div id="zoomCard">
+    <canvas id="zoomPrev" width="560" height="560"></canvas>
+    <p id="zoomCap"></p>
+    <button class="primary" id="zoomClose" data-t="close"></button>
   </div>
 </div>
 
@@ -523,12 +620,22 @@ const SETS = [
     familyB:["serçe","kırlangıç","melek","güvercin","karga","kartal","baykuş","papağan","leylek","martı"] }
 ];
 
-const DIFFS = [
-  { id:"easy",    key:"diffEasy",       ms:4000, mode:"pool"  },
-  { id:"medium",     key:"diffMedium",     ms:2500, mode:"pool"  },
-  { id:"hard",      key:"diffHard",       ms:2500, mode:"typed" },
-  { id:"impossible", key:"diffImpossible", ms:1500, mode:"typed" }
+/* Two ways to answer, and the clock set separately in settings. The four fixed
+   difficulties conflated the two, so "medium" and "hard" differed only in how you
+   answered while sharing a timing nobody could change. */
+const MODES = [
+  { id:"pool",  key:"modePool"  },
+  { id:"typed", key:"modeTyped" }
 ];
+const SECS_MIN = 1, SECS_MAX = 10, SECS_DEFAULT = 2.5;
+
+// Rounds saved before modes existed carry one of these instead.
+const LEGACY_DIFFS = {
+  easy:       { mode:"pool",  seconds:4   },
+  medium:     { mode:"pool",  seconds:2.5 },
+  hard:       { mode:"typed", seconds:2.5 },
+  impossible: { mode:"typed", seconds:1.5 }
+};
 
 /* =========================================================================
    GAME TEXT — Turkish.
@@ -543,9 +650,17 @@ const TEXT = {
   join:             "katıl",
   codePlaceholder:  "kod",
   namePrompt:       "adın?",
-  namePlaceholder:  "en fazla 5 harf",
+  namePlaceholder:  "adın",
   continue:         "devam",
-  enterName:        "bir ad yaz.",
+  enterName:        "Önce adını yaz.",
+  joinBoard:        "Katıl",
+  perWord:          "Kelime başına süre",
+  theme:            "Tema",
+  themeDark:        "Koyu",
+  themeLight:       "Açık",
+  modePool:         "Havuzdan",
+  modeTyped:        "Yazarak",
+  totalTime:        "toplam",
   enterCode:        "4 haneli kodu gir.",
 
   backToMenu:       "Ana menüye dön",
@@ -599,22 +714,20 @@ const TEXT = {
   theseDrawings:    "Bu çizimler",
   scores:           "Skorlar",
   scoresSuffix:     " · skorlar",
-  scoresNoteLive:   "Bitirme sırasına göre. Arkadaşların bitirdikçe kendiliğinden güncellenir.",
-  scoresNoteResult: "Bitirme sırasına göre. Arkadaşların bitirdikçe burada beliriyor.",
+  scoresNoteLive:   "Skora göre sıralı; eşitlikte hızlı olan önde. Arkadaşların bitirdikçe kendiliğinden güncellenir.",
+  scoresNoteResult: "Skora göre sıralı; eşitlikte hızlı olan önde. Arkadaşların bitirdikçe burada beliriyor.",
   nobodyFinished:   "Henüz kimse bitirmedi.",
   firstToPlay:      "Bu çizimleri ilk oynayan sensin.",
 
-  diffEasy:         "Kolay",
-  diffMedium:       "Orta",
-  diffHard:         "Zor",
-  diffImpossible:   "İmkansız",
 
   share:            "Paylaş",
   copied:           "Panoya kopyalandı ✓",
   copyFailedSelect: "Kopyalanamadı — aşağıdaki metni seç:",
   difficultyLabel:  "Zorluk: ",
   playAgain:        "Tekrar oyna",
-  youDrawToo:       "Sen de çiz"
+  youDrawToo:       "Sen de çiz",
+  close:            "Kapat",
+  guessTooInvite:   "Sen de tahmin et:"
 };
 
 // Fill every element that carries a text key.
@@ -633,7 +746,7 @@ function applyText(){
   });
 }
 
-function diffName(){ return TEXT[diffOf().key]; }
+function diffName(){ return TEXT[modeOf().key] + " \u00b7 " + secsText(secs); }
 
 function boardHeading(){
   const who = drawerName ? TEXT.drawingsOf.replace("{name}", drawerName) : TEXT.theseDrawings;
@@ -646,7 +759,9 @@ const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
 /* --------------------------------------------------------------- status --- */
 
-let diffId   = "medium";
+let modeId   = "pool";
+let secs     = SECS_DEFAULT;     // seconds per word, 1-10
+let theme    = "dark";
 let setId    = null;      // chosen at random when a round starts
 let lastSetId = null;     // never draw the same set twice in a row
 
@@ -660,13 +775,106 @@ let score    = 0;
 let role      = "solo";    // "solo" | "drawer" | "guesser"
 let drawerName  = "";        // name of whoever drew the round, in a duel
 let lastCode   = "";        // code of the shared round; keys the score board
-let myName  = "";        // player name; asked up front, kept between rounds
+const NAME_MAX = 10;     // not shown anywhere: the field simply stops accepting more
+let myName  = "";        // asked when it is first needed, then kept on the device
 let scores  = [];        // [{name, score}] — sunucudan gelen tablo
 let scoreSent = false;   // has this round's score been posted yet
+let recallStart = 0;     // when the grid first went up; the board ranks ties by this
+let recallMs  = 0;       // how long the round took, frozen once it is finished
 
 const $ = function(id){ return document.getElementById(id); };
-const diffOf = function(){ return DIFFS.find(function(d){ return d.id === diffId; }); };
+const modeOf = function(){ return MODES.find(function(m){ return m.id === modeId; }) || MODES[0]; };
+const roundMs = function(){ return Math.round(secs * 1000); };
+
+function clampSecs(v){
+  const n = Math.round(Number(v) * 2) / 2;                 // half-second steps
+  if (!isFinite(n)) return SECS_DEFAULT;
+  return Math.min(SECS_MAX, Math.max(SECS_MIN, n));
+}
+
+function secsText(v){ return String(v).replace(".", ",") + " sn"; }
+
+function applyTheme(){
+  document.documentElement.dataset.theme = theme;
+}
 const setOf  = function(){ return SETS.find(function(s){ return s.id === setId; }); };
+
+/* --------------------------------------------------------------- storage --- */
+/* The v1 brief banned localStorage, back when a round was one throwaway sitting.
+   Shared rounds changed that: a link gets opened twice, a phone reloads the tab,
+   and the player expects to find their game where they left it. Only what the
+   round already shows is kept -- the name typed on this device, and per round
+   code the grid order, the answers and whether it was finished. Every access is
+   wrapped: Safari in private mode throws on localStorage rather than no-opping. */
+const STORE_KEY   = "chizz.v1";
+const KEEP_ROUNDS = 40;
+const ROUND_TTL   = 30 * 24 * 60 * 60 * 1000;   // the server expires rounds on the same clock
+
+function loadStore(){
+  try {
+    const v = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (!v || typeof v !== "object") return { name: "", rounds: {} };
+    if (!v.rounds || typeof v.rounds !== "object") v.rounds = {};
+    if (typeof v.name !== "string") v.name = "";
+    return v;
+  } catch(e){ return { name: "", rounds: {} }; }
+}
+
+function saveStore(store){
+  // Drop what the server has expired anyway, then keep the newest few.
+  const now = Date.now();
+  const kept = {};
+  Object.keys(store.rounds)
+    .filter(function(c){ return now - (store.rounds[c].at || 0) < ROUND_TTL; })
+    .sort(function(a, b){ return (store.rounds[b].at || 0) - (store.rounds[a].at || 0); })
+    .slice(0, KEEP_ROUNDS)
+    .forEach(function(c){ kept[c] = store.rounds[c]; });
+  store.rounds = kept;
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){}
+}
+
+function savedName(){ return loadStore().name; }
+
+function rememberSettings(){
+  const store = loadStore();
+  store.mode  = modeId;
+  store.secs  = secs;
+  store.theme = theme;
+  saveStore(store);
+}
+
+function loadSettings(){
+  const store = loadStore();
+  if (MODES.some(function(m){ return m.id === store.mode; })) modeId = store.mode;
+  if (store.secs !== undefined) secs = clampSecs(store.secs);
+  if (store.theme === "light" || store.theme === "dark") theme = store.theme;
+}
+
+function rememberName(n){
+  const store = loadStore();
+  store.name = String(n || "").slice(0, NAME_MAX);
+  saveStore(store);
+}
+
+function savedRound(code){
+  return code ? (loadStore().rounds[code] || null) : null;
+}
+
+function rememberRound(code, patch){
+  if (!code) return;
+  const store = loadStore();
+  const rec = store.rounds[code] || {};
+  Object.keys(patch).forEach(function(k){ rec[k] = patch[k]; });
+  rec.at = Date.now();
+  store.rounds[code] = rec;
+  saveStore(store);
+}
+
+// Put the round in the address bar so a reload returns to it instead of the home
+// screen. replaceState, not pushState: the back button should still leave.
+function setUrlCode(code){
+  try { history.replaceState(null, "", location.pathname + "?o=" + encodeURIComponent(code)); } catch(e){}
+}
 
 function shuffle(a){
   a = a.slice();
@@ -680,6 +888,7 @@ function shuffle(a){
 function show(id){
   const list = document.querySelectorAll(".screen");
   for (let i = 0; i < list.length; i++) list[i].classList.toggle("on", list[i].id === id);
+  if (typeof closeZoom === "function") closeZoom();
   // stop polling on any screen other than the score board
   if (id !== "result" && id !== "scores" && typeof stopBoardPoll === "function") stopBoardPoll();
 }
@@ -730,17 +939,36 @@ function isCorrect(cevap, kelime){
 /* ---------------------------------------------------------- ana ekran --- */
 
 function buildHome(){
-  const box = $("diffs");
+  const box = $("modes");
   box.innerHTML = "";
-  DIFFS.forEach(function(d){
+  MODES.forEach(function(m){
     const b = document.createElement("button");
-    b.className = "diff" + (d.id === diffId ? " sel" : "");
+    b.className = "diff" + (m.id === modeId ? " sel" : "");
     b.innerHTML = "<b></b>";
-    b.querySelector("b").textContent = TEXT[d.key];
-    b.onclick = function(){ diffId = d.id; buildHome(); };
+    b.querySelector("b").textContent = TEXT[m.key];
+    b.onclick = function(){ modeId = m.id; rememberSettings(); buildHome(); };
     box.appendChild(b);
   });
+
+  const seg = $("themes");
+  seg.innerHTML = "";
+  [["dark", "themeDark"], ["light", "themeLight"]].forEach(function(pair){
+    const b = document.createElement("button");
+    b.className = pair[0] === theme ? "sel" : "";
+    b.textContent = TEXT[pair[1]];
+    b.onclick = function(){ theme = pair[0]; applyTheme(); rememberSettings(); buildHome(); };
+    seg.appendChild(b);
+  });
+
+  $("secs").value = secs;
+  $("secsOut").textContent = secsText(secs);
 }
+
+$("secs").addEventListener("input", function(){
+  secs = clampSecs($("secs").value);
+  $("secsOut").textContent = secsText(secs);
+});
+$("secs").addEventListener("change", rememberSettings);
 
 /* -------------------------------------------------------------- game flow --- */
 
@@ -759,6 +987,8 @@ function startGame(){
   role      = "solo";
   drawerName  = "";
   lastCode   = "";
+  recallStart = 0;
+  recallMs  = 0;
   scores  = [];
   scoreSent = false;
   words    = shuffle(s.familyA.concat(s.familyB));
@@ -788,8 +1018,10 @@ const pctx = pad.getContext("2d");
 
 let padSize = 0;
 let strokes = [];
-let cur = null;
-let drawing = false;
+// One stroke per pointer, keyed by pointerId. A single shared "current stroke"
+// made a second finger carry on the first one, so two hands drew a line joining
+// them instead of two separate lines. Any number of pointers now draw at once.
+const live = new Map();
 let idx = 0;
 let wordStart = 0;
 let raf = 0;
@@ -848,14 +1080,15 @@ pad.addEventListener("pointerdown", function(e){
   if (!$("draw").classList.contains("on")) return;
   e.preventDefault();
   try { pad.setPointerCapture(e.pointerId); } catch(err){}
-  drawing = true;
-  cur = [padPoint(e)];
-  strokes.push(cur);
+  const stroke = [padPoint(e)];
+  live.set(e.pointerId, stroke);
+  strokes.push(stroke);
   paintPad();
 });
 
 pad.addEventListener("pointermove", function(e){
-  if (!drawing) return;
+  const stroke = live.get(e.pointerId);
+  if (!stroke) return;
   e.preventDefault();
   // getCoalescedEvents sometimes returns an empty array; fall back to the event
   let evts = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
@@ -864,21 +1097,21 @@ pad.addEventListener("pointermove", function(e){
   pctx.lineWidth = lw; pctx.lineCap = "round"; pctx.lineJoin = "round"; pctx.strokeStyle = PEN;
   for (let i = 0; i < evts.length; i++){
     const p = padPoint(evts[i]);
-    const prev = cur[cur.length - 1];
+    const prev = stroke[stroke.length - 1];
     if (Math.abs(p.x - prev.x) + Math.abs(p.y - prev.y) < 0.0015) continue;
     pctx.beginPath();
     pctx.moveTo(prev.x * padSize, prev.y * padSize);
     pctx.lineTo(p.x * padSize, p.y * padSize);
     pctx.stroke();
-    cur.push(p);
+    stroke.push(p);
   }
 });
 
 function endStroke(e){
-  if (!drawing) return;
-  if (e) e.preventDefault();
-  drawing = false;
-  cur = null;
+  if (!e){ live.clear(); return; }        // called with nothing = drop every pointer
+  if (!live.has(e.pointerId)) return;     // a finger that was never drawing
+  e.preventDefault();
+  live.delete(e.pointerId);
 }
 pad.addEventListener("pointerup", endStroke);
 pad.addEventListener("pointercancel", endStroke);
@@ -894,7 +1127,7 @@ function startDrawPhase(){
 function startWord(i){
   idx = i;
   strokes = [];
-  cur = null; drawing = false;
+  live.clear();
   paintPad();
   $("drawLevel").textContent = diffName();
   $("word").textContent = words[i];
@@ -905,7 +1138,7 @@ function startWord(i){
 }
 
 function tick(){
-  const ms = diffOf().ms;
+  const ms = roundMs();
   const el = performance.now() - wordStart;
   $("bar").style.transform = "scaleX(" + Math.max(0, 1 - el / ms) + ")";
   if (el >= ms){ nextWord(); return; }
@@ -914,7 +1147,7 @@ function tick(){
 
 function nextWord(){
   cancelAnimationFrame(raf);
-  drawing = false; cur = null;
+  live.clear();
   drawings[idx] = strokes.filter(function(s){ return s && s.length; });   // empty drawing = []
   if (idx + 1 < N) startWord(idx + 1);
   else show("between");
@@ -962,8 +1195,8 @@ function confirmExit(){
   cancelAnimationFrame(raf);
   clearTimeout(cdTimer);
   pausedAt = 0;
-  drawing = false; cur = null;
-  closeSheet(); closeModal();
+  live.clear();
+  closeSheet(); closeModal(); closeZoom();
   clearUrl();
   show("home");
 }
@@ -1045,23 +1278,42 @@ function buildRecall(){
   $("recallTitle").textContent = role === "guesser"
     ? (drawerName ? TEXT.whatDidDraw.replace("{name}", drawerName) : TEXT.whatWasDrawn)
     : TEXT.whichWasWhich;
-  $("recallHint").textContent = diffOf().mode === "typed"
+  $("recallHint").textContent = modeId === "typed"
     ? TEXT.hintTyped
     : TEXT.hintPool;
   closeSheet(); closeModal();
+  if (!recallStart){
+    recallStart = Date.now();
+    if (lastCode) rememberRound(lastCode, { startedAt: recallStart });
+  }
   refreshRecall();
   show("recall");
   paintAll("recallGrid");
 }
 
 function onCellTap(pos){
-  if (diffOf().mode === "typed"){ selPos = pos; openModal(pos); refreshRecall(); return; }
+  if (modeId === "typed"){ selPos = pos; openModal(pos); refreshRecall(); return; }
   if (picks[pos]){                       // tapping an assigned cell releases the word
     picks[pos] = null; selPos = -1; closeSheet(); refreshRecall(); return;
   }
   selPos = pos;
   openSheet(pos);
   refreshRecall();
+}
+
+// Wall clock from the grid appearing to the finish button. Kept with the round so
+// a reload carries on the same clock instead of restarting it.
+function elapsedMs(){
+  if (recallMs) return recallMs;
+  return recallStart ? Math.max(0, Date.now() - recallStart) : 0;
+}
+
+function timeLabel(ms){
+  if (!ms) return "\u2013";
+  const s = ms / 1000;
+  if (s < 60) return (s < 10 ? s.toFixed(1) : Math.round(s)) + " sn";
+  const m = Math.floor(s / 60);
+  return m + ":" + String(Math.round(s - m * 60)).padStart(2, "0");
 }
 
 function answeredCount(){
@@ -1089,6 +1341,9 @@ function refreshRecall(){
   $("assigned").textContent = n + " / " + N;
   // any mode can be finished early; anything left blank counts as wrong
   $("finish").disabled = false;
+  // Keep the answers on the device: a reload should come back to this grid with
+  // the work still in it. The order goes with them -- see loadGame.
+  if (lastCode) rememberRound(lastCode, { order: order, picks: picks });
 }
 
 /* kelime havuzu */
@@ -1107,24 +1362,37 @@ function openSheet(pos){
     b.onclick = function(){ picks[pos] = w; selPos = -1; closeSheet(); refreshRecall(); };
     box.appendChild(b);
   });
+  const sc = $("recallGrid").parentElement;
+  if (sc && sheetScroll < 0) sheetScroll = sc.scrollTop;   // where to come back to
+  paintPreview($("sheetPrev"), order[pos]);   // the cell is too small to judge from
   $("sheet").classList.add("on");
   $("recallGrid").style.paddingBottom = ($("sheet").offsetHeight + 20) + "px";
 }
 
+// The pool is position:fixed, so the grid takes on bottom padding to keep its last
+// rows reachable above it. That padding is scrollable space which exists only while
+// the pool is open: dropping it shrinks the scroll range, the browser clamps
+// scrollTop, and the whole grid slides under the player, who reads it as the
+// drawings having swapped places. How far it slides depends on the screen, which is
+// why it looked different on every device. Nothing can hold a position inside space
+// that no longer exists, so instead the offset from before the pool opened is put
+// back -- it was reached with the padding collapsed, so it is always reachable again.
+let sheetScroll = -1;
+
 function closeSheet(){
+  const g = $("recallGrid");
+  const sc = g.parentElement;
   $("sheet").classList.remove("on");
-  $("recallGrid").style.paddingBottom = "14px";
+  g.style.paddingBottom = "14px";
+  if (sc && sheetScroll >= 0) sc.scrollTop = sheetScroll;
+  sheetScroll = -1;
 }
 
 $("sheetX").onclick = function(){ selPos = -1; closeSheet(); refreshRecall(); };
 
 /* yazarak cevap */
 function openModal(pos){
-  const cv = $("modalPrev");
-  const ctx = cv.getContext("2d");
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, cv.width, cv.height);
-  paintStrokes(ctx, drawings[order[pos]] || [], cv.width, Math.max(3, cv.width * 0.025));
+  paintPreview($("modalPrev"), order[pos]);
   const inp = $("modalInput");
   inp.value = picks[pos] || "";
   $("modal").classList.add("on");
@@ -1141,6 +1409,43 @@ function closeModal(){
   $("modal").style.height = "";
   $("modal").style.top = "";
 }
+
+// Every enlarged view of a drawing goes through here. The canvas keeps its fixed
+// backing size and CSS scales it, so the strokes stay smooth however big it gets.
+function paintPreview(cv, di){
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  paintStrokes(ctx, drawings[di] || [], cv.width, Math.max(3, cv.width * 0.025));
+}
+
+/* ------------------------------------------------------------------ zoom --- */
+
+function openZoom(pos){
+  const di = order[pos];
+  paintPreview($("zoomPrev"), di);
+  const cap = $("zoomCap");
+  cap.innerHTML = "";
+  const guess = picks[pos] && String(picks[pos]).trim();
+  if (!isCorrect(picks[pos], words[di])){
+    const bad = document.createElement("span");
+    bad.className = "bad";
+    bad.textContent = guess ? guess : "\u2014";
+    cap.appendChild(bad);
+  }
+  const good = document.createElement("span");
+  good.className = "good";
+  good.textContent = words[di];
+  cap.appendChild(good);
+  $("zoom").classList.add("on");
+}
+
+function closeZoom(){ $("zoom").classList.remove("on"); }
+
+$("zoomClose").onclick = closeZoom;
+$("zoom").onclick = function(e){ if (e.target === $("zoom")) closeZoom(); };
+document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeZoom(); });
 
 // Keep the sheet above the keyboard by sitting it on the visual viewport.
 function modalYerlestir(){
@@ -1168,13 +1473,14 @@ $("modal").onclick      = function(e){ if (e.target === $("modal")){ selPos = -1
 /* ----------------------------------------------------------- result screen --- */
 
 function buildResult(){
+  if (!recallMs) recallMs = elapsedMs();      // stop the clock before anything is drawn
   score = 0;
   order.forEach(function(di, pos){ if (isCorrect(picks[pos], words[di])) score++; });
 
   $("score").textContent = role === "guesser"
     ? ((drawerName ? TEXT.inDrawingsOf.replace("{name}", drawerName) : TEXT.inTheseDrawings) + score + "/" + N)
     : TEXT.outOf.replace("{n}", N).replace("{score}", score);
-  $("scoreSub").textContent = diffName();
+  $("scoreSub").textContent = diffName() + " \u00b7 " + TEXT.totalTime + " " + timeLabel(elapsedMs());
   $("copyNote").textContent = "";
   $("fallback").style.display = "none";
 
@@ -1202,10 +1508,18 @@ function buildResult(){
       cap.appendChild(document.createElement("br"));
       cap.appendChild(good);
     }
+    cell.classList.add("tappable");
+    cell.onclick = function(){ openZoom(pos); };
     g.appendChild(cell);
   });
 
   $("again").textContent = role === "guesser" ? TEXT.youDrawToo : TEXT.playAgain;
+  // Guessing your own drawings first used to be a dead end: there was no way to
+  // hand the round to anyone afterwards. Only the person who drew it can.
+  $("inviteFriends").hidden = role === "guesser";   // only the person who drew it can hand it on
+  // Record the finish before the board goes up: opening this code again on this
+  // device should land here, on the score table, rather than on an empty grid.
+  if (lastCode) rememberRound(lastCode, { done: true, score: score, ms: recallMs, order: order, picks: picks, name: myName });
   showBoard();
   show("result");
   paintAll("resultGrid");
@@ -1221,37 +1535,51 @@ function showBoard(){
   $("board").hidden = !lastCode;              // the board only exists for shared rounds
   if (!lastCode) return;
   $("boardTitle").textContent = boardHeading();
-  // The name was taken up front, so the score posts itself without asking again.
-  if (!scoreSent){ scoreSent = true; sendScore(); }
+  // A score needs a name to sit under. Without one the board is still readable,
+  // it just has no row for this player until they add one.
+  $("boardNameRow").hidden = !!myName;
+  if (myName && !scoreSent){ scoreSent = true; sendScore(); }
   renderScores();
   fetchScores();
   startBoardPoll();
 }
 
+// Winner first: best score, and on a tie whoever got there quickest. Rows written
+// before times were recorded have no ms and fall in behind the timed ones.
+function rankScores(list){
+  return list.slice().sort(function(a, b){
+    if (b.score !== a.score) return b.score - a.score;
+    const am = a.ms > 0 ? a.ms : Infinity, bm = b.ms > 0 ? b.ms : Infinity;
+    if (am !== bm) return am - bm;
+    return (a.ts || 0) - (b.ts || 0);
+  });
+}
+
 function renderScores(){
-  // The server returns finishing order; do not re-sort.
-  const liste = scores.slice();
+  const liste = rankScores(scores);
   // Always show your own row: KV listing is eventually consistent, so a score
   // just written may not be in the list yet.
   if (myName && !liste.some(function(s){ return sameName(s.name, myName); })){
-    liste.push({ name: myName, score: score });
+    liste.push({ name: myName, score: score, ms: elapsedMs() });
   }
+  const sirali = rankScores(liste);
 
   const kutular = [$("boardList"), $("scoresList")];
   kutular.forEach(function(box){
     if (!box) return;
     box.innerHTML = "";
-    liste.forEach(function(s, i){
+    sirali.forEach(function(s, i){
       const row = document.createElement("div");
       row.className = "brow" + (myName && sameName(s.name, myName) ? " me" : "");
       const rk = document.createElement("span"); rk.className = "rk"; rk.textContent = (i + 1) + ".";
       const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = s.name;
+      const tm = document.createElement("span"); tm.className = "tm"; tm.textContent = s.ms > 0 ? timeLabel(s.ms) : "";
       const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = s.score + "/" + N;
-      row.appendChild(rk); row.appendChild(nm); row.appendChild(sc);
+      row.appendChild(rk); row.appendChild(nm); row.appendChild(tm); row.appendChild(sc);
       box.appendChild(row);
     });
   });
-  const bos = liste.length === 0;
+  const bos = sirali.length === 0;
   if ($("boardEmpty"))  $("boardEmpty").hidden  = !bos;
   if ($("scoresEmpty")) $("scoresEmpty").hidden = !bos;
 }
@@ -1305,49 +1633,43 @@ function sendScore(){
   api("/api/scores/" + encodeURIComponent(lastCode), {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ name: myName, score: score })
+    body: JSON.stringify({ name: myName, score: score, ms: elapsedMs() })
   }).then(function(r){
+    rememberRound(lastCode, { sent: true });      // do not post it again on a revisit
     if (r.ok && r.data && Array.isArray(r.data.scores)){ scores = r.data.scores; renderScores(); }
   }).catch(function(){ /* already shown locally, fail quietly */ });
 }
 
 /* ---------------------------------------------------------- name sorma --- */
 
-let afterNameFn = null;
-
-function askForName(sonra){
-  afterNameFn = sonra;
-  $("playerName").value = myName || "";     // one tap is enough on the second round
-  $("nameErr").textContent = "";
-  show("askName");
-  setTimeout(function(){ $("playerName").focus(); }, 50);
-}
-
-function confirmName(){
-  const name = $("playerName").value.trim().slice(0, 5);
-  if (!name){ $("nameErr").textContent = TEXT.enterName; $("playerName").focus(); return; }
+// Nothing is asked before a round any more: you press start and draw. A name is
+// only needed to put your round in someone else's hands, or your score on a
+// board, so it is asked at exactly those two points.
+function setName(raw){
+  const name = String(raw || "").trim().slice(0, NAME_MAX);
+  if (!name) return "";
   myName = name;
-  const devam = afterNameFn;
-  afterNameFn = null;
-  if (devam) devam();
+  rememberName(name);
+  return name;
 }
-
-$("nameNext").onclick = confirmName;
-$("playerName").addEventListener("keydown", function(e){
-  if (e.key === "Enter"){ e.preventDefault(); confirmName(); }
-});
 
 function shareText(){
   let rows = "";
   order.forEach(function(di, pos){
     rows += (isCorrect(picks[pos], words[di]) ? "🟩" : "🟥");
-    if (pos % 5 === 4 && pos !== N - 1) rows += "\n";
+    // The grid is 4 across and 5 down on a phone, so the shared squares match it:
+    // a 5-wide block was not the shape the player had been looking at.
+    if (pos % 4 === 3 && pos !== N - 1) rows += "\n";
   });
   // The set is never named in the share text, so it cannot leak which words came up.
   const head = role === "guesser" && drawerName
     ? "Chizz 🎨 " + TEXT.drawingsOf.replace("{name}", drawerName)
     : "Chizz 🎨";
-  return head + "\n" + TEXT.difficultyLabel + diffName() + "\n" + score + "/" + N + "\n\n" + rows;
+  let out = head + "\n" + TEXT.difficultyLabel + diffName() + "\n" + score + "/" + N
+          + " \u00b7 " + timeLabel(elapsedMs()) + "\n\n" + rows;
+  // Anyone reading the score can play the same round straight from the message.
+  if (lastCode) out += "\n\n" + TEXT.guessTooInvite + "\n" + gameLink(lastCode);
+  return out;
 }
 
 function copyText(t){
@@ -1443,23 +1765,65 @@ function sendShow(which){
 $("toSend").onclick = function(){
   $("sendErr").textContent = "";
   $("linkNote").textContent = "";
+  $("sendName").value = myName || "";
+  sendNameReady();
+  sendFrom = "between";
   sendShow("form");
   show("send");
 };
 
-$("sendBack").onclick = function(){ show("between"); };
+let sendFrom = "between";
+$("sendBack").onclick = function(){ show(sendFrom); };
+
+$("inviteFriends").onclick = function(){
+  $("sendErr").textContent = "";
+  $("linkNote").textContent = "";
+  $("sendName").value = myName || "";
+  sendNameReady();
+  sendFrom = "result";
+  if (lastCode){                     // already shared: show the same link, do not save twice
+    $("code").textContent = lastCode;
+    $("link").textContent = gameLink(lastCode);
+    sendShow("done");
+  } else {
+    sendShow("form");
+  }
+  show("send");
+};
 $("doneHome").onclick = function(){ show("home"); };
 $("doneRecall").onclick = function(){ buildRecall(); };
 
+function sendNameReady(){
+  const ok = !!$("sendName").value.trim();
+  $("sendGo").classList.toggle("off", !ok);
+  return ok;
+}
+
+$("sendName").addEventListener("input", function(){
+  sendNameReady();
+  $("sendErr").textContent = "";
+});
+$("sendName").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); $("sendGo").click(); }
+});
+
 $("sendGo").onclick = function(){
-  const name = myName;          // taken up front
+  // The button stays tappable while it is dimmed, so it can say what is missing
+  // rather than silently doing nothing.
+  if (!sendNameReady()){
+    $("sendErr").textContent = TEXT.enterName;
+    $("sendName").focus();
+    return;
+  }
+  const name = setName($("sendName").value);
   sendShow("busy");
   api("/api/save", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       setId: setId,
-      difficulty: diffId,
+      mode: modeId,
+      seconds: secs,
       name: name,
       words: words,
       drawings: encodeDrawings(drawings)
@@ -1470,6 +1834,9 @@ $("sendGo").onclick = function(){
     drawerName = name;
     $("code").textContent = lastCode;
     $("link").textContent = gameLink(lastCode);
+    // Without this a reload loses the code, and with it the link just shared.
+    rememberRound(lastCode, { mine: true, order: order, picks: picks });
+    setUrlCode(lastCode);
     sendShow("done");
   }).catch(function(){
     // the drawings are still in memory, nothing lost
@@ -1519,19 +1886,49 @@ function loadGame(code){
     if (!Array.isArray(loadedWords) || loadedWords.length !== N || loadedDrawings.length !== N) throw new Error("malformed");
 
     setId    = v.setId && SETS.some(function(s){ return s.id === v.setId; }) ? v.setId : SETS[0].id;
-    diffId   = DIFFS.some(function(d){ return d.id === v.difficulty; }) ? v.difficulty : "medium";
-    role      = "guesser";
+    // Accept both shapes: rounds shared before modes existed only have a difficulty.
+    const legacy = LEGACY_DIFFS[v.difficulty];
+    modeId = MODES.some(function(m){ return m.id === v.mode; }) ? v.mode
+           : (legacy ? legacy.mode : "pool");
+    secs   = v.seconds !== undefined ? clampSecs(v.seconds)
+           : (legacy ? legacy.seconds : SECS_DEFAULT);
     lastCode   = code;
     scores  = [];
-    scoreSent = false;
-    drawerName  = typeof v.name === "string" ? v.name.slice(0, 5) : "";
+    drawerName  = typeof v.name === "string" ? v.name.slice(0, NAME_MAX) : "";
     words    = loadedWords;
     drawings = loadedDrawings;
-    order    = shuffle(words.map(function(_, i){ return i; }));
-    picks    = new Array(N).fill(null);
     selPos   = -1;
+
+    // Has this device been here before? The grid order has to be restored with
+    // the answers: it is reshuffled on every visit, so putting old picks against
+    // a fresh order would pin every answer to the wrong drawing.
+    const rec = savedRound(code);
+    const resumable = !!(rec && Array.isArray(rec.order) && rec.order.length === N);
+    role      = rec && rec.mine ? "drawer" : "guesser";
+    scoreSent = !!(rec && rec.sent);
+    order     = resumable ? rec.order.slice()
+                          : shuffle(words.map(function(_, i){ return i; }));
+    picks     = resumable && Array.isArray(rec.picks) && rec.picks.length === N
+                  ? rec.picks.slice()
+                  : new Array(N).fill(null);
+    recallStart = rec && rec.startedAt ? rec.startedAt : 0;
+    recallMs  = rec && rec.done && rec.ms ? rec.ms : 0;
+    if (!resumable) rememberRound(code, { order: order });
     buildHome();
-    askForName(buildRecall);          // the friend names themselves before playing too
+    setUrlCode(code);                 // reloading returns here, including after a join by code
+
+    if (rec && rec.done){             // already played on this device: straight to the scores
+      buildResult();
+      return;
+    }
+    if (rec && rec.mine){             // this device drew the round: back to the share screen
+      $("code").textContent = code;
+      $("link").textContent = gameLink(code);
+      sendShow("done");
+      show("send");
+      return;
+    }
+    buildRecall();                    // straight into guessing; the name comes later
   }).catch(function(e){
     $("loadTitle").textContent = e && e.message === "notfound"
       ? TEXT.codeInvalid
@@ -1540,6 +1937,16 @@ function loadGame(code){
     $("loadHome").hidden = false;
   });
 }
+
+$("boardJoin").onclick = function(){
+  if (!setName($("boardName").value)){ $("boardName").focus(); return; }
+  $("boardNameRow").hidden = true;
+  if (!scoreSent){ scoreSent = true; sendScore(); }
+  renderScores();
+};
+$("boardName").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); $("boardJoin").click(); }
+});
 
 $("loadHome").onclick = function(){ clearUrl(); show("home"); };
 
@@ -1561,7 +1968,7 @@ $("joinCode").addEventListener("keydown", function(e){
 
 /* ------------------------------------------------------------------ wiring --- */
 
-$("start").onclick    = function(){ askForName(startGame); };
+$("start").onclick    = startGame;
 $("toRecall").onclick = buildRecall;
 $("finish").onclick   = function(){ closeSheet(); closeModal(); buildResult(); };
 
@@ -1579,11 +1986,14 @@ $("share").onclick = function(){
   });
 };
 
-$("again").onclick = function(){ clearTimeout(cdTimer); clearUrl(); askForName(startGame); };
+$("again").onclick = function(){ clearTimeout(cdTimer); clearUrl(); startGame(); };
 $("home2").onclick = function(){ clearTimeout(cdTimer); clearUrl(); closeSheet(); closeModal(); show("home"); };
 
 document.addEventListener("gesturestart", function(e){ e.preventDefault(); });
 
+myName = savedName();             // the device already knows who is playing
+loadSettings();
+applyTheme();
 applyText();
 buildHome();
 

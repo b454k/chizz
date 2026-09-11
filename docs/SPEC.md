@@ -34,8 +34,9 @@ wrangler.jsonc                  Cloudflare Pages config and the KV binding
 ```
 
 `public/index.html` has no external scripts, stylesheets, fonts or network
-dependencies, and uses no `localStorage` or `sessionStorage`. Opened directly from
-disk it plays solo; the API is only needed for the duel and score features.
+dependencies. Opened directly from disk it plays solo; the API is only needed for
+the duel and score features. It does use `localStorage` — see
+[Section 14](#14-what-is-kept-on-the-device).
 
 ## 3. Screens
 
@@ -43,8 +44,7 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 
 | id | Purpose |
 |---|---|
-| `home` | Title, four difficulty buttons, a start button, and a 4-character code field with a join button |
-| `askName` | Asks the player's name (max 5 characters). Shown before every round |
+| `home` | Title, two mode buttons, a settings panel, a start button, and a 4-character code field with a join button |
 | `countdown` | Full-screen 3 → 2 → 1, one second each |
 | `draw` | The drawing phase |
 | `between` | After 20 drawings: send to a friend, or guess them yourself |
@@ -61,13 +61,16 @@ Two overlays sit outside the screen system: `#sheet` (the word pool) and `#modal
 
 ### Solo
 
-1. `home` — pick a difficulty, press start
-2. `askName` — enter a name; it is remembered for later rounds in the same session
-3. `countdown` — 3, 2, 1
-4. `draw` — 20 words, one at a time, auto-advancing
-5. `between` — choose to guess yourself or send to a friend
-6. `recall` — assign a word to each drawing
-7. `result` — score, per-cell correction, share text
+1. `home` — pick a mode, adjust the settings if you want, press start
+2. `countdown` — 3, 2, 1
+3. `draw` — 20 words, one at a time, auto-advancing
+4. `between` — choose to guess yourself or send to a friend
+5. `recall` — assign a word to each drawing
+6. `result` — score, per-cell correction, share text
+
+Nothing is asked before the round starts. A name is only needed to hand the round
+to someone else or to take a place on a score board, so it is asked at exactly
+those two points and nowhere else.
 
 ### Duel, drawer's side
 
@@ -77,10 +80,15 @@ watch-scores button that opens the live score board for that code.
 
 ### Duel, guesser's side
 
-Opening `?o=<code>`, or entering a code on `home`, fetches the round, then asks for a
-name, then goes straight to `recall`. There is no drawing phase. The result screen
-reads "in <drawer>'s drawings, 12/20" and the guesser's score is posted to that
-round's board. A draw-your-own button starts a fresh round.
+Opening `?o=<code>`, or entering a code on `home`, fetches the round and goes
+straight to `recall`. There is no drawing phase and no name prompt. The round's own
+mode and seconds are used, not the ones set on this device. The result screen reads
+"in <drawer>'s drawings, 12/20". If the device has no name yet the board shows a
+name field instead of a row; filling it in posts the score. A draw-your-own button
+starts a fresh round.
+
+The drawer's side also gains an invite button on `result`, so guessing your own
+drawings first is no longer a dead end.
 
 ### Leaving a round
 
@@ -89,20 +97,33 @@ action is to stay. **While the confirmation is
 open the word timer is paused** and resumes from where it stopped, so the dialog never
 costs the player time.
 
-## 5. Difficulty
+## 5. Modes and settings
 
-Four levels. The two variables — time pressure and answer method — are deliberately
-separated, so `medium` and `hard` share a duration and differ only in how you answer.
+Two variables, set independently rather than bundled into fixed levels.
 
-| id | Label | Per word | Answer method |
-|---|---|---|---|
-| `easy` | Easy | 4000 ms | Word pool |
-| `medium` | Medium | 2500 ms | Word pool |
-| `hard` | Hard | 2500 ms | Typed |
-| `impossible` | Impossible | 1500 ms | Typed |
+**Mode** — how an answer is given:
 
-Default is `medium`. The chosen level is shown on the drawing, recall and result
-screens, and in the share text.
+| id | Label | Answer method |
+|---|---|---|
+| `pool` | Havuzdan | Choose from the remaining words |
+| `typed` | Yazarak | Type the word |
+
+**Seconds per word** — a slider from **1 to 10 seconds in half-second steps**,
+defaulting to 2.5.
+
+**Theme** — dark (default) or light. Applied as `data-theme` on the root element;
+the dark palette is the base and the light one restates only the colours that differ.
+
+Mode, seconds and theme are all kept on the device. The mode and duration are shown
+together on the drawing, recall and result screens, and in the share text
+(`Havuzdan · 2,5 sn`).
+
+This replaced four fixed difficulties (`easy`, `medium`, `hard`, `impossible`), which
+conflated the two variables: `medium` and `hard` differed only in answer method while
+sharing a duration nobody could change. Rounds saved under the old scheme are mapped
+on read — `easy`→pool/4s, `medium`→pool/2.5s, `hard`→typed/2.5s,
+`impossible`→typed/1.5s — in both the client and `GET /api/game/:code`, and
+`POST /api/save` still accepts the old field from a stale tab.
 
 ## 6. Drawing phase
 
@@ -153,16 +174,26 @@ The 20 drawings appear in a grid — 4 columns on narrow screens, 5 on wide — 
 order shuffled independently of the drawing order, with **no cell numbers**, so
 position gives nothing away. The result screen reuses the same order.
 
-**Pool mode** (`easy`, `medium`): tapping a drawing opens a bottom sheet listing the
-remaining words, sorted with Turkish collation. Choosing a word assigns it and removes
-it from the pool; each word is used at most once. Tapping an assigned drawing releases
-the word back. Finishing unlocks only when all 20 are assigned.
+**Pool mode**: tapping a drawing opens a bottom sheet showing that drawing enlarged —
+a grid cell is around 76 px wide, far too small to recognise a scribble by — above
+the remaining words, sorted with Turkish collation. Choosing a word assigns it and
+removes it from the pool; each word is used at most once. Tapping an assigned drawing
+releases the word back.
 
-**Typed mode** (`hard`, `impossible`): tapping a drawing opens a card near the top of the
+The sheet is `position: fixed`, so the grid is given bottom padding to keep its last
+rows reachable above it. That padding is scrollable space existing only while the
+sheet is open, so closing it shrinks the scroll range and the browser clamps
+`scrollTop` — which slid the whole grid under the player and read as the drawings
+having swapped places, by an amount that varied with screen size. The scroll offset
+from before the sheet opened is therefore restored on close; it was reached with the
+padding collapsed, so it is always reachable again.
+
+**Typed mode**: tapping a drawing opens a card near the top of the
 screen — deliberately not a bottom sheet, so the phone keyboard cannot cover it —
-showing a preview of the drawing, a text field, a save button and a skip button.
-Answers can be edited by tapping again. Passing is allowed, so finishing is always
-enabled.
+showing a large preview of the drawing, a text field, a save button and a skip button.
+Answers can be edited by tapping again. Passing is allowed.
+
+Finishing is always enabled in both modes; anything left blank counts as wrong.
 
 Cells are repainted through a `ResizeObserver`, so drawings still render correctly if
 the grid is built before the page has been laid out.
@@ -190,7 +221,12 @@ drawing. The heading reads `20'de 12` for your own round, or
 "in <drawer>'s drawings, 12/20" when guessing someone else's.
 
 Every cell is framed green or red. Wrong cells show the guess struck through with the
-correct word in green beneath it; a skipped answer shows `—`.
+correct word in green beneath it; a skipped answer shows `—`. Tapping any cell opens
+it full size in the middle of the screen with the same caption.
+
+The round is also timed: the clock runs from the recall grid first appearing to the
+finish button, survives a reload, and is shown beside the score and used to break
+ties on the board.
 
 ## 11. Share text
 
@@ -200,18 +236,24 @@ not theoretical.
 
 ```
 Chizz 🎨
-Zorluk: Zor
-12/20
+Zorluk: Yazarak · 2,5 sn
+12/20 · 47 sn
 
-🟩🟩🟥🟩🟥
-🟩🟩🟩🟥🟩
-🟥🟩🟩🟩🟩
-🟩🟥🟩🟩🟥
+🟩🟩🟥🟩
+🟩🟩🟩🟥
+🟥🟩🟩🟩
+🟩🟥🟩🟩
+🟩🟩🟥🟩
+
+Sen de tahmin et:
+https://chizz.party/?o=A7K2
 ```
 
 Guessing someone else's round, the first line also names the drawer.
-The grid is 4 rows of 5 in the recall order. **The set is deliberately not named**, so
-sharing a result cannot leak which words were in play.
+The grid is **5 rows of 4** in the recall order, matching the 4-column phone layout —
+it used to be 4 rows of 5, which was not the shape the player had been looking at.
+The invite line is only added once the round has a code. **The set is deliberately not
+named**, so sharing a result cannot leak which words were in play.
 
 ## 12. Duel and storage
 
@@ -231,25 +273,29 @@ trip. A typical 20-drawing round is 30–40 KB against a 200 KB limit.
 
 ### Endpoints
 
-`POST /api/save` — body `{setId, difficulty, name, words, drawings}`, returns
-`{code}`. Validates set id, difficulty, exactly 20 words, exactly 20 drawings and every
-coordinate as an integer in range; rejects bodies over 200 KB with `413`. Non-`POST`
+`POST /api/save` — body `{setId, mode, seconds, name, words, drawings}`, returns
+`{code}`. Validates set id, mode, seconds in 1–10, exactly 20 words, exactly 20
+drawings and every coordinate as an integer in range; rejects bodies over 200 KB with
+`413`. A legacy `difficulty` is accepted in place of `mode`/`seconds`. Non-`POST`
 methods return `405` — without an explicit handler Pages would fall through and serve
 the whole HTML page in reply to an API call.
 
 `GET /api/game/:code` — returns the stored round, `404` for an unknown or expired code.
 
-`GET/POST /api/scores/:code` — the score board, ordered by finishing time. Each player
-writes to their own key (`<CODE>:s:<name>`) so two people finishing at once cannot
-overwrite each other, and a summary is written to `<CODE>:board` for readers. This
-keeps reads to a single `get`: the board is polled live, and calling `list` on every
-read would exhaust the free tier's 1,000 daily list operations. Names are normalised
-the same way answers are, so case and accent variants are one player. A score can only be
-written against a code that exists. Re-playing keeps your original finishing position.
+`GET/POST /api/scores/:code` — body `{name, score, ms}`. **The board is ranked best
+score first, ties broken by the faster time**, then by who finished first; rows
+written before times were recorded have no `ms` and fall in behind timed ones on a
+tie. Each player writes to their own key (`<CODE>:s:<name>`) so two people finishing
+at once cannot overwrite each other, and a summary is written to `<CODE>:board` for
+readers. This keeps reads to a single `get`: the board is polled live, and calling
+`list` on every read would exhaust the free tier's 1,000 daily list operations. Names
+are normalised the same way answers are, so case and accent variants are one player,
+and are capped at 10 characters. A score can only be written against a code that
+exists. Re-playing keeps your original finishing position and your original time.
 
 Everything is written with a **30-day TTL** and expires by itself. Stored data is the
-set id, difficulty, an optional name, the 20 words and the 20 drawings. No email, no
-IP, no account.
+set id, mode, seconds, an optional name, the 20 words and the 20 drawings. No email,
+no IP, no account.
 
 ### Score board
 
@@ -268,10 +314,44 @@ before KV's listing catches up.
 | Code typed in wrong format | Rejected before any request, including the ambiguous `0OIL` characters |
 | Clipboard unavailable | Share text shown in a selectable box instead |
 
-## 14. Hosting
+## 14. What is kept on the device
+
+The original brief banned `localStorage`, when a round was a single throwaway sitting.
+Shared rounds made that untenable: a link gets opened twice, a phone reloads the tab,
+and the player expects to find their game where they left it. One key, `chizz.v1`,
+holds:
+
+| Field | Purpose |
+|---|---|
+| `name` | The name typed on this device, so it is asked once rather than per round |
+| `mode`, `secs`, `theme` | The settings chosen on the home screen |
+| `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, and whether this device drew it |
+
+Nothing here is not already on screen during the round. Entries older than the
+server's 30-day TTL are dropped, and only the newest 40 rounds are kept.
+
+What this buys:
+
+- **A reload stays in the round.** Re-entering a code restores the grid order and the
+  answers. The order has to be restored *with* the answers — it is reshuffled on every
+  visit, so old picks against a fresh order would pin every answer to the wrong drawing.
+- **A finished round reopens on its score table**, with the original time, instead of
+  offering to play it again.
+- **The drawer comes back to their share screen** with the same code and link; a reload
+  used to lose the link entirely. The round's code is written into the address bar with
+  `replaceState`, so a reload has something to return to while the back button still
+  leaves.
+
+Every access is wrapped in `try`/`catch`: Safari in private mode throws on
+`localStorage` rather than quietly doing nothing. A round that cannot be stored is
+still playable; it just will not survive a reload.
+
+## 15. Hosting
 
 Cloudflare Pages, static assets from `public/`, Functions from `functions/`, one KV
-namespace bound as `OYUNLAR`.
+namespace bound as `GAMES`. (The namespace's own title in the dashboard is still
+`OYUNLAR` from before the rename; the binding name in `wrangler.jsonc` is what the
+code sees, so the two need not match and the stored data is untouched.)
 
 The canonical address is **https://chizz.party**. The project also answers on
 `chizz.pages.dev`, but that domain is filtered on some networks and operators, which
@@ -290,17 +370,19 @@ The v1.5 document is a design brief. These are the places the shipped code diffe
 |---|---|---|
 | Name | The original Turkish title | **Chizz** |
 | Word sets | 10 sets, 200 slots, 161 unique | **30 sets, 600 slots, 459 unique** (same rules: 10+10 families, no word more than twice, no repeat inside a set) |
-| Difficulty names | Four Turkish labels, with the third one a variant of the second | Relabelled; ids are now `easy` / `medium` / `hard` / `impossible`. Same durations and answer methods |
-| Set label | Neutral `Set 7` shown on the result screen and in the share text so friends could compare | **Removed entirely.** The set is named nowhere. The share text carries only the difficulty |
+| Difficulty | Four fixed levels | **Replaced by two independent settings**: a mode (`pool` / `typed`) and a 1–10 s slider. Old rounds are mapped on read |
+| Set label | Neutral `Set 7` shown on the result screen and in the share text so friends could compare | **Removed entirely.** The set is named nowhere. The share text carries only the mode and the duration |
 | Typed answers | Text box opens at the bottom | **Card near the top of the screen** with a preview of the drawing, so the phone keyboard cannot cover it |
-| Player name | Optional nickname, one field, may be left blank | **Required, asked before every round**, max 5 characters, reused for the score board |
+| Player name | Optional nickname, one field, may be left blank | Up to 10 characters, never asked before a round. Asked only when sharing a round or joining a board, and remembered afterwards |
 | Language | Turkish strings inline throughout | Interface strings live in one `TEXT` table; identifiers, comments and docs are English |
-| Score board | Listed under "not in this version" | **Implemented** — per-code board, ordered by finishing time, polled live |
+| Score board | Listed under "not in this version" | **Implemented** — per-code board ranked by score, ties broken by time, polled live |
+| Storage | "Do not use localStorage" | **Used deliberately** for the name, the settings and in-progress rounds, so a reload does not lose the game. See Section 14 |
+| Multi-touch | Not mentioned | Each pointer draws its own stroke, so two fingers make two lines rather than one joining them |
 | Leaving a round | Not mentioned | `←` with a confirmation, and the timer pauses while it is open |
 | Canonical URL | A `pages.dev` address | `https://chizz.party/?o=A7K2`, with non-canonical origins rewritten |
 
 Everything else in the v1.5 spec — the shuffled grid with no cell numbers, random set
-selection with no repeat, the four-level structure, the normalisation and one-character
+selection with no repeat, the normalisation and one-character
 typo tolerance, the code alphabet, the 30-day TTL, the 0–255 coordinate shrinking, the
 error behaviours — is implemented as written.
 

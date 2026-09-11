@@ -2,7 +2,17 @@
 // Cloudflare Pages Function. KV binding name: GAMES
 
 const ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";  // no 0/O or 1/I/L, so a code can be read aloud
-const DIFFICULTIES = ["easy", "medium", "hard", "impossible"];
+const MODES = ["pool", "typed"];
+const SECS_MIN = 1, SECS_MAX = 10;
+// Rounds are saved with a mode and a seconds-per-word setting. A client still
+// running the old build posts one of these four names instead; map rather than
+// reject, so a stale tab does not lose the round it just drew.
+const LEGACY_DIFFS = {
+  easy:       { mode: "pool",  seconds: 4 },
+  medium:     { mode: "pool",  seconds: 2.5 },
+  hard:       { mode: "typed", seconds: 2.5 },
+  impossible: { mode: "typed", seconds: 1.5 }
+};
 const MAX_BYTES = 200 * 1024;
 const TTL = 30 * 24 * 60 * 60;   // 30 days
 const N = 20;
@@ -54,7 +64,13 @@ export async function onRequestPost({ request, env }) {
   if (!d || typeof d !== "object") return error("invalid body", 400);
 
   if (typeof d.setId !== "string" || !/^set-(0[1-9]|[12][0-9]|30)$/.test(d.setId)) return error("invalid setId", 400);
-  if (DIFFICULTIES.indexOf(d.difficulty) < 0) return error("invalid difficulty", 400);
+  const legacy = LEGACY_DIFFS[d.difficulty];
+  const mode = MODES.indexOf(d.mode) >= 0 ? d.mode : (legacy ? legacy.mode : null);
+  if (!mode) return error("invalid mode", 400);
+
+  let seconds = d.seconds !== undefined ? Number(d.seconds) : (legacy ? legacy.seconds : NaN);
+  seconds = Math.round(seconds * 2) / 2;                       // half-second steps
+  if (!isFinite(seconds) || seconds < SECS_MIN || seconds > SECS_MAX) return error("invalid seconds", 400);
 
   if (!Array.isArray(d.words) || d.words.length !== N) return error("invalid words", 400);
   for (const k of d.words) {
@@ -66,7 +82,8 @@ export async function onRequestPost({ request, env }) {
 
   const record = JSON.stringify({
     setId: d.setId,
-    difficulty: d.difficulty,
+    mode,
+    seconds,
     name,                    // optional, may be empty; no personal data is stored
     words: d.words,
     drawings: d.drawings
