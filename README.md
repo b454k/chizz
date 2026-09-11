@@ -70,7 +70,7 @@ id in `wrangler.jsonc`. Full steps: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 - [docs/SPEC.md](docs/SPEC.md) — what the game actually does right now, written from
   the code
-- [docs/DEPLOY.md](docs/DEPLOY.md) — hosting and deployment setup (Turkish)
+- [docs/DEPLOY.md](docs/DEPLOY.md) — hosting and deployment setup
 - [docs/CHANGELOG.md](docs/CHANGELOG.md)
 - `docs/chizz-original-spec.md` and `docs/chizz-v15-spec.md` — the original design
   briefs, translated from Turkish and kept as historical documents. The code has moved
