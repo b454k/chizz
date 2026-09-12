@@ -1077,13 +1077,20 @@ $("homeName").addEventListener("change", syncRoundName);
    later beep runs on that one permission. */
 let audio = null;
 
+// Resolves once the context is actually running, so a countdown can wait for it
+// instead of scheduling tones into a context that is still suspended and dropping
+// them.
 function wakeAudio(){
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
+    if (!Ctx) return Promise.resolve();
     if (!audio) audio = new Ctx();
-    if (audio.state === "suspended") audio.resume();
+    if (audio.state === "suspended"){
+      const r = audio.resume();
+      if (r && r.then) return r.catch(function(){});
+    }
   } catch(e){ audio = null; }      // no audio is not a reason to stop the game
+  return Promise.resolve();
 }
 
 function tone(freq, startIn, length, peak){
@@ -1103,8 +1110,25 @@ function tone(freq, startIn, length, peak){
   } catch(e){}
 }
 
-function beepCount(){ tone(660, 0, 0.12, 0.14); }            // 3, 2, 1
-function beepGo(){    tone(990, 0, 0.22, 0.17); }            // draw
+/* All four countdown tones are scheduled in one go, on the audio clock, against the
+   same absolute grid the numbers use. Firing each one from its own setTimeout at
+   "currentTime + 0" was the problem: the timeout chain restarted from whenever the
+   callback actually ran, so lateness piled up, and a tone asked for at +0 lands on
+   the next render quantum rather than now. The audio clock does not drift, so the
+   beats stay even however busy the page gets.
+
+   startAt is a performance.now() reading, so the offset is measured rather than
+   assumed -- scheduling may happen a little after the countdown became visible,
+   while waiting for the context to resume. */
+function countdownBeeps(startAt){
+  if (!audio || audio.state !== "running") return;
+  for (let k = 0; k <= 3; k++){
+    const when = (startAt + k * 1000 - performance.now()) / 1000;
+    if (when < -0.05) continue;                        // that beat is already gone
+    if (k < 3) tone(660, Math.max(0, when), 0.12, 0.14);   // 3, 2, 1
+    else       tone(990, Math.max(0, when), 0.22, 0.17);   // draw
+  }
+}
 function beepScores(){                                        // the board is in
   tone(523.25, 0,    0.16, 0.11);
   tone(659.25, 0.13, 0.16, 0.11);
@@ -1175,17 +1199,23 @@ function startGame(){
   closeSheet(); closeModal();
 
   show("countdown");
-  let n = 3;
   const num = $("cdNum");
-  const beat = function(){
-    num.textContent = String(n);
+  const startAt = performance.now();
+
+  // The tones go on the clock as soon as the context is awake; both they and the
+  // numbers are pinned to startAt, so they cannot slide apart.
+  wakeAudio().then(function(){ countdownBeeps(startAt); });
+
+  const step = function(k){
+    num.textContent = String(3 - k);
     num.classList.remove("pop"); void num.offsetWidth; num.classList.add("pop");
-    beepCount();
-    n--;
-    if (n >= 1) cdTimer = setTimeout(beat, 1000);
-    else        cdTimer = setTimeout(function(){ beepGo(); startDrawPhase(); }, 1000);
+    // Each wait is measured back to startAt rather than being a flat 1000, so a
+    // late callback does not push everything after it later still.
+    const nextAt = startAt + (k + 1) * 1000;
+    const wait = Math.max(0, nextAt - performance.now());
+    cdTimer = setTimeout(k < 2 ? function(){ step(k + 1); } : startDrawPhase, wait);
   };
-  beat();
+  step(0);
 }
 
 /* ----------------------------------------------------------- drawing phase --- */
@@ -2284,7 +2314,7 @@ $("joinCode").addEventListener("keydown", function(e){
 
 /* ------------------------------------------------------------------ wiring --- */
 
-$("start").onclick    = function(){ wakeAudio(); startGame(); };
+$("start").onclick    = startGame;   // the countdown wakes the audio itself
 $("toRecall").onclick = buildRecall;
 $("finish").onclick   = function(){ closeSheet(); closeModal(); buildResult(); };
 

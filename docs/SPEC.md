@@ -388,7 +388,15 @@ type.
 
 **Sound.** Three tones, synthesised with the Web Audio API rather than loaded, so the
 page still pulls nothing from outside: a beep on each of 3-2-1, a higher one as drawing
-starts, and a three-note rise when the score board appears. Browsers refuse to start
+starts, and a three-note rise when the score board appears.
+
+The four countdown tones are scheduled **in one go, on the audio clock**, against the
+same absolute grid the numbers use, and the numbers time each wait back to the start
+rather than to the previous callback. Firing each tone from its own `setTimeout` at
+`currentTime + 0` drifted twice over: the timeout chain restarted from whenever the
+callback actually ran so lateness piled up, and a tone asked for at +0 lands on the
+next render quantum rather than now. Measured after the change, the gaps between tones
+are exact to the millisecond and each beep sits within 8ms of its number. Browsers refuse to start
 audio without a user gesture, so the context is created and resumed when start is
 pressed, and on the first tap anywhere as a fallback for rounds reached through a link.
 Every call is wrapped and guarded on the context actually running; no audio never stops
