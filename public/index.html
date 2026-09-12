@@ -805,7 +805,8 @@ const TEXT = {
   playAgain:        "Tekrar oyna",
   youDrawToo:       "Sen de çiz",
   close:            "Kapat",
-  guessTooInvite:   "Sen de tahmin et:"
+  guessTooInvite:   "Sen de tahmin et:",
+  inviteBlurb:      "20 çizim, 20 kelime. Hangisi neydi?"
 };
 
 // Fill every element that carries a text key.
@@ -1145,7 +1146,7 @@ function copyInvite(el){
   if (!lastCode) return;
   const label = el.querySelector(".cl");
   const from = $("scores").classList.contains("on") ? "scores" : "recall";
-  copyText(inviteText()).then(function(ok){
+  copyText(inviteMessage()).then(function(ok){
     if (!ok){
       // Telling someone to select the link by hand is no use here: the chip does
       // not show one. Put them on the screen that does.
@@ -1961,10 +1962,21 @@ function shareText(){
   return out;
 }
 
-// The one place the invite is worded, so every screen that offers it says the same
-// thing and carries the same link.
+// The tail that goes under a score: the message above it already says what this is.
 function inviteText(){
   return TEXT.guessTooInvite + "\n" + gameLink(lastCode);
+}
+
+/* The whole message, for the places that send the link on its own. It has to say
+   something in words, because a message containing nothing but a URL is swallowed
+   whole by the link preview -- WhatsApp shows the card and not a single line of
+   text, so the reader never sees who sent it or why. */
+function inviteMessage(){
+  const who = role === "guesser" ? drawerName : myName;
+  const head = who
+    ? "Chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{name}", who)
+    : "Chizz \u{1F3A8}";
+  return head + "\n" + TEXT.inviteBlurb + "\n\n" + inviteText();
 }
 
 function copyText(t){
@@ -2212,7 +2224,9 @@ function gameLink(code){
 }
 
 $("linkCopy").onclick = function(){
-  copyText(gameLink(lastCode)).then(function(ok){
+  // The message, not the bare address: a lone URL arrives as a preview card with no
+  // words beside it.
+  copyText(inviteMessage()).then(function(ok){
     $("linkNote").style.color = ok ? "var(--ok)" : "var(--no)";
     $("linkNote").textContent = ok ? TEXT.linkCopied : TEXT.linkCopyFailed;
   });
