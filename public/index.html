@@ -71,13 +71,25 @@
      top gets clipped with no way to scroll to it. */
   #home{justify-content:center; justify-content:safe center;}
   .hwrap{width:100%; max-width:340px; margin:0 auto; padding:28px 0; flex:none;}
-  #home h1{font-size:52px; text-align:center; margin:0 0 30px; letter-spacing:-.04em;}
-
-  .diffs{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-  .diff{
-    border:2px solid var(--line); border-radius:14px; padding:15px 8px; text-align:center;
-    background:var(--panel); text-transform:lowercase;
+  #home h1{font-size:52px; text-align:center; margin:0 0 14px; letter-spacing:-.04em;}
+  .tagline{
+    color:var(--muted); font-size:14px; line-height:1.5; text-align:center;
+    margin:0 0 22px;
   }
+
+  /* One per row rather than side by side: the names and their explanations need
+     the width, and there are only two of them. */
+  .diffs{display:grid; grid-template-columns:1fr; gap:10px;}
+  .diff{
+    border:2px solid var(--line); border-radius:14px; padding:13px 15px; text-align:left;
+    background:var(--panel);
+  }
+  .diff .mname{display:block; text-transform:lowercase; font-size:16px;}
+  .diff .mdesc{
+    display:block; margin-top:3px; color:var(--muted);
+    font-size:13px; line-height:1.4; font-weight:500;
+  }
+  .diff.sel .mdesc{color:var(--ink); opacity:.75;}
   .diff.sel{border-color:var(--ink); background:var(--panel2);}
 
   /* settings on the home screen */
@@ -92,6 +104,7 @@
     width:100%; margin:8px 0 2px; accent-color:var(--accent);
     background:transparent; touch-action:manipulation;
   }
+  .shint{color:var(--muted); font-size:12px; margin:2px 0 0;}
   .seg{display:flex; gap:6px;}
   .seg button{
     border:2px solid var(--line); border-radius:10px; padding:7px 12px;
@@ -339,6 +352,7 @@
   <section class="screen on" id="home">
     <div class="hwrap">
       <h1>chizz</h1>
+      <p class="tagline" data-t="tagline"></p>
       <div class="diffs" id="modes"></div>
 
       <div class="settings">
@@ -347,6 +361,7 @@
           <output id="secsOut"></output>
         </div>
         <input type="range" id="secs" min="1" max="10" step="0.5" data-tal="perWord">
+        <p class="shint" data-t="recommended"></p>
         <div class="srow">
           <span class="lbl" data-t="difficulty"></span>
           <output id="diffOut"></output>
@@ -629,9 +644,11 @@ const SETS = [
 /* Two ways to answer, and the clock set separately in settings. The four fixed
    difficulties conflated the two, so "medium" and "hard" differed only in how you
    answered while sharing a timing nobody could change. */
+// The ids stay pool/typed: they are written into every saved round, so renaming
+// them would break links already shared. Only the labels changed.
 const MODES = [
-  { id:"pool",  key:"modePool"  },
-  { id:"typed", key:"modeTyped" }
+  { id:"pool",  key:"modeOpen",   desc:"modeOpenDesc"   },
+  { id:"typed", key:"modeHidden", desc:"modeHiddenDesc" }
 ];
 const SECS_MIN = 1, SECS_MAX = 10, SECS_DEFAULT = 2.5;
 
@@ -664,8 +681,13 @@ const TEXT = {
   theme:            "Tema",
   themeDark:        "Koyu",
   themeLight:       "Açık",
-  modePool:         "Havuzdan",
-  modeTyped:        "Yazarak",
+  tagline:          "Saniyeler içinde 20 kelime çiz, sonra karışmış çizimlerine bakıp hangisi neydi bul. Kelimeler birbirine benzer şekillerde seçilir; işin zor kısmı da bu.",
+
+  modeOpen:         "Kelimeler açık",
+  modeOpenDesc:     "Kelime listesi önünde durur, her çizim için doğru olanı seçersin.",
+  modeHidden:       "Kelimeler gizli",
+  modeHiddenDesc:   "Liste yok. Her çizimin kelimesini kendin hatırlayıp yazarsın.",
+  recommended:      "Önerilen: 3 sn",
   diffEasy:         "Kolay",
   diffMedium:       "Orta",
   diffHard:         "Zor",
@@ -968,8 +990,13 @@ function buildHome(){
   MODES.forEach(function(m){
     const b = document.createElement("button");
     b.className = "diff" + (m.id === modeId ? " sel" : "");
-    b.innerHTML = "<b></b>";
-    b.querySelector("b").textContent = TEXT[m.key];
+    const name = document.createElement("b");
+    name.className = "mname";
+    name.textContent = TEXT[m.key];
+    const desc = document.createElement("span");
+    desc.className = "mdesc";
+    desc.textContent = TEXT[m.desc];
+    b.appendChild(name); b.appendChild(desc);
     b.onclick = function(){ modeId = m.id; rememberSettings(); buildHome(); };
     box.appendChild(b);
   });
@@ -1461,7 +1488,7 @@ function closeSheet(){
 
 $("sheetX").onclick = function(){ selPos = -1; closeSheet(); refreshRecall(); };
 
-/* yazarak cevap */
+/* typed answer */
 function openModal(pos){
   paintPreview($("modalPrev"), order[pos]);
   const inp = $("modalInput");

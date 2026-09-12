@@ -105,8 +105,8 @@ Two variables, set independently rather than bundled into fixed levels.
 
 | id | Label | Answer method |
 |---|---|---|
-| `pool` | Havuzdan | Choose from the remaining words |
-| `typed` | Yazarak | Type the word |
+| `pool` | Kelimeler açık | Choose from the remaining words, which stay on screen |
+| `typed` | Kelimeler gizli | No list; recall and type the word |
 
 **Seconds per word** — a slider from **1 to 10 seconds in half-second steps**,
 defaulting to 2.5.
@@ -119,17 +119,17 @@ shown on the home screen as they are adjusted:
 
 | Mode | Seconds | Name |
 |---|---|---|
-| Yazarak | any | Zor |
-| Havuzdan | under 4 | Zor |
-| Havuzdan | 4 to under 7 | Orta |
-| Havuzdan | 7 and over | Kolay |
+| Kelimeler gizli | any | Zor |
+| Kelimeler açık | under 4 | Zor |
+| Kelimeler açık | 4 to under 7 | Orta |
+| Kelimeler açık | 7 and over | Kolay |
 
 Typing is hard at any speed — you have to produce the word, not recognise it — so only
 the pool is graded by the clock.
 
 Mode, seconds and theme are all kept on the device. The difficulty, mode and duration
 are shown together on the drawing, recall and result screens, and in the share text
-(`Zor · Havuzdan · 2,5 sn`).
+(`Zor · Kelimeler açık · 2,5 sn`).
 
 This replaced four fixed difficulties (`easy`, `medium`, `hard`, `impossible`), which
 conflated the two variables: `medium` and `hard` differed only in answer method while
@@ -249,7 +249,7 @@ not theoretical.
 
 ```
 Chizz 🎨
-Zorluk: Yazarak · 2,5 sn
+Zorluk: Zor · Kelimeler gizli · 2,5 sn
 12/20 · 47 sn
 
 🟩🟩🟥🟩
