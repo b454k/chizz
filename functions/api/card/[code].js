@@ -7,23 +7,26 @@
 // The words are deliberately NOT written on it. A preview that labelled each drawing
 // would hand the recipient every answer before they opened the game.
 //
-// No image library: a PNG is a handful of chunks around a zlib stream, and a zlib
-// stream is allowed to be uncompressed. Line art at one bit per pixel is small enough
-// that skipping compression costs nothing worth having -- roughly 100 KB -- and the
-// whole thing stays inside the CPU budget because the drawing writes straight into
-// the packed rows instead of building an image and squeezing it afterwards.
+// No image library: a PNG is a handful of chunks around a deflate stream, and line
+// art at one bit per pixel is nearly all long runs of identical bytes, which a match
+// at distance 1 collapses to a few bits each. That is the whole compressor below --
+// enough to make a 1600x2000 sheet cost tens of kilobytes instead of four hundred,
+// which is what lets the picture be drawn at a size a phone will not have to enlarge.
 
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
 
-const COLS = 4, ROWS = 5, CELL = 200;
+// Rendered at twice the obvious size: a chat app shows the preview around 350 css px
+// wide, and on a 3x screen that is over a thousand device pixels. An 800px sheet was
+// being enlarged to fit, which is what made it look soft.
+const COLS = 4, ROWS = 5, CELL = 400;
 const W = COLS * CELL, H = ROWS * CELL;
-const PAD = 12;                 // keeps strokes off the cell edges
-const PEN = 2;                  // half-width of the pen, in pixels
+const PAD = 26;                 // keeps strokes off the cell edges
+const PEN = 5;                  // half-width of the pen: an 11px stroke, ~2.75% of a cell
 
 const PAPER = [0xe8, 0xe5, 0xde];
 const INK   = [0x17, 0x18, 0x1c];
 
-/* ----------------------------------------------------------------- png --- */
+/* ------------------------------------------------------------- checksums --- */
 
 const CRC_TABLE = (function () {
   const t = new Uint32Array(256);
@@ -52,6 +55,94 @@ function adler32(bytes) {
   return ((b << 16) | a) >>> 0;
 }
 
+/* --------------------------------------------------------------- deflate --- */
+
+const LEN_BASE  = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+const LEN_EXTRA = [0,0,0,0,0,0,0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0];
+
+// A Huffman code is written high bit first while the stream is packed low bit first,
+// so every code has to come out reversed. Reversing them once at startup turns the
+// inner loop from eight or nine single-bit writes into one.
+function reverseBits(code, bits) {
+  let r = 0;
+  for (let i = 0; i < bits; i++) r = (r << 1) | ((code >>> i) & 1);
+  return r >>> 0;
+}
+
+const LIT_REV = new Uint16Array(256), LIT_BITS = new Uint8Array(256);
+for (let b = 0; b < 256; b++) {
+  const code = b <= 143 ? 0x30 + b : 0x190 + (b - 144);
+  const bits = b <= 143 ? 8 : 9;
+  LIT_REV[b] = reverseBits(code, bits); LIT_BITS[b] = bits;
+}
+const LENC_REV = new Uint16Array(286), LENC_BITS = new Uint8Array(286);
+for (let c = 256; c <= 285; c++) {
+  const code = c <= 279 ? c - 256 : 0xC0 + (c - 280);
+  const bits = c <= 279 ? 7 : 8;
+  LENC_REV[c] = reverseBits(code, bits); LENC_BITS[c] = bits;
+}
+
+// Fixed Huffman, and the only matches looked for are runs of one repeated byte. For a
+// sheet that is mostly blank paper that is nearly all of the win.
+function deflateFixed(data) {
+  // Literal-only output can grow slightly, so leave room rather than reallocating.
+  const out = new Uint8Array(data.length + (data.length >> 2) + 64);
+  let at = 0, bitBuf = 0, bitCount = 0;
+
+  function putBits(value, count) {          // deflate packs bits low end first
+    bitBuf |= (value << bitCount);
+    bitCount += count;
+    while (bitCount >= 8) { out[at++] = bitBuf & 0xFF; bitBuf >>>= 8; bitCount -= 8; }
+  }
+  function literal(b) { putBits(LIT_REV[b], LIT_BITS[b]); }
+  function lengthCode(c) { putBits(LENC_REV[c], LENC_BITS[c]); }
+  function match(len) {                     // always distance 1
+    let i = LEN_BASE.length - 1;
+    while (LEN_BASE[i] > len) i--;
+    lengthCode(257 + i);
+    if (LEN_EXTRA[i]) putBits(len - LEN_BASE[i], LEN_EXTRA[i]);
+    putBits(0, 5);                          // distance code 0 = distance 1
+  }
+
+  putBits(1, 1);                            // final block
+  putBits(1, 2);                            // fixed Huffman
+
+  let i = 0;
+  while (i < data.length) {
+    const b = data[i];
+    let j = i + 1;
+    while (j < data.length && data[j] === b) j++;
+    const run = j - i;
+    if (run >= 4) {
+      literal(b);
+      let rem = run - 1;
+      while (rem >= 3) { const take = Math.min(258, rem); match(take); rem -= take; }
+      while (rem > 0) { literal(b); rem--; }
+    } else {
+      for (let k = 0; k < run; k++) literal(b);
+    }
+    i = j;
+  }
+
+  lengthCode(256);                          // end of block
+  if (bitCount > 0) out[at++] = bitBuf & 0xFF;
+  return out.subarray(0, at);
+}
+
+function zlib(raw) {
+  const body = deflateFixed(raw);
+  const out = new Uint8Array(2 + body.length + 4);
+  out[0] = 0x78; out[1] = 0x01;
+  out.set(body, 2);
+  const ad = adler32(raw);
+  const p = 2 + body.length;
+  out[p] = (ad >>> 24) & 0xFF; out[p + 1] = (ad >>> 16) & 0xFF;
+  out[p + 2] = (ad >>> 8) & 0xFF; out[p + 3] = ad & 0xFF;
+  return out;
+}
+
+/* ------------------------------------------------------------------- png --- */
+
 function chunk(type, data) {
   const out = new Uint8Array(12 + data.length);
   const view = new DataView(out.buffer);
@@ -62,27 +153,7 @@ function chunk(type, data) {
   return out;
 }
 
-// A zlib stream of stored (uncompressed) deflate blocks.
-function zlibStored(raw) {
-  const MAX = 65535;
-  const blocks = Math.ceil(raw.length / MAX) || 1;
-  const out = new Uint8Array(2 + raw.length + blocks * 5 + 4);
-  let p = 0;
-  out[p++] = 0x78; out[p++] = 0x01;
-  for (let i = 0; i < raw.length; i += MAX) {
-    const len = Math.min(MAX, raw.length - i);
-    out[p++] = (i + len >= raw.length) ? 1 : 0;        // BFINAL, BTYPE 00
-    out[p++] = len & 0xFF; out[p++] = (len >>> 8) & 0xFF;
-    out[p++] = ~len & 0xFF; out[p++] = (~len >>> 8) & 0xFF;
-    out.set(raw.subarray(i, i + len), p); p += len;
-  }
-  const ad = adler32(raw);
-  out[p++] = (ad >>> 24) & 0xFF; out[p++] = (ad >>> 16) & 0xFF;
-  out[p++] = (ad >>> 8) & 0xFF; out[p++] = ad & 0xFF;
-  return out.subarray(0, p);
-}
-
-function buildPng(rows, rowBytes) {
+function buildPng(rows) {
   const ihdr = new Uint8Array(13);
   const view = new DataView(ihdr.buffer);
   view.setUint32(0, W);
@@ -97,7 +168,7 @@ function buildPng(rows, rowBytes) {
     new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
     chunk("IHDR", ihdr),
     chunk("PLTE", plte),
-    chunk("IDAT", zlibStored(rows)),
+    chunk("IDAT", zlib(rows)),
     chunk("IEND", new Uint8Array(0))
   ];
   let total = 0;
@@ -108,35 +179,50 @@ function buildPng(rows, rowBytes) {
   return png;
 }
 
-/* -------------------------------------------------------------- drawing --- */
+/* --------------------------------------------------------------- drawing --- */
 
 // Rows are packed as PNG wants them: one filter byte, then one bit per pixel.
-function makeRows() {
-  const rowBytes = Math.ceil(W / 8);
-  return { rows: new Uint8Array((rowBytes + 1) * H), rowBytes: rowBytes };
-}
+const ROW_BYTES = Math.ceil(W / 8);
 
-function setPixel(rows, rowBytes, x, y) {
+function setPixel(rows, x, y) {
   if (x < 0 || y < 0 || x >= W || y >= H) return;
-  rows[y * (rowBytes + 1) + 1 + (x >> 3)] |= 0x80 >> (x & 7);
+  rows[y * (ROW_BYTES + 1) + 1 + (x >> 3)] |= 0x80 >> (x & 7);
 }
 
-function stamp(rows, rowBytes, cx, cy, r) {
-  for (let dy = -r; dy <= r; dy++) {
-    for (let dx = -r; dx <= r; dx++) setPixel(rows, rowBytes, cx + dx, cy + dy);
-  }
+// A run of bits at a time. Setting an eleven pixel wide nib one pixel at a time was
+// most of the render cost; whole bytes in the middle of the run go in at once.
+function span(rows, y, x0, x1) {
+  if (y < 0 || y >= H) return;
+  if (x0 < 0) x0 = 0;
+  if (x1 > W - 1) x1 = W - 1;
+  if (x1 < x0) return;
+  const base = y * (ROW_BYTES + 1) + 1;
+  const b0 = x0 >> 3, b1 = x1 >> 3;
+  const head = 0xFF >> (x0 & 7);
+  const tail = (0xFF << (7 - (x1 & 7))) & 0xFF;
+  if (b0 === b1) { rows[base + b0] |= head & tail; return; }
+  rows[base + b0] |= head;
+  for (let b = b0 + 1; b < b1; b++) rows[base + b] = 0xFF;
+  rows[base + b1] |= tail;
 }
 
-function line(rows, rowBytes, x0, y0, x1, y1) {
+function stamp(rows, cx, cy, r) {
+  for (let dy = -r; dy <= r; dy++) span(rows, cy + dy, cx - r, cx + r);
+}
+
+function line(rows, x0, y0, x1, y1) {
   const dx = x1 - x0, dy = y1 - y0;
-  const steps = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy))));
+  const dist = Math.max(Math.abs(dx), Math.abs(dy));
+  // Nibs PEN apart still overlap by half their width, so the stroke stays solid
+  // while doing a fifth of the work of a stamp per pixel.
+  const steps = Math.max(1, Math.ceil(dist / PEN));
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    stamp(rows, rowBytes, Math.round(x0 + dx * t), Math.round(y0 + dy * t), PEN);
+    stamp(rows, Math.round(x0 + dx * t), Math.round(y0 + dy * t), PEN);
   }
 }
 
-function drawCell(rows, rowBytes, strokes, ox, oy) {
+function drawCell(rows, strokes, ox, oy) {
   const size = CELL - PAD * 2;
   for (let s = 0; s < strokes.length; s++) {
     const pts = strokes[s];
@@ -149,36 +235,36 @@ function drawCell(rows, rowBytes, strokes, ox, oy) {
     };
     if (pts.length === 1) {                      // a tap is still a mark
       const p = at(0);
-      stamp(rows, rowBytes, Math.round(p[0]), Math.round(p[1]), PEN);
+      stamp(rows, Math.round(p[0]), Math.round(p[1]), PEN);
       continue;
     }
     for (let i = 1; i < pts.length; i++) {
       const a = at(i - 1), b = at(i);
-      line(rows, rowBytes, a[0], a[1], b[0], b[1]);
+      line(rows, a[0], a[1], b[0], b[1]);
     }
   }
 }
 
 function render(drawings) {
-  const made = makeRows();
-  const rows = made.rows, rowBytes = made.rowBytes;
+  const rows = new Uint8Array((ROW_BYTES + 1) * H);
 
   // Boxes sit flush against each other, so a hairline is what separates them.
   for (let c = 1; c < COLS; c++) {
-    for (let y = 0; y < H; y++) setPixel(rows, rowBytes, c * CELL, y);
+    for (let y = 0; y < H; y++) span(rows, y, c * CELL, c * CELL + 1);
   }
   for (let r = 1; r < ROWS; r++) {
-    for (let x = 0; x < W; x++) setPixel(rows, rowBytes, x, r * CELL);
+    span(rows, r * CELL, 0, W - 1);
+    span(rows, r * CELL + 1, 0, W - 1);
   }
 
   for (let i = 0; i < COLS * ROWS; i++) {
     const strokes = Array.isArray(drawings[i]) ? drawings[i] : [];
-    drawCell(rows, rowBytes, strokes, (i % COLS) * CELL, Math.floor(i / COLS) * CELL);
+    drawCell(rows, strokes, (i % COLS) * CELL, Math.floor(i / COLS) * CELL);
   }
-  return buildPng(rows, rowBytes);
+  return buildPng(rows);
 }
 
-/* ------------------------------------------------------------- handler --- */
+/* --------------------------------------------------------------- handler --- */
 
 export async function onRequestGet({ params, env }) {
   if (!env.GAMES) return new Response("storage not bound", { status: 500 });

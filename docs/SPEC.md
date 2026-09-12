@@ -402,19 +402,33 @@ one place it was not needed.
 
 Pasting a round into a chat shows its drawings. Two pieces:
 
-`GET /api/card/:code.png` draws the 20 drawings as one 800x1000 PNG, 4 across and 5
-down, boxes flush with a hairline between them. It is rendered from the strokes already
-in KV, so it costs no extra storage and works for rounds shared before it existed.
+`GET /api/card/:code.png` draws the 20 drawings as one **1600x2000** PNG, 4 across and
+5 down, boxes flush with a hairline between them. It is rendered from the strokes
+already in KV, so it costs no extra storage and works for rounds shared before it
+existed.
+
+It is drawn at twice the obvious size on purpose. A chat app shows the preview around
+350 css px wide, which on a 3x phone is over a thousand device pixels, so the first
+version at 800px was being enlarged to fit and looked soft.
 
 **The words are deliberately not written on it.** A preview that labelled each drawing
 would hand the recipient every answer before they opened the game.
 
-There is no image library. A PNG is a few chunks around a zlib stream, and a zlib
-stream is allowed to be uncompressed; line art at one bit per pixel is small enough
-that skipping compression costs about 100 KB, which a chat app fetches once. The
-drawing writes straight into the packed PNG rows rather than building an image and
-squeezing it afterwards, which is what keeps it inside the CPU budget. Cached hard,
-since a round's drawings never change.
+There is no image library. A PNG is a few chunks around a deflate stream, and the
+deflate is about sixty lines: fixed Huffman codes, and the only matches it looks for
+are runs of one repeated byte. That is nearly all of the win on a sheet that is mostly
+blank paper, and it turns 402 KB of pixels into 57 KB -- smaller than the 800px sheet
+was when stored uncompressed. It was checked against node's own inflate, random input
+included, before going near the endpoint.
+
+Two things keep it inside the CPU budget, and both mattered. Bits go into the packed
+PNG rows a horizontal run at a time rather than a pixel at a time, and the pen is
+stamped every PEN pixels along a stroke rather than every pixel, which still overlaps
+by half a nib so the line stays solid. Written the obvious way the render took 34ms,
+well past the 10ms a request gets; this way it is about 6, against roughly 4 for the
+old sheet at a quarter of the pixels.
+
+Cached hard, since a round's drawings never change.
 
 `functions/_middleware.js` puts the og: tags on the page itself. The page is one static
 file shared by every round, so the tags have to be added per request: the picture, the
