@@ -327,9 +327,9 @@ holds:
 
 | Field | Purpose |
 |---|---|
-| `name` | The name typed on this device. Editable in settings at any time; changing it renames the rounds this device saved |
+| `name` | The name typed on this device. Editable on the result screen at any time; changing it renames the rounds this device saved |
 | `mode`, `secs`, `theme` | The settings chosen on the home screen |
-| `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, and the owner token that lets it be renamed |
+| `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
 
 Nothing here is not already on screen during the round. Entries older than the
 server's 30-day TTL are dropped, and only the newest 40 rounds are kept.
@@ -375,7 +375,28 @@ before anyone asks for it.
 This trades KV writes for the feature: every round taken into guessing now writes,
 where previously only an explicit share did. The free tier allows 1,000 writes a day.
 
-## 16. Dismissing the word pool and the answer card
+## 16. Where the name is asked
+
+On the result screen, under the grid: the score about to go on the board and the link
+about to be shared both carry it, so that is where it belongs. Nothing is asked on the
+way into a round. The field is always there, prefilled, and clearing it is allowed; the
+button reads Katıl when there is no name yet and Kaydet when there is.
+
+It sits outside the score board, so a round with no board of its own can still be
+named -- the name still decides what a shared link says.
+
+Changing it does three things: stores the new name, renames the round this device
+saved, and re-posts the score. **The board row moves rather than multiplying**: the
+score endpoint accepts the previous name along with a token it handed the writer when
+the row was created, and only that token can move a row. Without it a caller can add
+their own row but never remove anyone else's, so a stranger reading the board cannot
+delete a score by claiming to have been that player. The row keeps the finishing
+position it earned.
+
+A field on the start screen was tried first and moved here; it asked for a name in the
+one place it was not needed.
+
+## 17. Dismissing the word pool and the answer card
 
 Both close by dragging them down past 60px or tapping away from them, as well as by
 the cross in the corner — which is a stretch to reach one-handed on a phone. The pool
@@ -384,7 +405,7 @@ underneath, and a grab handle so the drag is discoverable. A drag that starts in
 the word list, or on a field or button in the card, is left alone: those scroll and
 type.
 
-## 17. Sound and zoom
+## 18. Sound and zoom
 
 **Sound.** Three tones, synthesised with the Web Audio API rather than loaded, so the
 page still pulls nothing from outside: a beep on each of 3-2-1, a higher one as drawing
@@ -420,7 +441,7 @@ other half of the same trap. Inputs inherit the 16px body font; the share fallba
 textarea did not, and it is focused and selected programmatically, so it zoomed without
 the player touching it.
 
-## 18. Hosting
+## 19. Hosting
 
 Cloudflare Pages, static assets from `public/`, Functions from `functions/`, one KV
 namespace bound as `GAMES`. (The namespace's own title in the dashboard is still

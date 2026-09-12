@@ -105,10 +105,8 @@
     background:transparent; touch-action:manipulation;
   }
   .shint{color:var(--muted); font-size:12px; margin:2px 0 0;}
-  .srow .nameIn{
-    width:auto; max-width:150px; padding:7px 10px; border-radius:10px;
-    text-align:right; font-weight:700;
-  }
+  .nlabel{color:var(--muted); font-size:13px; font-weight:600; margin:0 0 6px;}
+  #nameNote{color:var(--ok); font-weight:600; font-size:13px; min-height:18px; margin:4px 0 0;}
   .seg{display:flex; gap:6px;}
   .seg button{
     border:2px solid var(--line); border-radius:10px; padding:7px 12px;
@@ -405,11 +403,6 @@
           <span class="lbl" data-t="theme"></span>
           <div class="seg" id="themes"></div>
         </div>
-        <div class="srow">
-          <span class="lbl" data-t="yourName"></span>
-          <input class="txt nameIn" id="homeName" maxlength="10" data-tph="nameHint"
-                 autocorrect="off" spellcheck="false" enterkeyhint="done">
-        </div>
       </div>
 
       <button class="primary" id="start" data-t="start"></button>
@@ -529,14 +522,19 @@
     <div id="score"></div>
     <div class="scroll"><div class="grid" id="resultGrid"></div></div>
     <div style="padding-top:8px">
+      <!-- Outside the board, so the name can be set even on a round that has no
+           score table: it still decides what a shared link says. -->
+      <p class="nlabel" data-t="yourName"></p>
+      <div class="namerow" id="nameRow">
+        <input class="txt" id="nameField" maxlength="10" data-tph="nameHint"
+               autocorrect="off" spellcheck="false" enterkeyhint="done">
+        <button id="nameSave"></button>
+      </div>
+      <p id="nameNote"></p>
+
       <div id="board" hidden>
         <h3 id="boardTitle"></h3>
         <p id="boardEmpty" hidden data-t="firstToPlay"></p>
-        <div class="namerow" id="boardNameRow" hidden>
-          <input class="txt" id="boardName" maxlength="10" data-tph="namePlaceholder"
-                 autocorrect="off" spellcheck="false" enterkeyhint="go">
-          <button id="boardJoin" data-t="joinBoard"></button>
-        </div>
         <div id="boardList"></div>
         <p class="bnote" data-t="scoresNoteResult"></p>
       </div>
@@ -726,10 +724,12 @@ const TEXT = {
   continue:         "devam",
   enterName:        "Önce adını yaz.",
   joinBoard:        "Katıl",
+  saveName:         "Kaydet",
   perWord:          "kelime başına süre",
   theme:            "tema",
   yourName:         "adın",
   nameHint:         "adını yaz",
+  nameSaved:        "Kaydedildi ✓",
   themeDark:        "koyu",
   themeLight:       "açık",
   tagline:          "saniyeler içinde 20 kelime çiz, sonra karışmış çizimlerine bakıp hangisi neydi bul. kelimeler birbirine benzer şekillerde seçilir; işin zor kısmı da bu.",
@@ -1052,7 +1052,6 @@ function buildHome(){
 
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
-  $("homeName").value = myName;
 }
 
 $("secs").addEventListener("input", function(){
@@ -1061,14 +1060,6 @@ $("secs").addEventListener("input", function(){
 });
 $("secs").addEventListener("change", rememberSettings);
 
-/* The name used to be asked once and then kept for good, with no way back to it:
-   whatever you typed the first time followed you into every later round and every
-   link you shared. It lives in settings now, and clearing it is allowed. */
-$("homeName").addEventListener("input", function(){
-  myName = $("homeName").value.trim().slice(0, NAME_MAX);
-  rememberName(myName);
-});
-$("homeName").addEventListener("change", syncRoundName);
 
 /* --------------------------------------------------------------- sound --- */
 /* Tones are synthesised rather than loaded, so the page still pulls nothing from
@@ -1795,6 +1786,7 @@ function buildResult(){
   // Guessing your own drawings first used to be a dead end: there was no way to
   // hand the round to anyone afterwards. Only the person who drew it can.
   $("inviteFriends").hidden = role === "guesser";   // only the person who drew it can hand it on
+  fillNameRow();
   // Record the finish before the board goes up: opening this code again on this
   // device should land here, on the score table, rather than on an empty grid.
   if (lastCode) rememberRound(lastCode, { done: true, score: score, ms: recallMs, order: order, picks: picks, name: myName });
@@ -1815,7 +1807,6 @@ function showBoard(){
   $("boardTitle").textContent = boardHeading();
   // A score needs a name to sit under. Without one the board is still readable,
   // it just has no row for this player until they add one.
-  $("boardNameRow").hidden = !!myName;
   beepScores();
   if (myName && !scoreSent){ scoreSent = true; sendScore(); }
   renderScores();
@@ -1913,12 +1904,23 @@ $("scoresBack").onclick = function(){ stopBoardPoll(); show("send"); };
 function sendScore(){
   if (!lastCode || !myName) return;
   renderScores();                                 // show your own row without waiting
+  const rec = savedRound(lastCode) || {};
   api("/api/scores/" + encodeURIComponent(lastCode), {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ name: myName, score: score, ms: elapsedMs() })
+    body: JSON.stringify({
+      name: myName,
+      score: score,
+      ms: elapsedMs(),
+      // What this round was last posted under, and the proof it was us, so a
+      // rename moves the row rather than adding a second one.
+      was: rec.postedAs || "",
+      token: rec.scoreToken || ""
+    })
   }).then(function(r){
-    rememberRound(lastCode, { sent: true });      // do not post it again on a revisit
+    const patch = { sent: true, postedAs: myName };   // do not post it again on a revisit
+    if (r.ok && r.data && r.data.token) patch.scoreToken = r.data.token;
+    rememberRound(lastCode, patch);
     if (r.ok && r.data && Array.isArray(r.data.scores)){ scores = r.data.scores; renderScores(); }
   }).catch(function(){ /* already shown locally, fail quietly */ });
 }
@@ -2283,15 +2285,32 @@ function loadGame(code){
   });
 }
 
-$("boardJoin").onclick = function(){
-  if (!setName($("boardName").value)){ $("boardName").focus(); return; }
-  syncRoundName();           // the round may have been saved before this name existed
-  $("boardNameRow").hidden = true;
-  if (!scoreSent){ scoreSent = true; sendScore(); }
+/* The one place a name is written or changed. It sits on the result screen because
+   that is where it matters: the score about to go on the board, and the link about
+   to be shared, both carry it. */
+function fillNameRow(){
+  $("nameField").value = myName;
+  $("nameSave").textContent = myName ? TEXT.saveName : TEXT.joinBoard;
+  $("nameNote").textContent = "";
+}
+
+$("nameSave").onclick = function(){
+  const was = myName;
+  if (!setName($("nameField").value)){ $("nameField").focus(); return; }
+  if (myName === was && scoreSent){ fillNameRow(); return; }   // nothing to do
+
+  syncRoundName();           // the round was saved before this name, or under an old one
+  // Re-post under the new name. sendScore carries the old one and the row token, so
+  // the board moves the row instead of growing a second one.
+  if (lastCode){ scoreSent = true; sendScore(); }
+  fillNameRow();               // before the note, since refilling the row clears it
+  $("nameNote").textContent = TEXT.nameSaved;
+  setTimeout(function(){ $("nameNote").textContent = ""; }, 2000);
   renderScores();
 };
-$("boardName").addEventListener("keydown", function(e){
-  if (e.key === "Enter"){ e.preventDefault(); $("boardJoin").click(); }
+
+$("nameField").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); $("nameSave").click(); }
 });
 
 $("loadHome").onclick = function(){ clearUrl(); show("home"); };

@@ -168,11 +168,33 @@ export async function onRequestPost({ params, request, env }) {
 
   // Replaying must not push you down the list, or rewrite the time you set.
   const previous = known.get(key);
-  const ts = previous && previous.ts ? previous.ts : Date.now();
+  let ts = previous && previous.ts ? previous.ts : Date.now();
   const keepMs = previous && previous.ms > 0 ? previous.ms : ms;
 
+  // Each row carries a token, handed back to whoever wrote it. Renaming yourself
+  // moves that row instead of leaving the old name sitting on the board beside the
+  // new one -- but only for the holder of the token, since otherwise anyone reading
+  // the board could delete a stranger's score by claiming to have been them.
+  const existing = await env.GAMES.getWithMetadata(code + ":s:" + key);
+  let token = existing && existing.metadata && typeof existing.metadata.token === "string"
+    ? existing.metadata.token : "";
+
+  const wasKey = typeof d.was === "string" && d.was.trim() ? nameKey(d.was.trim()) : "";
+  if (wasKey && wasKey !== key) {
+    const old = await env.GAMES.getWithMetadata(code + ":s:" + wasKey);
+    const om = old && old.metadata;
+    const given = typeof d.token === "string" ? d.token : "";
+    if (om && typeof om.token === "string" && om.token && given && om.token === given) {
+      if (!token) token = om.token;          // the same player, under a new name
+      if (om.ts) ts = om.ts;                 // keep the finishing position they earned
+      await env.GAMES.delete(code + ":s:" + wasKey);
+      known.delete(wasKey);
+    }
+  }
+  if (!token) token = crypto.randomUUID().replace(/-/g, "");
+
   await env.GAMES.put(code + ":s:" + key, "", {
-    metadata: { name, score: d.score, ms: keepMs, ts },
+    metadata: { name, score: d.score, ms: keepMs, ts, token },
     expirationTtl: TTL
   });
 
@@ -182,5 +204,7 @@ export async function onRequestPost({ params, request, env }) {
   const scores = rank(Array.from(known.values())).slice(0, MAX_PLAYERS);
   await writeBoard(env, code, scores);
 
-  return json({ scores });
+  // The token goes only to the writer. scanBoard copies name/score/ms/ts and
+  // nothing else, so it never reaches the board everyone reads.
+  return json({ scores, token });
 }
