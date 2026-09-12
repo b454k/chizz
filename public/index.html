@@ -250,12 +250,19 @@
   #sheet.on{transform:translateY(0); visibility:visible;}
   /* Tapping away from the sheet should close it. A scrim does that without the
      tap also landing on whatever cell happens to be underneath. */
-  #sheetScrim{position:fixed; inset:0; z-index:19; background:rgba(0,0,0,.35);}
+  #sheetScrim{
+    position:fixed; inset:0; z-index:19; background:rgba(0,0,0,.35);
+    transition:opacity .18s ease-out;
+  }
   .grab{
     width:40px; height:4px; border-radius:99px; background:var(--line);
     margin:0 auto 10px; flex:none;
   }
   #modalCard .grab{margin-bottom:14px;}
+  /* The card itself scrolls once the keyboard shrinks it, so only the handle and
+     the drawing give their vertical gesture to the drag. */
+  #modalCard .grab, #modalPrev{touch-action:none;}
+  .grab{cursor:grab;}
   #sheet .row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
   #sheet .row b{font-size:15px;}
   #sheet .x{font-size:22px; line-height:1; color:var(--muted); padding:4px 8px;}
@@ -266,7 +273,13 @@
     margin:0 auto 12px; border:2px solid var(--line); border-radius:14px;
     background:var(--paper); flex:none;
   }
-  #chips{display:flex; flex-wrap:wrap; gap:8px; max-height:32vh; overflow-y:auto;}
+  /* The sheet keeps vertical drags for itself; the word list is the one part that
+     still scrolls, so it takes them back. */
+  #sheet{touch-action:none;}
+  #chips{
+    display:flex; flex-wrap:wrap; gap:8px; max-height:32vh; overflow-y:auto;
+    touch-action:pan-y;
+  }
   .chip{border:2px solid var(--line); border-radius:99px; padding:10px 15px; font-size:15px; font-weight:600; background:var(--panel);}
   .chip:active{background:var(--panel2);}
 
@@ -1538,8 +1551,16 @@ $("sheetX").onclick = function(){ selPos = -1; closeSheet(); refreshRecall(); };
 
 /* Reaching the little cross in the corner one-handed is a stretch on a phone, so
    both panels also close by dragging them down or tapping away from them. */
-function enableSwipeDown(el, close, holdsOwnGesture){
+const SWIPE_CLOSE_PX = 60;
+
+function enableSwipeDown(el, close, holdsOwnGesture, scrim){
   let startY = 0, dragging = false;
+
+  function clear(){
+    el.style.transition = "";
+    el.style.transform = "";
+    if (scrim) scrim.style.opacity = "";
+  }
 
   el.addEventListener("pointerdown", function(e){
     if (holdsOwnGesture && holdsOwnGesture(e.target)) return;   // scrolling or typing
@@ -1552,17 +1573,36 @@ function enableSwipeDown(el, close, holdsOwnGesture){
   el.addEventListener("pointermove", function(e){
     if (!dragging) return;
     const dy = e.clientY - startY;
-    if (dy > 0) el.style.transform = "translateY(" + dy + "px)";   // downward only
+    if (dy <= 0) return;                                        // downward only
+    el.style.transform = "translateY(" + dy + "px)";
+    // The backdrop thins out as the panel goes, so the two move together.
+    if (scrim) scrim.style.opacity = String(Math.max(0, 1 - dy / (el.offsetHeight || 300)));
   });
 
   const release = function(e){
     if (!dragging) return;
     dragging = false;
     const dy = e.clientY - startY;
-    el.style.transition = "";
-    el.style.transform = "";
-    if (dy > 60) close();
+
+    if (dy <= SWIPE_CLOSE_PX){ clear(); return; }               // springs back
+
+    // Carry on in the direction the finger was going, rather than snapping back to
+    // the top and only then playing the close animation.
+    let finished = false;
+    const done = function(){
+      if (finished) return;
+      finished = true;
+      el.removeEventListener("transitionend", done);
+      clear();
+      close();
+    };
+    el.style.transition = "transform .18s ease-in";
+    el.style.transform = "translateY(" + (el.offsetHeight + 60) + "px)";
+    if (scrim) scrim.style.opacity = "0";
+    el.addEventListener("transitionend", done);
+    setTimeout(done, 260);      // transitionend never fires if nothing actually moves
   };
+
   el.addEventListener("pointerup", release);
   el.addEventListener("pointercancel", release);
 }
@@ -1572,7 +1612,7 @@ function dismissSheet(){ selPos = -1; closeSheet(); refreshRecall(); }
 $("sheetScrim").onclick = dismissSheet;
 enableSwipeDown($("sheet"), dismissSheet, function(t){
   return !!(t.closest && t.closest("#chips"));      // the word list scrolls on its own
-});
+}, $("sheetScrim"));
 enableSwipeDown($("modalCard"), function(){ selPos = -1; closeModal(); refreshRecall(); }, function(t){
   return !!(t.closest && t.closest("input, button, textarea"));
 });
@@ -1781,10 +1821,10 @@ function fetchScores(){
 
 /* Refresh as friends finish. A read is a single get on the server side, so
    this poll is cheap. */
-// A read is a single KV get, and the free tier allows 100,000 a day, so a board
-// being watched for ten minutes costs about 240 of them. Six seconds was slow
-// enough that a friend finishing felt like nothing had happened.
-const POLL_MS = 2000;
+// A read is a single KV get against a 100,000/day allowance, so a board watched
+// for ten minutes costs about 600 of them. The server side was measured at half a
+// second, so the poll interval is what the wait actually is.
+const POLL_MS = 1000;
 let boardTimer = null;
 
 function startBoardPoll(){

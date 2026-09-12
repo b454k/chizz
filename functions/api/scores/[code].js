@@ -57,6 +57,12 @@ function rank(scores) {
 // many people are watching.
 const REPAIR_AFTER = 5 * 60 * 1000;
 
+// KV caches a read at the network location that served it. A write only clears the
+// cache in its own region, so a score set by a friend somewhere else stays invisible
+// until this copy expires. 30 seconds is the lowest KV accepts; the default of 60
+// meant a distant player could take a full minute to appear.
+const BOARD_CACHE = 30;
+
 // Combine what the summary remembers with what the per-player keys say. Neither is
 // reliable alone: KV listing lags a write by up to a minute, and the summary is a
 // read-modify-write that a concurrent finisher can have based on a stale read. A
@@ -107,7 +113,7 @@ export async function onRequestGet({ params, env }) {
   const code = String(params.code || "").trim().toUpperCase();
   if (!CODE_PATTERN.test(code)) return json({ error: "code not found" }, 404);
 
-  const summary = await env.GAMES.get(code + ":board", { type: "json" });
+  const summary = await env.GAMES.get(code + ":board", { type: "json", cacheTtl: BOARD_CACHE });
   const fresh = summary
     && Array.isArray(summary.scores)
     && typeof summary.scannedAt === "number"
