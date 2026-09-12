@@ -62,6 +62,8 @@ id in `wrangler.jsonc`. Full steps: [docs/DEPLOY.md](docs/DEPLOY.md).
   without scrolling the page.
 - [Cloudflare Pages](https://pages.cloudflare.com/) for hosting, Pages Functions for
   the API, Workers KV for storage. Saved rounds expire after 30 days.
+- Pasting a round into a chat shows its drawings: the preview image is a PNG encoded
+  by hand from the stored strokes, no image library and nothing stored for it.
 - No account, no login, no tracking. Stored on the server: the words, the drawings, the
   mode, the seconds per word and a name of up to 10 characters. Stored in the browser:
   your name, your settings, and rounds in progress so a reload does not lose your game.

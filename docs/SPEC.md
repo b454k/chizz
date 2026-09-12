@@ -30,6 +30,8 @@ public/index.html               the entire game: HTML + CSS + vanilla JS, no dep
 functions/api/save.js           POST /api/save             save a round, return a code
 functions/api/game/[code].js    GET  /api/game/:code       fetch a saved round
 functions/api/scores/[code].js  GET+POST /api/scores/:code score board for a round
+functions/api/card/[code].js    GET  /api/card/:code.png   the round as one PNG, for link previews
+functions/_middleware.js        adds the preview tags to a shared page
 wrangler.jsonc                  Cloudflare Pages config and the KV binding
 ```
 
@@ -396,7 +398,34 @@ position it earned.
 A field on the start screen was tried first and moved here; it asked for a name in the
 one place it was not needed.
 
-## 17. Dismissing the word pool and the answer card
+## 17. Link previews
+
+Pasting a round into a chat shows its drawings. Two pieces:
+
+`GET /api/card/:code.png` draws the 20 drawings as one 800x1000 PNG, 4 across and 5
+down, boxes flush with a hairline between them. It is rendered from the strokes already
+in KV, so it costs no extra storage and works for rounds shared before it existed.
+
+**The words are deliberately not written on it.** A preview that labelled each drawing
+would hand the recipient every answer before they opened the game.
+
+There is no image library. A PNG is a few chunks around a zlib stream, and a zlib
+stream is allowed to be uncompressed; line art at one bit per pixel is small enough
+that skipping compression costs about 100 KB, which a chat app fetches once. The
+drawing writes straight into the packed PNG rows rather than building an image and
+squeezing it afterwards, which is what keeps it inside the CPU budget. Cached hard,
+since a round's drawings never change.
+
+`functions/_middleware.js` puts the og: tags on the page itself. The page is one static
+file shared by every round, so the tags have to be added per request: the picture, the
+name of whoever drew it, and the canonical link. It hangs them off the `<title>` tag,
+there being no explicit `<head>` in the document. Anything that is not the page with a
+valid code -- `/api` included -- passes straight through untouched.
+
+One cost: middleware runs for every request to the site, so every page load is now a
+function invocation rather than a plain static hit. The free tier allows 100,000 a day.
+
+## 18. Dismissing the word pool and the answer card
 
 Both close by dragging them down past 60px or tapping away from them, as well as by
 the cross in the corner — which is a stretch to reach one-handed on a phone. The pool
@@ -405,7 +434,7 @@ underneath, and a grab handle so the drag is discoverable. A drag that starts in
 the word list, or on a field or button in the card, is left alone: those scroll and
 type.
 
-## 18. Sound and zoom
+## 19. Sound and zoom
 
 **Sound.** Three tones, synthesised with the Web Audio API rather than loaded, so the
 page still pulls nothing from outside: a beep on each of 3-2-1, a higher one as drawing
@@ -441,7 +470,7 @@ other half of the same trap. Inputs inherit the 16px body font; the share fallba
 textarea did not, and it is focused and selected programmatically, so it zoomed without
 the player touching it.
 
-## 19. Hosting
+## 20. Hosting
 
 Cloudflare Pages, static assets from `public/`, Functions from `functions/`, one KV
 namespace bound as `GAMES`. (The namespace's own title in the dashboard is still
