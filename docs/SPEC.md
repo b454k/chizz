@@ -109,27 +109,18 @@ Two variables, set independently rather than bundled into fixed levels.
 | `typed` | Kelimeler gizli | No list; recall and type the word |
 
 **Seconds per word** — a slider from **1 to 10 seconds in half-second steps**,
-defaulting to 2.5.
+defaulting to 3, which is also the recommended speed named under the slider.
+
+There is deliberately no difficulty grade. One existed briefly, read back from these
+two settings, but it was a label placed on top of choices the player had already made
+and it contradicted the recommended speed by calling it the hardest.
 
 **Theme** — dark (default) or light. Applied as `data-theme` on the root element;
 the dark palette is the base and the light one restates only the colours that differ.
 
-**Difficulty is derived, not chosen.** The name is read back from the two settings and
-shown on the home screen as they are adjusted:
-
-| Mode | Seconds | Name |
-|---|---|---|
-| Kelimeler gizli | any | Zor |
-| Kelimeler açık | under 4 | Zor |
-| Kelimeler açık | 4 to under 7 | Orta |
-| Kelimeler açık | 7 and over | Kolay |
-
-Typing is hard at any speed — you have to produce the word, not recognise it — so only
-the pool is graded by the clock.
-
-Mode, seconds and theme are all kept on the device. The difficulty, mode and duration
-are shown together on the drawing, recall and result screens, and in the share text
-(`Zor · Kelimeler açık · 2,5 sn`).
+Mode, seconds and theme are all kept on the device. The mode and duration are shown
+together on the drawing, recall and result screens, and in the share text
+(`Kelimeler açık · 3 sn`).
 
 This replaced four fixed difficulties (`easy`, `medium`, `hard`, `impossible`), which
 conflated the two variables: `medium` and `hard` differed only in answer method while
@@ -249,7 +240,7 @@ not theoretical.
 
 ```
 Chizz 🎨
-Zorluk: Zor · Kelimeler gizli · 2,5 sn
+Kelimeler gizli · 3 sn
 12/20 · 47 sn
 
 🟩🟩🟥🟩
@@ -359,7 +350,39 @@ Every access is wrapped in `try`/`catch`: Safari in private mode throws on
 `localStorage` rather than quietly doing nothing. A round that cannot be stored is
 still playable; it just will not survive a reload.
 
-## 15. Sound and zoom
+## 15. Sharing a round while it is played
+
+A round is saved the moment its own guessing begins, not only when the share screen is
+opened. People want to play the same round side by side, so the code has to exist
+before anyone asks for it.
+
+- The round code sits in the corner of the header on the recall and score screens,
+  for whoever is in the round — the person who drew it and anyone guessing it. Tapping
+  it copies the invite; if the clipboard refuses, it opens the screen that shows the
+  link in full rather than telling the reader to select a link that is not on screen.
+- The invite wording and link come from one place, so the share text and the chip
+  always agree.
+- The share text names whose drawings these are: the other player's when guessing,
+  **your own otherwise**. Guessing your own round used to fall through to the bare
+  title, so sharing it said nothing about who drew it and carried no link.
+- A round saved before a name existed gets one attached later, through
+  `POST /api/game/:code`. That only ever fills a blank — a round that already carries a
+  name cannot be renamed through it.
+- Nothing is saved for a round with no strokes in it at all.
+
+This trades KV writes for the feature: every round taken into guessing now writes,
+where previously only an explicit share did. The free tier allows 1,000 writes a day.
+
+## 16. Dismissing the word pool and the answer card
+
+Both close by dragging them down past 60px or tapping away from them, as well as by
+the cross in the corner — which is a stretch to reach one-handed on a phone. The pool
+gets a scrim so the dismissing tap cannot also land on whatever grid cell is
+underneath, and a grab handle so the drag is discoverable. A drag that starts inside
+the word list, or on a field or button in the card, is left alone: those scroll and
+type.
+
+## 17. Sound and zoom
 
 **Sound.** Three tones, synthesised with the Web Audio API rather than loaded, so the
 page still pulls nothing from outside: a beep on each of 3-2-1, a higher one as drawing
@@ -387,7 +410,7 @@ other half of the same trap. Inputs inherit the 16px body font; the share fallba
 textarea did not, and it is focused and selected programmatically, so it zoomed without
 the player touching it.
 
-## 16. Hosting
+## 18. Hosting
 
 Cloudflare Pages, static assets from `public/`, Functions from `functions/`, one KV
 namespace bound as `GAMES`. (The namespace's own title in the dashboard is still

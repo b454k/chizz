@@ -2,6 +2,7 @@
 // 404 when the code is unknown or has expired.
 
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
+const TTL = 30 * 24 * 60 * 60;   // matches the TTL save.js writes with
 
 // What the four fixed difficulties meant, for rounds saved before modes existed.
 const LEGACY_DIFFS = {
@@ -48,8 +49,39 @@ export async function onRequestGet({ params, env }) {
   return json(withLegacyFields(data));
 }
 
-// Any method other than GET. Without this Pages falls through to the static
-// asset handler and answers an API call with the whole index.html page.
+// A round is now saved the moment its own guessing starts, so friends can join
+// while the drawer plays. At that point there may be no name yet -- one is only
+// asked for when it is first needed. This fills that blank in afterwards.
+//
+// It only ever fills a blank. A round that already carries a name cannot be
+// renamed through this, so the worst anyone can do with a guessed code is name an
+// anonymous round once.
+export async function onRequestPost({ params, request, env }) {
+  if (!env.GAMES) return json({ error: "storage not bound" }, 500);
+
+  const code = String(params.code || "").trim().toUpperCase();
+  if (!CODE_PATTERN.test(code)) return json({ error: "code not found" }, 404);
+
+  let d;
+  try { d = await request.json(); } catch (e) { return json({ error: "invalid JSON" }, 400); }
+  const name = d && typeof d.name === "string" ? d.name.trim().slice(0, 20) : "";
+  if (!name) return json({ error: "name required" }, 400);
+
+  const data = await env.GAMES.get(code, { type: "json" });
+  if (!data) return json({ error: "code not found" }, 404);
+
+  const current = withLegacyFields(data);
+  if (current.name) return json({ name: current.name });      // already named, left alone
+
+  current.name = name;
+  // Re-putting restarts the 30 days. The round is being actively played, so
+  // outliving its original expiry by a few minutes is the harmless direction.
+  await env.GAMES.put(code, JSON.stringify(current), { expirationTtl: TTL });
+  return json({ name });
+}
+
+// Any method other than GET or POST. Without this Pages falls through to the
+// static asset handler and answers an API call with the whole index.html page.
 export function onRequest() {
-  return json({ error: "GET only" }, 405);
+  return json({ error: "GET or POST only" }, 405);
 }

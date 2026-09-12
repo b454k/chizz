@@ -170,6 +170,20 @@
   }
   .back:active{background:var(--panel2);}
 
+  /* The round code, in the corner of the header, from the moment guessing starts:
+     people want to play the same round together without going and finding it. */
+  /* The title has to give way, not the chip: without min-width:0 a flex item will
+     not shrink past its longest word, and the chip was pushed off the screen. */
+  .headrow h2{min-width:0;}
+  .chip2{
+    flex:none; margin-left:auto; display:flex; align-items:center; gap:7px;
+    border:2px solid var(--line); border-radius:999px; padding:5px 11px;
+    background:var(--panel);
+  }
+  .chip2:active{background:var(--panel2);}
+  .chip2 .cc{font-weight:800; font-size:14px; letter-spacing:.1em;}
+  .chip2 .cl{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
+
   /* leave-game confirmation */
   #confirm{
     position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
@@ -234,6 +248,14 @@
     transform:translateY(105%); transition:transform .16s ease-out; visibility:hidden;
   }
   #sheet.on{transform:translateY(0); visibility:visible;}
+  /* Tapping away from the sheet should close it. A scrim does that without the
+     tap also landing on whatever cell happens to be underneath. */
+  #sheetScrim{position:fixed; inset:0; z-index:19; background:rgba(0,0,0,.35);}
+  .grab{
+    width:40px; height:4px; border-radius:99px; background:var(--line);
+    margin:0 auto 10px; flex:none;
+  }
+  #modalCard .grab{margin-bottom:14px;}
   #sheet .row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
   #sheet .row b{font-size:15px;}
   #sheet .x{font-size:22px; line-height:1; color:var(--muted); padding:4px 8px;}
@@ -363,10 +385,6 @@
         <input type="range" id="secs" min="1" max="10" step="0.5" data-tal="perWord">
         <p class="shint" data-t="recommended"></p>
         <div class="srow">
-          <span class="lbl" data-t="difficulty"></span>
-          <output id="diffOut"></output>
-        </div>
-        <div class="srow">
           <span class="lbl" data-t="theme"></span>
           <div class="seg" id="themes"></div>
         </div>
@@ -451,6 +469,9 @@
       <div class="headrow">
         <button class="back" id="scoresBack" data-tal="back">←</button>
         <h2 id="scoresTitle"></h2>
+        <button class="chip2" id="scoresChip" hidden>
+          <span class="cc"></span><span class="cl" data-t="share"></span>
+        </button>
       </div>
       <p data-t="scoresNoteLive"></p>
     </div>
@@ -467,6 +488,9 @@
       <div class="headrow">
         <button class="back" id="backRecall" data-tal="backToMenu">←</button>
         <h2 id="recallTitle"></h2>
+        <button class="chip2" id="recallChip" hidden>
+          <span class="cc"></span><span class="cl" data-t="share"></span>
+        </button>
       </div>
       <p id="recallHint"></p>
     </div>
@@ -507,7 +531,9 @@
 
 </div>
 
+<div id="sheetScrim" hidden></div>
 <div id="sheet">
+  <div class="grab"></div>
   <div class="row"><b id="sheetTitle" data-t="pickWord"></b><button class="x" id="sheetX">✕</button></div>
   <canvas id="sheetPrev" width="480" height="480"></canvas>
   <div id="chips"></div>
@@ -524,6 +550,7 @@
 
 <div id="modal">
   <div id="modalCard">
+    <div class="grab"></div>
     <canvas id="modalPrev" width="420" height="420"></canvas>
     <form id="modalForm">
       <input class="txt" id="modalInput" maxlength="30" data-tph="whatIsThis"
@@ -650,7 +677,7 @@ const MODES = [
   { id:"pool",  key:"modeOpen",   desc:"modeOpenDesc"   },
   { id:"typed", key:"modeHidden", desc:"modeHiddenDesc" }
 ];
-const SECS_MIN = 1, SECS_MAX = 10, SECS_DEFAULT = 2.5;
+const SECS_MIN = 1, SECS_MAX = 10, SECS_DEFAULT = 3;   // the recommended speed
 
 // Rounds saved before modes existed carry one of these instead.
 const LEGACY_DIFFS = {
@@ -677,21 +704,17 @@ const TEXT = {
   continue:         "devam",
   enterName:        "Önce adını yaz.",
   joinBoard:        "Katıl",
-  perWord:          "Kelime başına süre",
-  theme:            "Tema",
-  themeDark:        "Koyu",
-  themeLight:       "Açık",
-  tagline:          "Saniyeler içinde 20 kelime çiz, sonra karışmış çizimlerine bakıp hangisi neydi bul. Kelimeler birbirine benzer şekillerde seçilir; işin zor kısmı da bu.",
+  perWord:          "kelime başına süre",
+  theme:            "tema",
+  themeDark:        "koyu",
+  themeLight:       "açık",
+  tagline:          "saniyeler içinde 20 kelime çiz, sonra karışmış çizimlerine bakıp hangisi neydi bul. kelimeler birbirine benzer şekillerde seçilir; işin zor kısmı da bu.",
 
   modeOpen:         "Kelimeler açık",
-  modeOpenDesc:     "Kelime listesi önünde durur, her çizim için doğru olanı seçersin.",
+  modeOpenDesc:     "kelime listesi önünde durur, her çizim için doğru olanı seçersin.",
   modeHidden:       "Kelimeler gizli",
-  modeHiddenDesc:   "Liste yok. Her çizimin kelimesini kendin hatırlayıp yazarsın.",
-  recommended:      "Önerilen: 3 sn",
-  diffEasy:         "Kolay",
-  diffMedium:       "Orta",
-  diffHard:         "Zor",
-  difficulty:       "Zorluk",
+  modeHiddenDesc:   "liste yok. her çizimin kelimesini kendin hatırlayıp yazarsın.",
+  recommended:      "önerilen: 3 sn",
   totalTime:        "toplam",
   enterCode:        "4 haneli kodu gir.",
 
@@ -755,7 +778,6 @@ const TEXT = {
   share:            "Paylaş",
   copied:           "Panoya kopyalandı ✓",
   copyFailedSelect: "Kopyalanamadı — aşağıdaki metni seç:",
-  difficultyLabel:  "Zorluk: ",
   playAgain:        "Tekrar oyna",
   youDrawToo:       "Sen de çiz",
   close:            "Kapat",
@@ -778,8 +800,10 @@ function applyText(){
   });
 }
 
-function diffName(){
-  return diffWord() + " \u00b7 " + TEXT[modeOf().key] + " \u00b7 " + secsText(secs);
+// What the round was set to, shown on the drawing, recall and result screens and in
+// the share text. The two settings say it themselves; there is no grade on top.
+function roundLabel(){
+  return TEXT[modeOf().key] + " \u00b7 " + secsText(secs);
 }
 
 function boardHeading(){
@@ -827,18 +851,6 @@ function clampSecs(v){
 }
 
 function secsText(v){ return String(v).replace(".", ",") + " sn"; }
-
-/* The difficulty is no longer chosen, it is read back from what was chosen. Typing
-   is hard at any speed -- you have to produce the word, not recognise it -- so only
-   the pool is graded by the clock. */
-function diffBand(){
-  if (modeId === "typed") return "diffHard";
-  if (secs < 4)  return "diffHard";
-  if (secs < 7)  return "diffMedium";
-  return "diffEasy";
-}
-
-function diffWord(){ return TEXT[diffBand()]; }
 
 function applyTheme(){
   document.documentElement.dataset.theme = theme;
@@ -935,6 +947,9 @@ function show(id){
   const list = document.querySelectorAll(".screen");
   for (let i = 0; i < list.length; i++) list[i].classList.toggle("on", list[i].id === id);
   if (typeof closeZoom === "function") closeZoom();
+  // The code can arrive from a save, a reload, or a link, so the chip is refreshed
+  // on every screen change rather than at any one of those points.
+  if (typeof updateCodeChip === "function") updateCodeChip();
   // stop polling on any screen other than the score board
   if (id !== "result" && id !== "scores" && typeof stopBoardPoll === "function") stopBoardPoll();
 }
@@ -1013,13 +1028,11 @@ function buildHome(){
 
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
-  $("diffOut").textContent = diffWord();
 }
 
 $("secs").addEventListener("input", function(){
   secs = clampSecs($("secs").value);
   $("secsOut").textContent = secsText(secs);
-  $("diffOut").textContent = diffWord();
 });
 $("secs").addEventListener("change", rememberSettings);
 
@@ -1066,6 +1079,38 @@ function beepScores(){                                        // the board is in
 
 // Any tap will do, in case the round was reached through a link rather than start.
 document.addEventListener("pointerdown", wakeAudio, { once: true });
+
+/* ----------------------------------------------------------- code chip --- */
+
+function chips2(){ return [$("recallChip"), $("scoresChip")]; }
+
+function updateCodeChip(){
+  chips2().forEach(function(el){
+    if (!el) return;
+    el.hidden = !lastCode;
+    if (lastCode) el.querySelector(".cc").textContent = lastCode;
+  });
+}
+
+function copyInvite(el){
+  if (!lastCode) return;
+  const label = el.querySelector(".cl");
+  const from = $("scores").classList.contains("on") ? "scores" : "recall";
+  copyText(inviteText()).then(function(ok){
+    if (!ok){
+      // Telling someone to select the link by hand is no use here: the chip does
+      // not show one. Put them on the screen that does.
+      openShareScreen(from);
+      return;
+    }
+    label.textContent = TEXT.linkCopied;
+    setTimeout(function(){ label.textContent = TEXT.share; }, 1800);
+  });
+}
+
+chips2().forEach(function(el){
+  if (el) el.onclick = function(){ copyInvite(el); };
+});
 
 /* -------------------------------------------------------------- game flow --- */
 
@@ -1227,7 +1272,7 @@ function startWord(i){
   strokes = [];
   live.clear();
   paintPad();
-  $("drawLevel").textContent = diffName();
+  $("drawLevel").textContent = roundLabel();
   $("word").textContent = words[i];
   $("counter").textContent = (i + 1) + " / " + N;
   $("bar").style.transform = "scaleX(1)";
@@ -1372,7 +1417,7 @@ function buildRecall(){
     cell.onclick = function(){ onCellTap(pos); };
     g.appendChild(cell);
   });
-  $("recallLevel").textContent = diffName();
+  $("recallLevel").textContent = roundLabel();
   $("recallTitle").textContent = role === "guesser"
     ? (drawerName ? TEXT.whatDidDraw.replace("{name}", drawerName) : TEXT.whatWasDrawn)
     : TEXT.whichWasWhich;
@@ -1384,6 +1429,7 @@ function buildRecall(){
     recallStart = Date.now();
     if (lastCode) rememberRound(lastCode, { startedAt: recallStart });
   }
+  ensureCode();
   refreshRecall();
   show("recall");
   paintAll("recallGrid");
@@ -1463,6 +1509,7 @@ function openSheet(pos){
   const sc = $("recallGrid").parentElement;
   if (sc && sheetScroll < 0) sheetScroll = sc.scrollTop;   // where to come back to
   paintPreview($("sheetPrev"), order[pos]);   // the cell is too small to judge from
+  $("sheetScrim").hidden = false;
   $("sheet").classList.add("on");
   $("recallGrid").style.paddingBottom = ($("sheet").offsetHeight + 20) + "px";
 }
@@ -1480,6 +1527,7 @@ let sheetScroll = -1;
 function closeSheet(){
   const g = $("recallGrid");
   const sc = g.parentElement;
+  $("sheetScrim").hidden = true;
   $("sheet").classList.remove("on");
   g.style.paddingBottom = "14px";
   if (sc && sheetScroll >= 0) sc.scrollTop = sheetScroll;
@@ -1487,6 +1535,47 @@ function closeSheet(){
 }
 
 $("sheetX").onclick = function(){ selPos = -1; closeSheet(); refreshRecall(); };
+
+/* Reaching the little cross in the corner one-handed is a stretch on a phone, so
+   both panels also close by dragging them down or tapping away from them. */
+function enableSwipeDown(el, close, holdsOwnGesture){
+  let startY = 0, dragging = false;
+
+  el.addEventListener("pointerdown", function(e){
+    if (holdsOwnGesture && holdsOwnGesture(e.target)) return;   // scrolling or typing
+    dragging = true;
+    startY = e.clientY;
+    el.style.transition = "none";
+    try { el.setPointerCapture(e.pointerId); } catch(err){}
+  });
+
+  el.addEventListener("pointermove", function(e){
+    if (!dragging) return;
+    const dy = e.clientY - startY;
+    if (dy > 0) el.style.transform = "translateY(" + dy + "px)";   // downward only
+  });
+
+  const release = function(e){
+    if (!dragging) return;
+    dragging = false;
+    const dy = e.clientY - startY;
+    el.style.transition = "";
+    el.style.transform = "";
+    if (dy > 60) close();
+  };
+  el.addEventListener("pointerup", release);
+  el.addEventListener("pointercancel", release);
+}
+
+function dismissSheet(){ selPos = -1; closeSheet(); refreshRecall(); }
+
+$("sheetScrim").onclick = dismissSheet;
+enableSwipeDown($("sheet"), dismissSheet, function(t){
+  return !!(t.closest && t.closest("#chips"));      // the word list scrolls on its own
+});
+enableSwipeDown($("modalCard"), function(){ selPos = -1; closeModal(); refreshRecall(); }, function(t){
+  return !!(t.closest && t.closest("input, button, textarea"));
+});
 
 /* typed answer */
 function openModal(pos){
@@ -1578,7 +1667,7 @@ function buildResult(){
   $("score").textContent = role === "guesser"
     ? ((drawerName ? TEXT.inDrawingsOf.replace("{name}", drawerName) : TEXT.inTheseDrawings) + score + "/" + N)
     : TEXT.outOf.replace("{n}", N).replace("{score}", score);
-  $("scoreSub").textContent = diffName() + " \u00b7 " + TEXT.totalTime + " " + timeLabel(elapsedMs());
+  $("scoreSub").textContent = roundLabel() + " \u00b7 " + TEXT.totalTime + " " + timeLabel(elapsedMs());
   $("copyNote").textContent = "";
   $("fallback").style.display = "none";
 
@@ -1765,14 +1854,24 @@ function shareText(){
     if (pos % 4 === 3 && pos !== N - 1) rows += "\n";
   });
   // The set is never named in the share text, so it cannot leak which words came up.
-  const head = role === "guesser" && drawerName
-    ? "Chizz 🎨 " + TEXT.drawingsOf.replace("{name}", drawerName)
+  // Whose drawings these are: the other player's when guessing, your own otherwise.
+  // Guessing your own round used to fall through to the bare title, so sharing it
+  // said nothing about who drew it.
+  const who = role === "guesser" ? drawerName : myName;
+  const head = who
+    ? "Chizz 🎨 " + TEXT.drawingsOf.replace("{name}", who)
     : "Chizz 🎨";
-  let out = head + "\n" + TEXT.difficultyLabel + diffName() + "\n" + score + "/" + N
+  let out = head + "\n" + roundLabel() + "\n" + score + "/" + N
           + " \u00b7 " + timeLabel(elapsedMs()) + "\n\n" + rows;
   // Anyone reading the score can play the same round straight from the message.
-  if (lastCode) out += "\n\n" + TEXT.guessTooInvite + "\n" + gameLink(lastCode);
+  if (lastCode) out += "\n\n" + inviteText();
   return out;
+}
+
+// The one place the invite is worded, so every screen that offers it says the same
+// thing and carries the same link.
+function inviteText(){
+  return TEXT.guessTooInvite + "\n" + gameLink(lastCode);
 }
 
 function copyText(t){
@@ -1876,15 +1975,21 @@ $("toSend").onclick = function(){
 };
 
 let sendFrom = "between";
-$("sendBack").onclick = function(){ show(sendFrom); };
+$("sendBack").onclick = function(){
+  // Coming from the grid means going back into it, not to a dead screen.
+  if (sendFrom === "recall") show("recall");
+  else show(sendFrom);
+};
 
-$("inviteFriends").onclick = function(){
+// The screen that shows the code and the link in full. Reached from the result
+// screen, and from the corner chip when the clipboard refuses to play.
+function openShareScreen(from){
   $("sendErr").textContent = "";
   $("linkNote").textContent = "";
   $("sendName").value = myName || "";
   sendNameReady();
-  sendFrom = "result";
-  if (lastCode){                     // already shared: show the same link, do not save twice
+  sendFrom = from || "result";
+  if (lastCode){                     // already saved: show the same link, do not save twice
     $("code").textContent = lastCode;
     $("link").textContent = gameLink(lastCode);
     sendShow("done");
@@ -1892,7 +1997,9 @@ $("inviteFriends").onclick = function(){
     sendShow("form");
   }
   show("send");
-};
+}
+
+$("inviteFriends").onclick = function(){ openShareScreen("result"); };
 $("doneHome").onclick = function(){ show("home"); };
 $("doneRecall").onclick = function(){ buildRecall(); };
 
@@ -1910,6 +2017,54 @@ $("sendName").addEventListener("keydown", function(e){
   if (e.key === "Enter"){ e.preventDefault(); $("sendGo").click(); }
 });
 
+// One place that posts a round, so the share screen and the automatic save on the
+// way into guessing cannot drift apart.
+function postRound(name){
+  return api("/api/save", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      setId: setId,
+      mode: modeId,
+      seconds: secs,
+      name: name || "",
+      words: words,
+      drawings: encodeDrawings(drawings)
+    })
+  }).then(function(r){
+    if (!r.ok || !r.data || !r.data.code) throw new Error("save failed");
+    lastCode = r.data.code;
+    if (name) drawerName = name;
+    rememberRound(lastCode, { mine: true, order: order, picks: picks });
+    setUrlCode(lastCode);
+    return lastCode;
+  });
+}
+
+/* People want to play the same round side by side, so the round is saved as soon
+   as its own guessing begins rather than only when the share screen is opened.
+   The code then exists for the corner chip, and for the invite line in the share
+   text, without the player having to do anything first. */
+function ensureCode(){
+  if (lastCode || role === "guesser") return;
+  if (!drawings.some(function(d){ return d && d.length; })) return;   // nothing worth sharing
+  postRound(myName).then(updateCodeChip).catch(function(){
+    /* offline, or the save failed: the chip stays hidden and the share screen can
+       still try again later. Nothing is lost, the drawings are in memory. */
+  });
+}
+
+// A round saved before a name existed gets the name attached once there is one.
+function claimRoundName(){
+  if (!lastCode || !myName || role === "guesser" || drawerName) return;
+  drawerName = myName;
+  api("/api/game/" + encodeURIComponent(lastCode), {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: myName })
+  }).catch(function(){});
+}
+
 $("sendGo").onclick = function(){
   // The button stays tappable while it is dimmed, so it can say what is missing
   // rather than silently doing nothing.
@@ -1920,26 +2075,18 @@ $("sendGo").onclick = function(){
   }
   const name = setName($("sendName").value);
   sendShow("busy");
-  api("/api/save", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      setId: setId,
-      mode: modeId,
-      seconds: secs,
-      name: name,
-      words: words,
-      drawings: encodeDrawings(drawings)
-    })
-  }).then(function(r){
-    if (!r.ok || !r.data || !r.data.code) throw new Error("kaydedilemedi");
-    lastCode = r.data.code;
+
+  // Guessing first already saved the round, so there is a code to keep rather than
+  // a second copy to make: name that one instead of saving the drawings twice.
+  const done = lastCode
+    ? Promise.resolve(claimRoundName()).then(function(){ return lastCode; })
+    : postRound(name);
+
+  done.then(function(){
     drawerName = name;
     $("code").textContent = lastCode;
     $("link").textContent = gameLink(lastCode);
-    // Without this a reload loses the code, and with it the link just shared.
-    rememberRound(lastCode, { mine: true, order: order, picks: picks });
-    setUrlCode(lastCode);
+    updateCodeChip();
     sendShow("done");
   }).catch(function(){
     // the drawings are still in memory, nothing lost
@@ -2043,6 +2190,7 @@ function loadGame(code){
 
 $("boardJoin").onclick = function(){
   if (!setName($("boardName").value)){ $("boardName").focus(); return; }
+  claimRoundName();          // the round may have been saved before this name existed
   $("boardNameRow").hidden = true;
   if (!scoreSent){ scoreSent = true; sendScore(); }
   renderScores();
