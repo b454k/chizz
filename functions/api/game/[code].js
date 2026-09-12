@@ -37,6 +37,14 @@ function withLegacyFields(record) {
   return record;
 }
 
+// The owner token is the one field a reader must never see: anyone holding it could
+// rename the round.
+function publicRecord(record) {
+  const out = withLegacyFields(record);
+  if (out && typeof out === "object") delete out.owner;
+  return out;
+}
+
 export async function onRequestGet({ params, env }) {
   if (!env.GAMES) return json({ error: "storage not bound" }, 500);
 
@@ -46,7 +54,7 @@ export async function onRequestGet({ params, env }) {
   const data = await env.GAMES.get(code, { type: "json" });
   if (!data) return json({ error: "code not found" }, 404);
 
-  return json(withLegacyFields(data));
+  return json(publicRecord(data));
 }
 
 // A round is now saved the moment its own guessing starts, so friends can join
@@ -71,7 +79,14 @@ export async function onRequestPost({ params, request, env }) {
   if (!data) return json({ error: "code not found" }, 404);
 
   const current = withLegacyFields(data);
-  if (current.name) return json({ name: current.name });      // already named, left alone
+  const owner = d && typeof d.owner === "string" ? d.owner : "";
+  const isOwner = !!current.owner && !!owner && current.owner === owner;
+
+  // A blank can be filled by whoever is playing the round, which is how a name
+  // given after the automatic save gets attached. Changing a name that is already
+  // there is only for the device that saved it.
+  if (current.name && !isOwner) return json({ error: "not yours to rename" }, 403);
+  if (current.name === name) return json({ name });
 
   current.name = name;
   // Re-putting restarts the 30 days. The round is being actively played, so

@@ -80,10 +80,16 @@ export async function onRequestPost({ request, env }) {
 
   const name = typeof d.name === "string" ? d.name.trim().slice(0, 20) : "";
 
+  // Proof that this device is the one that saved the round, so it alone can change
+  // the name on it later. Returned once, kept by the client, never handed out by
+  // the read endpoint.
+  const owner = crypto.randomUUID().replace(/-/g, "");
+
   const record = JSON.stringify({
     setId: d.setId,
     mode,
     seconds,
+    owner,
     name,                    // optional, may be empty; no personal data is stored
     words: d.words,
     drawings: d.drawings
@@ -94,7 +100,7 @@ export async function onRequestPost({ request, env }) {
     const taken = await env.GAMES.get(code);
     if (taken) continue;                                  // collision, generate another
     await env.GAMES.put(code, record, { expirationTtl: TTL });
-    return json({ code });
+    return json({ code, owner });
   }
   return error("could not allocate a code, try again", 503);
 }

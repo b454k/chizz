@@ -105,6 +105,10 @@
     background:transparent; touch-action:manipulation;
   }
   .shint{color:var(--muted); font-size:12px; margin:2px 0 0;}
+  .srow .nameIn{
+    width:auto; max-width:150px; padding:7px 10px; border-radius:10px;
+    text-align:right; font-weight:700;
+  }
   .seg{display:flex; gap:6px;}
   .seg button{
     border:2px solid var(--line); border-radius:10px; padding:7px 12px;
@@ -401,6 +405,11 @@
           <span class="lbl" data-t="theme"></span>
           <div class="seg" id="themes"></div>
         </div>
+        <div class="srow">
+          <span class="lbl" data-t="yourName"></span>
+          <input class="txt nameIn" id="homeName" maxlength="10" data-tph="nameHint"
+                 autocorrect="off" spellcheck="false" enterkeyhint="done">
+        </div>
       </div>
 
       <button class="primary" id="start" data-t="start"></button>
@@ -626,44 +635,44 @@ const SETS = [
     familyA:["gökdelen","bambu","mısır","selvi","baston","ampul","abajur","musluk","çeşme","heykel"],
     familyB:["gemi","tekne","denizaltı","balina","hipopotam","gergedan","deve","eşek","tilki","kurt"] },
   { id:"set-13",   // ucgen / cubuk
-    familyA:["külah","yelken","gönye","volkan","tepe","dilim","buzdağı","taç","fes","kama"],
-    familyB:["pipet","kürdan","tebeşir","sopa","değnek","olta","mızrak","şiş","maşa","spatula"] },
+    familyA:["külah","yelken","sandviç","volkan","tepe","kravat","buzdağı","taç","fes","abajur"],
+    familyB:["pipet","kürdan","tebeşir","sopa","sihirli değnek","olta","cetvel","çatal","maşa","spatula"] },
   { id:"set-14",   // kivrimli / duz
     familyA:["kuyruk","solucan","dudak","kulak","burun","kaş","bıyık","saç","yaprak","gül"],
-    familyB:["barkod","takvim","satranç tahtası","dama tahtası","jaluzi","panjur","hasır","ağ","file","örgü"] },
+    familyB:["barkod","takvim","satranç tahtası","çikolata","perde","gofret","yapboz","ağ","file","örgü"] },
   { id:"set-15",   // kanatli / sapli
-    familyA:["güvercin","karga","kartal","baykuş","papağan","leylek","martı","ördek","kaz","horoz"],
-    familyB:["bardak","kavanoz","süzgeç","matara","demlik","ibrik","güğüm","kapı kolu","balta","kazma"] },
+    familyA:["güvercin","civciv","kartal","baykuş","penguen","leylek","martı","ördek","kaz","horoz"],
+    familyB:["bardak","kavanoz","süzgeç","matara","demlik","vazo","termos","kapı kolu","balta","kazma"] },
   { id:"set-16",   // isinsal / oval
-    familyA:["fırıldak","pervane","vantilatör","jant","hedef tahtası","karahindiba","kirpi","havai fişek","yelpaze","örümcek ağı"],
-    familyB:["yumurta","patates","zeytin","badem","avokado","fıstık","fasulye","hindistan cevizi","rugby topu","kapsül"] },
+    familyA:["ayçiçeği","pervane","vantilatör","direksiyon","hedef tahtası","papatya","kirpi","havai fişek","yelpaze","örümcek ağı"],
+    familyB:["yumurta","patates","zeytin","badem","avokado","fıstık","fasulye","hindistan cevizi","limon","kapsül"] },
   { id:"set-17",   // kubbeli / halka
-    familyA:["gökkuşağı","tünel","iglo","mantar","kubbe","paraşüt","kask","miğfer","kase","çanak"],
-    familyB:["halka","çörek","can simidi","bilezik","kelepçe","zincir","lastik","anahtarlık","hula hoop","çember"] },
+    familyA:["gökkuşağı","tünel","iglo","mantar","kubbe","paraşüt","kask","kaplumbağa","kase","köprü"],
+    familyB:["halka","donut","can simidi","bilezik","kelepçe","zincir","lastik","anahtarlık","hula hoop","kolye"] },
   { id:"set-18",   // yuvarlak / cubuk
-    familyA:["erik","kayısı","ceviz","fındık","greyfurt","balkabağı","davul","tef","küre","dünya"],
-    familyB:["cımbız","çivi","vida","iğne","kibrit","salatalık","kereviz","baget","matkap","testere"] },
+    familyA:["kiraz","kayısı","ceviz","fındık","şeftali","balkabağı","davul","tef","küre","dünya"],
+    familyB:["cımbız","çivi","vida","iğne","kibrit","salatalık","havuç","baget","matkap","testere"] },
   { id:"set-19",   // koseli / kivrimli
-    familyA:["yastık","havlu","battaniye","halı","tablo","poster","pano","mendil","kartpostal","asansör"],
+    familyA:["yastık","havlu","battaniye","halı","tablo","gazete","harita","mendil","mektup","asansör"],
     familyB:["lale","papatya","fiyonk","düğüm","kanca","soru işareti","şimşek","nehir","tüy","yumak"] },
   { id:"set-20",   // dikey / yuvarlak
     familyA:["termometre","saksı","şelale","deniz feneri","elektrik direği","trafik lambası","vinç","anten","duş","kolon"],
-    familyB:["nohut","bezelye","rozet","kurabiye","elma","güneş","tekerlek","balon","portakal","tabak"] },
+    familyB:["üzüm","bezelye","misket","kurabiye","elma","güneş","tekerlek","balon","portakal","tabak"] },
   { id:"set-21",   // yatik / ucgen
-    familyA:["aslan","kaplan","zebra","minibüs","traktör","vagon","karavan","sedye","komodin","kertenkele"],
-    familyB:["peynir","kek","börek","kravat","diş","alev","pizza","dondurma","yelkenli","çatı"] },
+    familyA:["aslan","kaplan","zebra","minibüs","traktör","vagon","karavan","sedye","kamyon","kertenkele"],
+    familyB:["peynir","pasta","börek","kravat","diş","alev","pizza","dondurma","yelkenli","çatı"] },
   { id:"set-22",   // sapli / duz
-    familyA:["tırmık","çapa","el arabası","sırt çantası","kepçe","rende","tirbuşon","pompa","raket","lolipop"],
-    familyB:["nota","porte","çamaşır ipi","parmaklık","kalorifer","zebra geçidi","tel örgü","tırabzan","korkuluk","tabela"] },
+    familyA:["tırmık","çapa","el arabası","sırt çantası","kepçe","rende","tirbuşon","kürek","raket","lolipop"],
+    familyB:["nota","piyano","çamaşır ipi","parmaklık","kalorifer","yaya geçidi","file","ray","korkuluk","tabela"] },
   { id:"set-23",   // oval / koseli
     familyA:["hap","tohum","çekirdek","kozalak","gözyaşı","çakıl","patlıcan","armut","kabak","sabun"],
-    familyB:["çekmece","koli","bavul","pil","peçete","dosya","kutu","ev","televizyon","pencere"] },
+    familyB:["çekmece","hediye","bavul","pil","peçete","dosya","kutu","ev","televizyon","pencere"] },
   { id:"set-24",   // halka / dikey
-    familyA:["tasma","kolye","küpe","deniz simidi","kulp","halat","daire","paket lastiği","kemer tokası","bileklik"],
+    familyA:["tasma","kolye","küpe","deniz simidi","kulp","halat","daire","paket lastiği","kemer","bileklik"],
     familyB:["asa","insan","kule","şemsiye","mum","zürafa","kaktüs","süpürge","direk","fener"] },
   { id:"set-25",   // kanatli / yatik
-    familyA:["yusufçuk","uğur böceği","çekirge","ateş böceği","peri","planör","şahin","pelikan","flamingo","tavus kuşu"],
-    familyB:["fok","koltuk","kayık","sal","feribot","fil","kanepe","inek","masa","otobüs"] },
+    familyA:["yusufçuk","uğur böceği","çekirge","ateş böceği","peri","sivrisinek","devekuşu","güve","flamingo","tavus kuşu"],
+    familyB:["fok","koltuk","kayık","timsah","gemi","fil","kanepe","inek","masa","otobüs"] },
   { id:"set-26",   // isinsal / cubuk
     familyA:["rüzgar gülü","deniz kestanesi","dişli","kestane","yıldız","kar tanesi","çark","pusula","örümcek","denizyıldızı"],
     familyB:["makas","pense","sigara","biber","anahtar","çekiç","diş fırçası","balık","kılıç","tarak"] },
@@ -672,13 +681,13 @@ const SETS = [
     familyB:["hortum","beyin","çengel","virgül","kalp","ahtapot","damla","dalga","kurdele","tırtıl"] },
   { id:"set-28",   // oval / duz
     familyA:["mercimek","tespih","yumurta","patates","zeytin","badem","avokado","fıstık","fasulye","hindistan cevizi"],
-    familyB:["demiryolu","kafes","ızgara","fermuar","barkod","takvim","satranç tahtası","dama tahtası","jaluzi","panjur"] },
+    familyB:["demiryolu","kafes","ızgara","fermuar","barkod","takvim","satranç tahtası","çikolata","perde","gofret"] },
   { id:"set-29",   // yuvarlak / ucgen
     familyA:["ay","yüzük","karpuz","düğme","para","simit","göz","kavun","zil","nar"],
-    familyB:["piramit","elmas","ok","külah","yelken","gönye","volkan","tepe","dilim","buzdağı"] },
+    familyB:["piramit","elmas","ok","külah","yelken","sandviç","volkan","tepe","tost","buzdağı"] },
   { id:"set-30",   // sapli / kanatli
     familyA:["mikrofon","ayna","fincan","kova","tencere","sepet","çaydanlık","tava","kupa","sürahi"],
-    familyB:["serçe","kırlangıç","melek","güvercin","karga","kartal","baykuş","papağan","leylek","martı"] }
+    familyB:["serçe","flamingo","melek","güvercin","civciv","kartal","baykuş","penguen","leylek","martı"] }
 ];
 
 /* Two ways to answer, and the clock set separately in settings. The four fixed
@@ -719,6 +728,8 @@ const TEXT = {
   joinBoard:        "Katıl",
   perWord:          "kelime başına süre",
   theme:            "tema",
+  yourName:         "adın",
+  nameHint:         "adını yaz",
   themeDark:        "koyu",
   themeLight:       "açık",
   tagline:          "saniyeler içinde 20 kelime çiz, sonra karışmış çizimlerine bakıp hangisi neydi bul. kelimeler birbirine benzer şekillerde seçilir; işin zor kısmı da bu.",
@@ -1041,6 +1052,7 @@ function buildHome(){
 
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
+  $("homeName").value = myName;
 }
 
 $("secs").addEventListener("input", function(){
@@ -1048,6 +1060,15 @@ $("secs").addEventListener("input", function(){
   $("secsOut").textContent = secsText(secs);
 });
 $("secs").addEventListener("change", rememberSettings);
+
+/* The name used to be asked once and then kept for good, with no way back to it:
+   whatever you typed the first time followed you into every later round and every
+   link you shared. It lives in settings now, and clearing it is allowed. */
+$("homeName").addEventListener("input", function(){
+  myName = $("homeName").value.trim().slice(0, NAME_MAX);
+  rememberName(myName);
+});
+$("homeName").addEventListener("change", syncRoundName);
 
 /* --------------------------------------------------------------- sound --- */
 /* Tones are synthesised rather than loaded, so the page still pulls nothing from
@@ -2075,7 +2096,7 @@ function postRound(name){
     if (!r.ok || !r.data || !r.data.code) throw new Error("save failed");
     lastCode = r.data.code;
     if (name) drawerName = name;
-    rememberRound(lastCode, { mine: true, order: order, picks: picks });
+    rememberRound(lastCode, { mine: true, owner: r.data.owner || "", order: order, picks: picks });
     setUrlCode(lastCode);
     return lastCode;
   });
@@ -2094,14 +2115,18 @@ function ensureCode(){
   });
 }
 
-// A round saved before a name existed gets the name attached once there is one.
-function claimRoundName(){
-  if (!lastCode || !myName || role === "guesser" || drawerName) return;
+// Push the current name onto the round this device saved: either filling the blank
+// left by the automatic save, or replacing a name that has since been changed. The
+// token proves the round is ours to rename.
+function syncRoundName(){
+  if (!lastCode || !myName || role === "guesser") return;
+  if (drawerName === myName) return;
+  const rec = savedRound(lastCode) || {};
   drawerName = myName;
   api("/api/game/" + encodeURIComponent(lastCode), {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ name: myName })
+    body: JSON.stringify({ name: myName, owner: rec.owner || "" })
   }).catch(function(){});
 }
 
@@ -2119,7 +2144,7 @@ $("sendGo").onclick = function(){
   // Guessing first already saved the round, so there is a code to keep rather than
   // a second copy to make: name that one instead of saving the drawings twice.
   const done = lastCode
-    ? Promise.resolve(claimRoundName()).then(function(){ return lastCode; })
+    ? Promise.resolve(syncRoundName()).then(function(){ return lastCode; })
     : postRound(name);
 
   done.then(function(){
@@ -2230,7 +2255,7 @@ function loadGame(code){
 
 $("boardJoin").onclick = function(){
   if (!setName($("boardName").value)){ $("boardName").focus(); return; }
-  claimRoundName();          // the round may have been saved before this name existed
+  syncRoundName();           // the round may have been saved before this name existed
   $("boardNameRow").hidden = true;
   if (!scoreSent){ scoreSent = true; sendScore(); }
   renderScores();

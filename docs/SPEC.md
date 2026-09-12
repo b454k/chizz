@@ -327,9 +327,9 @@ holds:
 
 | Field | Purpose |
 |---|---|
-| `name` | The name typed on this device, so it is asked once rather than per round |
+| `name` | The name typed on this device. Editable in settings at any time; changing it renames the rounds this device saved |
 | `mode`, `secs`, `theme` | The settings chosen on the home screen |
-| `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, and whether this device drew it |
+| `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, and the owner token that lets it be renamed |
 
 Nothing here is not already on screen during the round. Entries older than the
 server's 30-day TTL are dropped, and only the newest 40 rounds are kept.
@@ -366,8 +366,10 @@ before anyone asks for it.
   **your own otherwise**. Guessing your own round used to fall through to the bare
   title, so sharing it said nothing about who drew it and carried no link.
 - A round saved before a name existed gets one attached later, through
-  `POST /api/game/:code`. That only ever fills a blank — a round that already carries a
-  name cannot be renamed through it.
+  `POST /api/game/:code`. A blank can be filled by whoever is playing the round;
+  changing a name that is already there needs the owner token `POST /api/save` handed
+  back when the round was created, which the read endpoint never discloses. That is
+  what lets you rename yourself and have rounds you already saved follow.
 - Nothing is saved for a round with no strokes in it at all.
 
 This trades KV writes for the feature: every round taken into guessing now writes,
