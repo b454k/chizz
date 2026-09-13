@@ -42,11 +42,16 @@ tidying at some point.)
 | `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 30 |
 | `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 24 |
 | `oval` | small and egg-shaped: seeds, nuts, pebbles | 22 |
-| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 19 |
-| `ring` | a closed loop with a hole: bracelets, tyres, chains | 19 |
+| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 20 |
+| `ring` | a closed loop with a hole: bracelets, tyres, chains | 20 |
 
-**437 words.** Checked: no word is in two families, and every word the game currently
+**439 words.** Checked: no word is in two families, and every word the game currently
 uses is in here.
+
+Two of those were added to reach the rule below — `bere` to `domed`, a beanie being a
+clean two-stroke dome, and `çelenk` to `ring`, a wreath being a ring of leaves.
+`alyans` was the obvious ring and was rejected: it draws identically to `yüzük`, which
+is already in `round`.
 
 ## The fourteen words that had to be decided
 
@@ -73,44 +78,48 @@ looks like, since that is all a player ever sees.
 
 ---
 
-## What the pool can and cannot sustain
+## The repeat rule: no word inside 14 days
 
 A daily set is 10 words from one family and 10 from another. With 14 families and two
 used a day, **each family comes round every 7 days** however evenly you schedule it.
-That number drives everything.
+That single number decides everything else.
 
-A word used today must not return inside the window. Since its family comes back every
-7 days, the family has to supply enough *fresh* batches of 10 to cover the gap:
+A word used today must not return inside the window. Its family comes back every 7
+days, so the family has to supply that many *fresh* batches of 10:
 
-| rule | batches a family must cover | words it needs |
+| window | fresh batches needed | words per family |
 |---|---|---|
-| no repeat within 13 days | 2 | 20 |
-| **no repeat within 14 days** | **2** | **20** |
-| **no repeat within 15 days** | **3** | **30** |
+| 8–14 days | 2 | **20** |
+| 15–21 days | 3 | **30** |
+| 22–28 days | 4 | **40** |
 
-15 is the expensive side of a boundary. It is one day past two family cycles, so it
-forces a third full batch out of every family.
+The cost is a staircase, not a slope, and **14 is the top of its step**. Every window
+from 8 to 14 costs exactly the same, so anything below 14 is giving away freshness for
+nothing.
 
-Simulated over a year, 7,300 word placements:
+It also makes 15 the worst number on the board: it pays the full price of 21 — a third
+batch from every family, 36 new words — and buys six fewer days. If the window is ever
+raised, the number to raise it to is **21**.
+
+Simulated over three years, 21,900 word placements, with the two families that were a
+batch short topped up:
 
 ```
-window 13 days ->  102 violations
-window 14 days ->  102 violations   (domed and ring only, one word short each)
-window 15 days -> 1702 violations   (domed, ring, oval and radial all short)
+violations:     0
+closest repeat: 14 days apart
 ```
 
-So:
+Exactly 14 at the closest, which is the rule binding tightly rather than comfortably —
+`domed` and `ring` sit at 20 words with no slack. Any word removed from either family
+breaks the rule, and any word added to either is pure headroom.
 
-- **At 14 days** the pool works as it stands apart from two families that are one word
-  short. Add a single `domed` word and a single `ring` word and it runs clean.
-- **At 15 days** four families need topping up to 30: `domed` +11, `ring` +11,
-  `oval` +8, `radial` +6. **36 new words**, and they have to be genuinely drawable and
-  genuinely that shape, or they weaken the family they join.
+## If the window is ever raised to 21
 
-A third option avoids new words entirely: **more families**. Splitting the larger
-families — `boxy` at 43 could give up a "flat and wide" group, `horizontal` at 39 an
-"animal" group — lengthens the cycle beyond 7 days, and a longer cycle needs fewer
-words per family for the same rule.
+Four families would need topping up to 30: `radial` +6, `oval` +8, `domed` +10,
+`ring` +10. **34 new words**, and they have to be genuinely drawable and genuinely
+that shape, or they weaken the family they join.
 
-None of this is urgent for launch: thirty hand-made sets already cover the first month
-of free play, and the daily only starts eating the pool when it ships.
+There is a cheaper route that needs no new words: **more families**. `boxy` at 43
+could shed a "flat and wide" group, `horizontal` at 39 an "animal" group. More
+families means each one comes round less often than every 7 days, and a longer cycle
+needs fewer words per family for the same window.

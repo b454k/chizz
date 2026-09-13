@@ -5,10 +5,11 @@
     "wordsPerSet": 20,
     "familiesPerSet": 2,
     "wordsPerFamily": 10,
-    "noRepeatWithinDays": 15,
-    "note": "A set is ten words from one family and ten from another. The two families must be easy to tell apart, so a player feels they have ruled out half the grid; the difficulty lives inside a family, where the shapes collide."
+    "noRepeatWithinDays": 14,
+    "note": "A set is ten words from one family and ten from another. The two families must be easy to tell apart, so a player feels they have ruled out half the grid; the difficulty lives inside a family, where the shapes collide.",
+    "why14": "A family comes round every 7 days, so a window of 8 to 14 days all cost the same: two fresh batches, 20 words per family. 14 is the top of that band. The next step up is 21, not 15 -- 15 through 21 all cost three batches, 30 words per family, so 15 would pay the full price of 21 and take six fewer days."
   },
-  "totalWords": 437,
+  "totalWords": 439,
   "families": [
     {
       "id": "boxy",
@@ -108,6 +109,7 @@
       "shape": "an arc over a base: rainbows, tunnels, shells, bowls",
       "words": [
         "at nalı",
+        "bere",
         "çan",
         "denizanası",
         "gökkuşağı",
@@ -313,6 +315,7 @@
         "bileklik",
         "bilezik",
         "can simidi",
+        "çelenk",
         "daire",
         "deniz simidi",
         "donut",
