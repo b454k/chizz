@@ -86,11 +86,12 @@ looks like, since that is all a player ever sees.
 ## The repeat rule: no word inside 14 days
 
 A daily set is 10 words from one family and 10 from another. With 14 families and two
-used a day, **each family comes round every 7 days** however evenly you schedule it.
-That single number decides everything else.
+used a day, a family averages **one appearance every 7 days**. It is not pinned there —
+see the section below, where the generator lets it float between about 6 and 9 — but 7
+is the number that sizes the pool.
 
-A word used today must not return inside the window. Its family comes back every 7
-days, so the family has to supply that many *fresh* batches of 10:
+A word used today must not return inside the window, so a family has to supply that
+many *fresh* batches of 10 across the gap:
 
 | window | fresh batches needed | words per family |
 |---|---|---|
@@ -107,25 +108,35 @@ batch from every family — and buys six fewer days. If the window is ever raise
 number to raise it to is **21**, which would need roughly 30 more words spread across
 `oval`, `radial`, `domed` and `ring`.
 
-## Why the words inside a family are shuffled
+## How a day is chosen
 
-Holding the rule is not enough on its own. Taking the ten *least recently used* words
-each time satisfies it perfectly and still produces a bad game: a family of 30 dealt 10
-at a time has only three possible groupings, so the same ten words keep arriving
-together and players notice.
+Nothing is rotated in order, and nothing is picked oldest-first.
 
-So the families rotate strictly oldest-first — that is what pins the cycle at seven
-days and makes the rule provable — but the words inside are **shuffled among everything
-currently eligible**, with a seed derived from the day number so every device produces
-the same set forever.
+A family is in the running for a day only if it can field **ten words nobody has seen
+for fourteen days**. The day then picks two of those families at random, and ten words
+at random from each, seeded by the day number so every device produces the same set
+for ever. A family that is short simply sits the day out and comes back once it has
+refilled.
 
-The difference, measured over three years:
+The rule therefore holds *by construction* rather than by schedule — a word can only
+be chosen when it is already allowed. That matters, because scheduling was tried first
+and it does not survive randomness:
 
-| | distinct 10-word groupings per family |
-|---|---|
-| strictly oldest-first | 3 – 8 |
-| shuffled among the eligible | **152 – 157** |
+| how families are chosen | violations over 3 years | distinct family pairs |
+|---|---|---|
+| strictly the two most overdue | 0 | 7 of 91 |
+| at random from the 3 most overdue | 1,696 | 91 |
+| at random from all 14 | 5,918 | 91 |
+| **at random from those with ten fresh words** | **0** | **91 of 91** |
 
-Three years simulated, 21,900 word placements: **zero violations, closest repeat
-exactly 14 days**. The rule binds tightly rather than comfortably, which is the point —
-every word is back in play the moment it is allowed to be.
+Ordering by age keeps the rule but leaves only seven possible shape pairings, so the
+same two families arrive together every week. Loosening the order breaks the rule,
+because a family returning early has fewer than ten fresh words and has to repeat one.
+Filtering by eligibility gets both.
+
+It also balances itself: over three years the large families come up every 6.2 days
+and the small ones every 9.4, which is exactly right — a small family needs longer to
+refresh, and now it simply takes it.
+
+Three years simulated on the shipped generator, 21,900 word placements: **zero
+violations, closest repeat exactly 14 days**, every day a full twenty words.

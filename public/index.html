@@ -827,29 +827,31 @@ function dailyTake(list, n, rnd){
 
 /* Which words are free today depends on what the days before used, so the whole
    schedule is replayed from day one. A few hundred cheap iterations, years in.
-   Families rotate strictly oldest-first, which is what pins their cycle at seven
-   days and makes the fourteen-day rule hold; only the words inside are shuffled,
-   which is what stops the same ten arriving together every time. */
+
+   Nothing is rotated in order. A family is in the running only if it can field ten
+   words nobody has seen for fourteen days, and the day picks two of those at random;
+   the rule then holds by construction rather than by schedule, and a family that is
+   short simply sits the day out and comes back when it has refilled. Small families
+   end up appearing every nine days or so and large ones every six, which is exactly
+   right -- a small family needs longer to refresh. */
 function dailyWords(day){
-  const lastUsed = {}, famLast = {};
+  const lastUsed = {};
   let out = [];
   for (let d = 1; d <= day; d++){
-    const order = DAILY_FAMILIES.slice().sort(function(a, b){
-      const la = famLast[a] === undefined ? -1e9 : famLast[a];
-      const lb = famLast[b] === undefined ? -1e9 : famLast[b];
-      return la - lb || (a < b ? -1 : 1);
-    });
     const rnd = dailyRandom(d);
-    out = [];
-    [order[0], order[1]].forEach(function(f){
-      const free = DAILY_POOL[f].filter(function(w){
+    const freeIn = function(f){
+      return DAILY_POOL[f].filter(function(w){
         return lastUsed[w] === undefined || d - lastUsed[w] >= DAILY_WINDOW;
       });
-      const from = free.length >= DAILY_PER_FAMILY ? free : DAILY_POOL[f];
-      dailyTake(from, DAILY_PER_FAMILY, rnd).forEach(function(w){
+    };
+    const ready = DAILY_FAMILIES.filter(function(f){
+      return freeIn(f).length >= DAILY_PER_FAMILY;
+    });
+    out = [];
+    dailyTake(ready, 2, rnd).forEach(function(f){
+      dailyTake(freeIn(f), DAILY_PER_FAMILY, rnd).forEach(function(w){
         lastUsed[w] = d; out.push(w);
       });
-      famLast[f] = d;
     });
   }
   return out;
@@ -959,7 +961,7 @@ const TEXT = {
   dailyPlayed:      "Bugünü oynadın",
   dailyScores:      "Günün skorları",
   dailyBoardTitle:  "Günün skorları · {date}",
-  dailyNote:        "Herkes bugün aynı 20 kelimeyi çiziyor. Kelimeler açık, 4 sn.",
+  dailyNote:        "Herkes bugün aynı 20 kelimeyi çiziyor. Kelimeler açık, 3 sn.",
   gateTitle:        "Önce sen çiz",
   gateBody:         "Bugün herkes aynı kelimeleri çiziyor. Arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. Önce sen çiz, sonra tahmin et.",
   pickTitle:        "Şimdi ne olsun?",
@@ -1291,7 +1293,7 @@ $("dailyGo").onclick = function(){
 // Pick the day back up from what was stored when the drawing phase ended.
 function resumeDaily(rec){
   dailyDay = dailyDayNumber();
-  isDaily = true; modeId = "pool"; secs = 4; setId = null;
+  isDaily = true; modeId = "pool"; secs = 3; setId = null;
   role = "solo"; drawerName = ""; lastCode = rec.code || "";
   scores = []; scoreSent = false;
   recallStart = rec.startedAt || 0; recallMs = 0;
@@ -1444,7 +1446,7 @@ function startDaily(){
   dailyDay = dailyDayNumber();
   isDaily  = true;
   modeId   = "pool";
-  secs     = 4;
+  secs     = 3;
   setId    = null;
 
   role      = "solo";
