@@ -1029,7 +1029,6 @@ let scores  = [];        // [{name, score}] — sunucudan gelen tablo
 let scoreSent = false;   // has this round's score been posted yet
 let isDaily  = false;    // this round is the day's puzzle, at fixed settings
 let dailyDay = 0;
-let heldRound = null;   // the round not being played, while a daily duel runs
 let afterDraw = "";     // where the drawing phase should hand off to
 let recallStart = 0;     // when the grid first went up; the board ranks ties by this
 let recallMs  = 0;       // how long the round took, frozen once it is finished
@@ -1290,20 +1289,30 @@ $("dailyGo").onclick = function(){
   startDaily();
 };
 
-// Pick the day back up from what was stored when the drawing phase ended.
+/* Put your own day back in play from what this device stored. The day record holds
+   the drawings; once guessing has started, the answers so far are kept against the
+   round's code, so they are read from there. Comes back to the grid if the day is
+   still open and to the result if it is finished. */
 function resumeDaily(rec){
+  const round = (rec.code && savedRound(rec.code)) || {};
+  const kept = Array.isArray(round.order) && round.order.length === N ? round
+             : (Array.isArray(rec.order) && rec.order.length === N ? rec : null);
+  const done = !!(rec.done || round.done);
   dailyDay = dailyDayNumber();
   isDaily = true; modeId = "pool"; secs = 3; setId = null;
   role = "solo"; drawerName = ""; lastCode = rec.code || "";
-  scores = []; scoreSent = false;
-  recallStart = rec.startedAt || 0; recallMs = 0;
+  scores = []; scoreSent = !!rec.sent;
+  recallStart = round.startedAt || 0;
+  recallMs = done ? (rec.ms || round.ms || 0) : 0;
   words = rec.words.slice();
   drawings = decodeDrawings(rec.drawings || []);
-  order = Array.isArray(rec.order) && rec.order.length === N
-    ? rec.order.slice() : shuffle(words.map(function(_, i){ return i; }));
-  picks = Array.isArray(rec.picks) && rec.picks.length === N ? rec.picks.slice() : new Array(N).fill(null);
+  order = kept ? kept.order.slice() : shuffle(words.map(function(_, i){ return i; }));
+  picks = kept && Array.isArray(kept.picks) && kept.picks.length === N
+    ? kept.picks.slice() : new Array(N).fill(null);
   selPos = -1;
-  buildRecall();
+  // No code yet means guessing never started; the save on the way in sets one.
+  if (lastCode) setUrlCode(lastCode); else clearUrl();
+  if (done) buildResult(); else buildRecall();
 }
 
 
@@ -1420,7 +1429,7 @@ function startGame(){
   const s = randomSet();
   setId = s.id;
   lastSetId = s.id;
-  isDaily = false; dailyDay = 0; heldRound = null; afterDraw = "";
+  isDaily = false; dailyDay = 0; afterDraw = "";
 
   role      = "solo";
   drawerName  = "";
@@ -1976,46 +1985,51 @@ function paintPreview(cv, di){
 
 /* ----------------------------------------------------------- daily duel --- */
 
-// Everything that makes one round what it is, so two can be held at once: yours
-// and the one a friend sent you.
-function snapshotRound(){
-  return {
-    modeId: modeId, secs: secs, setId: setId, role: role, drawerName: drawerName,
-    lastCode: lastCode, words: words, drawings: drawings, order: order, picks: picks,
-    selPos: selPos, score: score, recallStart: recallStart, recallMs: recallMs,
-    scoreSent: scoreSent, isDaily: isDaily, dailyDay: dailyDay, scores: scores
-  };
+/* Two rounds are in play during a daily duel: yours and the one a friend sent.
+   Whose round it is gets written into the day record when their link is opened, so
+   the way between the two survives a reload. Nothing about it is held only in memory. */
+
+// The round that is not on screen and still waiting to be guessed, or null.
+function duelPartner(){
+  const today = dailyDayNumber();
+  if (!isDaily || dailyDay !== today) return null;
+  const day = savedDay(today) || {};
+  if (role === "guesser"){
+    const ready = day.drawn && Array.isArray(day.words) && day.words.length === N;
+    return ready && !day.done ? { mine: true } : null;
+  }
+  if (!day.duelCode || day.duelCode === lastCode) return null;
+  const theirs = savedRound(day.duelCode) || {};
+  return theirs.done ? null : { mine: false, code: day.duelCode, name: day.duelName || "" };
 }
 
-function restoreRound(s){
-  modeId = s.modeId; secs = s.secs; setId = s.setId; role = s.role;
-  drawerName = s.drawerName; lastCode = s.lastCode; words = s.words;
-  drawings = s.drawings; order = s.order; picks = s.picks; selPos = s.selPos;
-  score = s.score; recallStart = s.recallStart; recallMs = s.recallMs;
-  scoreSent = s.scoreSent; isDaily = s.isDaily; dailyDay = s.dailyDay; scores = s.scores;
+// Go to the other round. Both routes put it in the address bar, so a reload from
+// there comes back to it.
+function goToOther(){
+  const other = duelPartner();
+  if (!other) return;
+  if (other.mine) resumeDaily(savedDay(dailyDay));
+  else loadGame(other.code);
 }
 
 function showPick(){
-  $("pickTheirs").textContent = heldRound && heldRound.drawerName
-    ? TEXT.guessTheirsFirst.replace("{name}", heldRound.drawerName)
+  const day = savedDay(dailyDay) || {};
+  $("pickTheirs").textContent = day.duelName
+    ? TEXT.guessTheirsFirst.replace("{name}", day.duelName)
     : TEXT.guessMyself;
   show("pick");
 }
 
-// Put the other round in play and take up where it was left.
-function swapRound(){
-  if (!heldRound) return;
-  const now = snapshotRound();
-  restoreRound(heldRound);
-  heldRound = now;
-  buildRecall();
-}
-
 $("gateDraw").onclick = function(){ wakeAudio(); afterDraw = "pick"; startDaily(); };
-$("gateHome").onclick = function(){ heldRound = null; clearUrl(); show("home"); };
-$("pickMine").onclick = function(){ buildRecall(); };
-$("pickTheirs").onclick = swapRound;
-$("switchRound").onclick = swapRound;
+$("gateHome").onclick = function(){ clearUrl(); show("home"); };
+$("pickMine").onclick = function(){ resumeDaily(savedDay(dailyDayNumber())); };
+$("pickTheirs").onclick = function(){
+  const day = savedDay(dailyDayNumber()) || {};
+  // After a reload on this screen the friend's round is already the one loaded.
+  if (role === "guesser" && lastCode === day.duelCode) buildRecall();
+  else if (day.duelCode) loadGame(day.duelCode);
+};
+$("switchRound").onclick = goToOther;
 
 /* ------------------------------------------------------------------ zoom --- */
 
@@ -2114,14 +2128,6 @@ function buildResult(){
   // Guessing your own drawings first used to be a dead end: there was no way to
   // hand the round to anyone afterwards. Only the person who drew it can.
   $("inviteFriends").hidden = role === "guesser";   // only the person who drew it can hand it on
-  // During a daily duel there are two rounds in play; offer whichever is not done.
-  const other = $("switchRound");
-  other.hidden = !heldRound;
-  if (heldRound){
-    other.textContent = heldRound.role === "guesser" && heldRound.drawerName
-      ? TEXT.nowGuessTheirs.replace("{name}", heldRound.drawerName)
-      : TEXT.nowGuessMine;
-  }
   fillNameRow();
   // Record the finish before the board goes up: opening this code again on this
   // device should land here, on the score table, rather than on an empty grid.
@@ -2129,6 +2135,15 @@ function buildResult(){
   // No second attempt at the day: closing it here is what makes the score mean
   // something on a board everybody shares.
   if (onDayBoard()) rememberDay(dailyDay, { done: true, score: score, ms: recallMs, order: order, picks: picks });
+  // During a daily duel, offer the other round. Asked after the finish is recorded,
+  // and answered from storage, so it is still offered after a reload.
+  const other = $("switchRound");
+  const partner = duelPartner();
+  other.hidden = !partner;
+  if (partner){
+    other.textContent = partner.mine ? TEXT.nowGuessMine
+      : (partner.name ? TEXT.nowGuessTheirs.replace("{name}", partner.name) : TEXT.guessMyself);
+  }
   showBoard();
   show("result");
   paintAll("resultGrid");
@@ -2514,7 +2529,9 @@ function postRound(name){
     if (!r.ok || !r.data || !r.data.code) throw new Error("save failed");
     lastCode = r.data.code;
     if (name) drawerName = name;
-    rememberRound(lastCode, { mine: true, owner: r.data.owner || "", order: order, picks: picks });
+    // Guessing may have started before this save returned, when there was no code to
+    // stamp the start time on, so it travels with the save.
+    rememberRound(lastCode, { mine: true, owner: r.data.owner || "", order: order, picks: picks, startedAt: recallStart || 0 });
     if (isDaily) rememberDay(dailyDay, { code: lastCode });
     setUrlCode(lastCode);
     return lastCode;
@@ -2655,16 +2672,30 @@ function loadGame(code){
     buildHome();
     setUrlCode(code);                 // reloading returns here, including after a join by code
 
+    const todaysDuel = isDaily && dailyDay === dailyDayNumber() && role === "guesser";
+    if (todaysDuel) rememberDay(dailyDay, { duelCode: code, duelName: drawerName });
+
     // Today's puzzle is the same twenty words for everyone, so looking at a
     // friend's grid before drawing would show the reader the words. Hold it.
-    if (isDaily && dailyDay === dailyDayNumber() && !drewToday()){
-      heldRound = snapshotRound();
+    if (todaysDuel && !drewToday()){
       show("gate");
       return;
     }
 
     if (rec && rec.done){             // already played on this device: straight to the scores
       buildResult();
+      return;
+    }
+    // Drawn today but neither round started: a reload on the choice screen returns to it.
+    const day = todaysDuel ? (savedDay(dailyDay) || {}) : null;
+    if (day && !day.code && !day.done && !recallStart){
+      showPick();
+      return;
+    }
+    // Was guessing its own drawings: back to the grid. A daily round is only ever saved
+    // on the way into guessing, so for one of those the share screen is never right.
+    if (rec && rec.mine && (rec.startedAt || isDaily)){
+      buildRecall();
       return;
     }
     if (rec && rec.mine){             // this device drew the round: back to the share screen

@@ -60,6 +60,13 @@ and its own board.
 - Set comments in `index.html` now name families in English and consistently
   (`round / boxy`), matching `docs/WORDS.md`. They were Turkish and spelled three
   different ways.
+- **A reload no longer strands a daily duel.** Which friend's round you are dueling
+  used to be held only in memory, and switching rounds left the address bar on the
+  round you had just left. Reloading after "now guess theirs" rebuilt your own result
+  and the way back was gone. The friend's code is now written into the day record when
+  their link opens, every switch goes through the address bar, a reload on the
+  choice screen comes back to it, and a half-guessed daily round of your own comes
+  back to its grid with the answers still in it rather than to the share screen.
 
 ## 2026-09-11 — first publication
 

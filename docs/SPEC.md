@@ -332,6 +332,7 @@ holds:
 | `name` | The name typed on this device. Editable on the result screen at any time; changing it renames the rounds this device saved |
 | `mode`, `secs`, `theme` | The settings chosen on the home screen |
 | `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
+| `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. Entries older than the
 server's 30-day TTL are dropped, and only the newest 40 rounds are kept.
@@ -347,6 +348,11 @@ What this buys:
   used to lose the link entirely. The round's code is written into the address bar with
   `replaceState`, so a reload has something to return to while the back button still
   leaves.
+- **A daily duel survives a reload at every step.** Whose round you are dueling is read
+  from `days[N]`, never from memory, and switching between your round and theirs always
+  rewrites the address bar. A reload on the choice screen returns to it; a reload in
+  either grid returns to that grid with its answers; a reload on either result still
+  offers the other round until both are finished.
 
 Every access is wrapped in `try`/`catch`: Safari in private mode throws on
 `localStorage` rather than quietly doing nothing. A round that cannot be stored is
