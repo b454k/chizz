@@ -1,3 +1,5 @@
+import { dayNumber as today } from "../../../lib/day.js";
+
 // GET  /api/daily/6  -> { scores: [{name, score, ms, ts}, ...] } best first
 // POST /api/daily/6  body {name, score, ms, was?, token?}
 //
@@ -18,9 +20,6 @@ const NAME_MAX = 10;
 const BOARD_CACHE = 30;        // the shortest read cache KV allows
 const REPAIR_AFTER = 5 * 60 * 1000;
 
-// Day 1 is Tuesday 8 September 2026, midnight in Turkey, written in UTC.
-const EPOCH = Date.UTC(2026, 8, 7, 21, 0, 0);
-const DAY_MS = 86400000;
 
 const TURKISH_FOLD = { "ç": "c", "ğ": "g", "ı": "i", "ö": "o", "ş": "s", "ü": "u" };
 
@@ -39,9 +38,6 @@ function nameKey(name) {
     .slice(0, NAME_MAX);
 }
 
-function today() {
-  return Math.floor((Date.now() - EPOCH) / DAY_MS) + 1;
-}
 
 function readDay(params) {
   const raw = String(params.day || "").trim();

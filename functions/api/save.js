@@ -1,3 +1,5 @@
+import { dayNumber as today, endOfDay } from "../../lib/day.js";
+
 // POST /api/save  ->  { code: "A7K2" }
 // Cloudflare Pages Function. KV binding name: GAMES
 
@@ -14,14 +16,6 @@ const LEGACY_DIFFS = {
   impossible: { mode: "typed", seconds: 1.5 }
 };
 const MAX_BYTES = 200 * 1024;
-// Day 1 is Tuesday 8 September 2026, midnight in Turkey, written in UTC.
-const EPOCH = Date.UTC(2026, 8, 7, 21, 0, 0);
-const DAY_MS = 86400000;
-function today(){ return Math.floor((Date.now() - EPOCH) / DAY_MS) + 1; }
-// A daily round is only worth anything on its own day, so it expires with it.
-function endOfDay(){
-  return Math.max(60, Math.round((EPOCH + today() * DAY_MS - Date.now()) / 1000));
-}
 const TTL = 30 * 24 * 60 * 60;   // 30 days
 const N = 20;
 
