@@ -11,7 +11,19 @@ const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
 
 const TITLE_SUFFIX = "chizz";
 const DESCRIPTION = "20 çizim, 20 kelime. Hangisi neydi?";
-const DRAWINGS_OF = "{name}'ın çizimleri";
+const DRAWINGS_OF = "{whose} çizimleri";
+
+// Same rule as whose() in public/index.html; keep the two identical.
+function whose(name){
+  const letters = String(name).replace(/I/g, "ı").replace(/İ/g, "i").toLowerCase()
+    .replace(/[^a-zçğıöşüâîû]/g, "");
+  const vowels = letters.match(/[aeıioöuüâîû]/g);
+  const last = vowels ? vowels[vowels.length - 1] : "e";
+  const ending = { a: "ın", â: "ın", ı: "ın", e: "in", i: "in", î: "in",
+                   o: "un", u: "un", û: "un", ö: "ün", ü: "ün" }[last];
+  const buffer = /[aeıioöuüâîû]$/.test(letters) ? "n" : "";
+  return name + "'" + buffer + ending;
+}
 
 function attr(s) {
   return String(s)
@@ -41,7 +53,7 @@ export async function onRequest(context) {
     }
   } catch (e) { /* a preview without a name is still a preview */ }
 
-  const title = name ? DRAWINGS_OF.replace("{name}", name) + " · " + TITLE_SUFFIX : TITLE_SUFFIX;
+  const title = name ? DRAWINGS_OF.replace("{whose}", whose(name)) + " · " + TITLE_SUFFIX : TITLE_SUFFIX;
   const page = url.origin + "/?o=" + code;
   const image = url.origin + "/api/card/" + code + ".png";
 

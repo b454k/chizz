@@ -67,6 +67,11 @@ and its own board.
   their link opens, every switch goes through the address bar, a reload on the
   choice screen comes back to it, and a half-guessed daily round of your own comes
   back to its grid with the answers still in it rather than to the share screen.
+- **Whose drawings now reads right in Turkish.** The possessive was a fixed `'ın`,
+  which only suits names like Başak: it showed "Ayşe'ın çizimleri". The ending now
+  follows the name's last vowel, with a buffer n after a vowel — Ayşe'nin, Mert'in,
+  Çağla'nın, Oğuz'un, Ümmü'nün — on the result line, the board heading, the share
+  text and the link preview title.
 
 ## 2026-09-11 — first publication
 

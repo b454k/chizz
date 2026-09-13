@@ -937,9 +937,9 @@ const TEXT = {
   leave:            "Çık",
 
   outOf:            "{n}'de {score}",
-  inDrawingsOf:     "{name}'ın çizimlerinde ",
+  inDrawingsOf:     "{whose} çizimlerinde ",
   inTheseDrawings:  "Bu çizimlerde ",
-  drawingsOf:       "{name}'ın çizimleri",
+  drawingsOf:       "{whose} çizimleri",
   theseDrawings:    "Bu çizimler",
   scores:           "Skorlar",
   scoresSuffix:     " · skorlar",
@@ -996,8 +996,25 @@ function roundLabel(){
   return TEXT[modeOf().key] + " \u00b7 " + secsText(secs);
 }
 
+/* Whose drawings, in Turkish. The possessive ending is not fixed: it follows the
+   last vowel of the name (vowel harmony), and a name ending in a vowel takes a
+   buffer n first. So Ayşe'nin, Mert'in, Çağla'nın, Oğuz'un, Ümmü'nün -- a fixed 'ın
+   was only right for names like Başak. Names are typed freely, so the dotted and
+   dotless capitals are folded by hand before looking at them, and a name with no
+   vowels at all falls back to 'in. */
+function whose(name){
+  const letters = String(name).replace(/I/g, "ı").replace(/İ/g, "i").toLowerCase()
+    .replace(/[^a-zçğıöşüâîû]/g, "");
+  const vowels = letters.match(/[aeıioöuüâîû]/g);
+  const last = vowels ? vowels[vowels.length - 1] : "e";
+  const ending = { a: "ın", â: "ın", ı: "ın", e: "in", i: "in", î: "in",
+                   o: "un", u: "un", û: "un", ö: "ün", ü: "ün" }[last];
+  const buffer = /[aeıioöuüâîû]$/.test(letters) ? "n" : "";
+  return name + "'" + buffer + ending;
+}
+
 function boardHeading(){
-  const who = drawerName ? TEXT.drawingsOf.replace("{name}", drawerName) : TEXT.theseDrawings;
+  const who = drawerName ? TEXT.drawingsOf.replace("{whose}", whose(drawerName)) : TEXT.theseDrawings;
   return who + TEXT.scoresSuffix;
 }
 
@@ -2089,7 +2106,7 @@ function buildResult(){
   order.forEach(function(di, pos){ if (isCorrect(picks[pos], words[di])) score++; });
 
   $("score").textContent = role === "guesser"
-    ? ((drawerName ? TEXT.inDrawingsOf.replace("{name}", drawerName) : TEXT.inTheseDrawings) + score + "/" + N)
+    ? ((drawerName ? TEXT.inDrawingsOf.replace("{whose}", whose(drawerName)) : TEXT.inTheseDrawings) + score + "/" + N)
     : TEXT.outOf.replace("{n}", N).replace("{score}", score);
   $("scoreSub").textContent = roundLabel() + " \u00b7 " + TEXT.totalTime + " " + timeLabel(elapsedMs());
   $("copyNote").textContent = "";
@@ -2339,7 +2356,7 @@ function shareText(){
   // said nothing about who drew it.
   const who = role === "guesser" ? drawerName : myName;
   const head = who
-    ? "Chizz 🎨 " + TEXT.drawingsOf.replace("{name}", who)
+    ? "Chizz 🎨 " + TEXT.drawingsOf.replace("{whose}", whose(who))
     : "Chizz 🎨";
   let out = head + "\n" + roundLabel() + "\n" + score + "/" + N
           + " \u00b7 " + timeLabel(elapsedMs()) + "\n\n" + rows;
@@ -2362,7 +2379,7 @@ function inviteMessage(){
   const head = onDayBoard()
     ? "Chizz \u{1F3A8} " + TEXT.dailyShare.replace("{date}", dailyDateLabel(dailyDay))
     : who
-      ? "Chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{name}", who)
+      ? "Chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{whose}", whose(who))
       : "Chizz \u{1F3A8}";
   return head + "\n" + TEXT.inviteBlurb + "\n\n" + inviteText();
 }
