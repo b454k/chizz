@@ -1,11 +1,11 @@
 # Word pool
 
 Every word the game knows, tagged by the silhouette it draws as. This is the source
-for **generating daily sets**. It is not the hand-made sets in `public/index.html` —
-free play keeps using those, and the daily gets its own.
+the **daily puzzle** generates its sets from. It is not the hand-made sets in
+`public/index.html` — free play keeps using those.
 
-The data is in [`words.json`](words.json). This file explains what is in it and what
-the numbers say about running a daily from it.
+The data is in [`words.json`](words.json). The generator that turns a date into twenty
+words lives in `public/index.html`, next to the pool it reads.
 
 ---
 
@@ -34,24 +34,29 @@ tidying at some point.)
 | `horizontal` | long and low, wider than tall: vehicles, big animals, furniture | 39 |
 | `curved` | a flowing curve with no corners: clouds, hearts, snakes, body parts | 38 |
 | `stick` | a long thin rod: pens, tools, cutlery, fish | 38 |
-| `round` | a closed circle: balls, fruit, faces, clock faces | 37 |
+| `round` | a closed circle: balls, fruit, faces, clock faces | 35 |
 | `vertical` | tall and narrow, standing up: poles, bottles, trees, towers | 35 |
 | `handled` | a body with a stalk or handle: cups, jugs, tools you hold | 32 |
 | `winged` | wings out to the sides: birds and insects | 31 |
 | `peaked` | a triangle or cone, pointed at the top: hats, mountains, sails | 30 |
 | `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 30 |
+| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 26 |
+| `ring` | a closed loop with a hole: bracelets, tyres, chains | 26 |
 | `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 24 |
 | `oval` | small and egg-shaped: seeds, nuts, pebbles | 22 |
-| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 20 |
-| `ring` | a closed loop with a hole: bracelets, tyres, chains | 20 |
 
-**439 words.** Checked: no word is in two families, and every word the game currently
-uses is in here.
+**449 words.** Checked: no word is in two families, none of the 39 removed words is
+back, and every word the free game uses is in here.
 
-Two of those were added to reach the rule below — `bere` to `domed`, a beanie being a
-clean two-stroke dome, and `çelenk` to `ring`, a wreath being a ring of leaves.
-`alyans` was the obvious ring and was rejected: it draws identically to `yüzük`, which
-is already in `round`.
+Ten were added to give `domed` and `ring` room to breathe — `bere`, `midye`,
+`deniz kabuğu`, `mağara`, `semer`, `beşik` and `kapak` to `domed`; `çelenk`, `kement`,
+`makara`, `bant` and `çengelli iğne` to `ring`. `alyans` was the obvious ring and was
+rejected: it draws identically to `yüzük`.
+
+Two more were corrections rather than additions. `yüzük` and `simit` moved from `round`
+to `ring` — both are circles with a hole through them, which is what `ring` means; they
+were only in `round` because that is the half of a hand-made set they happened to sit
+in.
 
 ## The fourteen words that had to be decided
 
@@ -94,32 +99,33 @@ days, so the family has to supply that many *fresh* batches of 10:
 | 22–28 days | 4 | **40** |
 
 The cost is a staircase, not a slope, and **14 is the top of its step**. Every window
-from 8 to 14 costs exactly the same, so anything below 14 is giving away freshness for
+from 8 to 14 costs exactly the same, so anything below 14 gives away freshness for
 nothing.
 
 It also makes 15 the worst number on the board: it pays the full price of 21 — a third
-batch from every family, 36 new words — and buys six fewer days. If the window is ever
-raised, the number to raise it to is **21**.
+batch from every family — and buys six fewer days. If the window is ever raised, the
+number to raise it to is **21**, which would need roughly 30 more words spread across
+`oval`, `radial`, `domed` and `ring`.
 
-Simulated over three years, 21,900 word placements, with the two families that were a
-batch short topped up:
+## Why the words inside a family are shuffled
 
-```
-violations:     0
-closest repeat: 14 days apart
-```
+Holding the rule is not enough on its own. Taking the ten *least recently used* words
+each time satisfies it perfectly and still produces a bad game: a family of 30 dealt 10
+at a time has only three possible groupings, so the same ten words keep arriving
+together and players notice.
 
-Exactly 14 at the closest, which is the rule binding tightly rather than comfortably —
-`domed` and `ring` sit at 20 words with no slack. Any word removed from either family
-breaks the rule, and any word added to either is pure headroom.
+So the families rotate strictly oldest-first — that is what pins the cycle at seven
+days and makes the rule provable — but the words inside are **shuffled among everything
+currently eligible**, with a seed derived from the day number so every device produces
+the same set forever.
 
-## If the window is ever raised to 21
+The difference, measured over three years:
 
-Four families would need topping up to 30: `radial` +6, `oval` +8, `domed` +10,
-`ring` +10. **34 new words**, and they have to be genuinely drawable and genuinely
-that shape, or they weaken the family they join.
+| | distinct 10-word groupings per family |
+|---|---|
+| strictly oldest-first | 3 – 8 |
+| shuffled among the eligible | **152 – 157** |
 
-There is a cheaper route that needs no new words: **more families**. `boxy` at 43
-could shed a "flat and wide" group, `horizontal` at 39 an "animal" group. More
-families means each one comes round less often than every 7 days, and a longer cycle
-needs fewer words per family for the same window.
+Three years simulated, 21,900 word placements: **zero violations, closest repeat
+exactly 14 days**. The rule binds tightly rather than comfortably, which is the point —
+every word is back in play the moment it is allowed to be.

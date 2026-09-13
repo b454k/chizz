@@ -72,6 +72,22 @@
   #home{justify-content:center; justify-content:safe center;}
   .hwrap{width:100%; max-width:340px; margin:0 auto; padding:28px 0; flex:none;}
   #home h1{font-size:52px; text-align:center; margin:0 0 14px; letter-spacing:-.04em;}
+  /* the day's puzzle, above everything else on the start screen */
+  #dailyRow{
+    display:flex; align-items:center; gap:12px;
+    border:2px solid var(--accent); border-radius:14px;
+    padding:12px 12px 12px 15px; margin:0 0 14px;
+    background:var(--panel);
+  }
+  #dailyRow .dtext{flex:1; min-width:0;}
+  #dailyRow b{display:block; font-size:16px;}
+  #dailyRow span{display:block; font-size:13px; color:var(--muted); margin-top:2px;}
+  #dailyGo{
+    flex:none; background:var(--accent); color:#fff; border-radius:12px;
+    padding:11px 20px; font-weight:800; font-size:15px;
+  }
+  #dailyGo:active{filter:brightness(.9);}
+  #dailyGo.done{background:transparent; color:var(--muted); border:2px solid var(--line); font-weight:700;}
   .tagline{
     color:var(--muted); font-size:16px; font-weight:700; line-height:1.5; text-align:center;
     margin:0 0 22px;
@@ -390,6 +406,14 @@
     <div class="hwrap">
       <h1>chizz</h1>
       <p class="tagline" data-t="tagline"></p>
+
+      <div id="dailyRow">
+        <div class="dtext">
+          <b data-t="dailyTitle"></b>
+          <span id="dailyDate"></span>
+        </div>
+        <button id="dailyGo"></button>
+      </div>
       <div class="diffs" id="modes"></div>
 
       <div class="settings">
@@ -412,6 +436,25 @@
         <button id="joinGo" data-t="join"></button>
       </div>
       <p class="err" id="joinErr"></p>
+    </div>
+  </section>
+
+  <!-- Shown when a daily link arrives before the reader has drawn that day. -->
+  <section class="screen mid" id="gate">
+    <div class="stack">
+      <h2 data-t="gateTitle"></h2>
+      <p data-t="gateBody"></p>
+      <button class="primary" id="gateDraw" data-t="draw"></button>
+      <button class="ghost" id="gateHome" data-t="home"></button>
+    </div>
+  </section>
+
+  <!-- After that forced draw: yours first, or theirs first. -->
+  <section class="screen mid" id="pick">
+    <div class="stack">
+      <h2 data-t="pickTitle"></h2>
+      <button class="primary" id="pickMine" data-t="guessMineFirst"></button>
+      <button class="ghost" id="pickTheirs"></button>
     </div>
   </section>
 
@@ -541,6 +584,7 @@
       <button class="primary" id="share" style="margin:0 0 6px" data-t="share"></button>
       <p id="copyNote"></p>
       <textarea id="fallback" rows="7" readonly></textarea>
+      <button class="ghost" id="switchRound" hidden style="margin:0 0 10px"></button>
       <button class="ghost" id="inviteFriends" hidden style="margin:0 0 10px" data-t="sendToFriend"></button>
       <div class="btnrow">
         <button class="ghost" id="again" data-t="playAgain"></button>
@@ -707,6 +751,110 @@ const LEGACY_DIFFS = {
   impossible: { mode:"typed", seconds:1.5 }
 };
 
+
+/* ========================================================= daily puzzle ===
+   The same twenty words for everyone, every day, chosen from the pool in
+   docs/words.json rather than from the hand-made sets above -- free play keeps
+   those. Families are what make it a game: ten words of one silhouette and ten
+   of another, so half the grid is ruled out at a glance and the work happens
+   inside a family where the shapes collide.
+
+   Day 1 is Tuesday 8 September 2026, and the day turns over at midnight in
+   Turkey for everyone, so two friends in different countries are always playing
+   the same puzzle and their scores mean the same thing.
+   ========================================================================= */
+const DAILY_POOL = {
+  boxy: ["asansör","battaniye","bavul","bilgisayar","buzdolabı","cüzdan","defter","dolap","dosya","ekran","ev","fırın","gazete","halı","harita","havlu","hediye","hoparlör","kapı","kasa","kitap","klima","kumbara","kutu","mektup","mendil","pencere","peçete","pil","radyo","sandık","tablet","tablo","telefon","televizyon","tuğla","valiz","yastık","zarf","çamaşır makinesi","çanta","çekmece","çerçeve"],
+  curved: ["ahtapot","ayak","beyin","bulut","burun","bıyık","dalga","damla","dudak","duman","düğüm","el","fiyonk","gül","hortum","ip","kalp","kanca","kaş","kedi","kulak","kurdele","kuyruk","lale","nehir","salyangoz","sarmaşık","saç","solucan","soru işareti","tüy","tırtıl","virgül","yaprak","yumak","yılan","çengel","şimşek"],
+  domed: ["at nalı","bere","beşik","deniz kabuğu","denizanası","gökkuşağı","hamak","hilal","iglo","kapak","kaplumbağa","kase","kask","kubbe","köprü","mantar","mağara","midye","mıknatıs","paraşüt","salıncak","semer","tas","tünel","yay","çan"],
+  handled: ["ayna","balta","bardak","cezve","demlik","el arabası","fincan","kapı kolu","kavanoz","kazma","kepçe","kilit","kova","kupa","kürek","lolipop","matara","mikrofon","raket","rende","sepet","sürahi","süzgeç","sırt çantası","tava","tencere","termos","tirbuşon","tırmık","vazo","çapa","çaydanlık"],
+  horizontal: ["araba","aslan","at","ayı","balina","bank","denizaltı","deve","domuz","eşek","fil","fok","gemi","gergedan","hipopotam","inek","kamyon","kanepe","kaplan","karavan","kayık","kertenkele","koltuk","koyun","kurt","köpek","masa","minibüs","otobüs","sedye","sehpa","tekne","tilki","timsah","traktör","tren","vagon","yatak","zebra"],
+  oval: ["armut","avokado","badem","fasulye","fıstık","gözyaşı","hap","hindistan cevizi","kabak","kapsül","kozalak","limon","mercimek","patates","patlıcan","sabun","tespih","tohum","yumurta","zeytin","çakıl","çekirdek"],
+  peaked: ["abajur","alev","buzdağı","börek","dağ","diş","dondurma","elmas","fes","huni","kravat","külah","ok","pasta","peynir","piramit","pizza","roket","sandviç","taç","tepe","tost","uçurtma","volkan","yelken","yelkenli","çadır","çam","çatı","şapka"],
+  radial: ["ateş","ayçiçeği","deniz kestanesi","denizyıldızı","direksiyon","dişli","havai fişek","hedef tahtası","kar tanesi","kestane","kirpi","palmiye","papatya","patlama","pervane","pusula","rüzgar gülü","vantilatör","yelpaze","yıldız","çark","çiçek","örümcek","örümcek ağı"],
+  ring: ["anahtarlık","bant","bileklik","bilezik","can simidi","daire","deniz simidi","donut","halat","halka","hula hoop","kelepçe","kement","kemer","kolye","kulp","küpe","lastik","makara","paket lastiği","simit","tasma","yüzük","zincir","çelenk","çengelli iğne"],
+  round: ["ay","balkabağı","balon","bezelye","ceviz","davul","domates","dünya","düğme","elma","fındık","göz","güneş","karpuz","kavun","kayısı","kiraz","kurabiye","küre","madalya","mandalina","misket","nar","para","portakal","saat","soğan","tabak","tef","tekerlek","top","zil","çilek","üzüm","şeftali"],
+  stick: ["anahtar","baget","balık","biber","bıçak","cetvel","cımbız","diş fırçası","flüt","fırça","havuç","iğne","kalem","kaşık","kibrit","kürdan","kılıç","makas","matkap","maşa","muz","olta","pense","pipet","salatalık","sigara","sihirli değnek","sopa","sosis","spatula","tarak","tebeşir","testere","tornavida","vida","çatal","çekiç","çivi"],
+  striped: ["ağ","barkod","bayrak","demiryolu","fermuar","file","gofret","gözlük","kafes","kalorifer","klavye","korkuluk","merdiven","nota","parmaklık","perde","piyano","raf","ray","satranç tahtası","tabela","takvim","yapboz","yaya geçidi","çamaşır ipi","çikolata","çit","örgü","ütü","ızgara"],
+  vertical: ["ampul","anten","asa","ağaç","baca","bambu","baston","deniz feneri","direk","duş","elektrik direği","fener","gökdelen","heykel","insan","kaktüs","kolon","kule","lamba","minare","mum","musluk","mısır","saksı","selvi","süpürge","sütun","termometre","trafik lambası","vinç","zürafa","çeşme","şelale","şemsiye","şişe"],
+  winged: ["arı","ateş böceği","baykuş","civciv","devekuşu","flamingo","güve","güvercin","helikopter","horoz","kartal","kaz","kelebek","kuğu","kuş","leylek","martı","melek","penguen","peri","serçe","sinek","sivrisinek","tavuk","tavus kuşu","uçak","uğur böceği","yarasa","yusufçuk","çekirge","ördek"]
+};
+
+const DAILY_FAMILIES = Object.keys(DAILY_POOL).sort();
+const DAILY_WINDOW = 14;   // a word may return on the 14th day, not before
+const DAILY_PER_FAMILY = 10;
+// Midnight in Turkey on 8 Sep 2026, written in UTC. Turkey has no daylight saving.
+const DAILY_EPOCH = Date.UTC(2026, 8, 7, 21, 0, 0);
+const DAY_MS = 86400000;
+
+function dailyDayNumber(at){
+  return Math.floor(((at === undefined ? Date.now() : at) - DAILY_EPOCH) / DAY_MS) + 1;
+}
+
+// When the current day ends, so a saved daily round can expire with it.
+function dailyEndsIn(at){
+  const now = at === undefined ? Date.now() : at;
+  const next = DAILY_EPOCH + dailyDayNumber(now) * DAY_MS;
+  return Math.max(60, Math.round((next - now) / 1000));
+}
+
+function dailyDateLabel(day){
+  const d = new Date(DAILY_EPOCH + (day - 1) * DAY_MS + DAY_MS / 2);
+  const p = function (n){ return n < 10 ? "0" + n : String(n); };
+  return p(d.getUTCDate()) + "/" + p(d.getUTCMonth() + 1) + "/" + d.getUTCFullYear();
+}
+
+// Deterministic, so every device shuffles a day the same way for ever.
+function dailyRandom(seed){
+  let a = (seed * 1831565813) >>> 0;
+  return function(){
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function dailyTake(list, n, rnd){
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rnd() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a.slice(0, n);
+}
+
+/* Which words are free today depends on what the days before used, so the whole
+   schedule is replayed from day one. A few hundred cheap iterations, years in.
+   Families rotate strictly oldest-first, which is what pins their cycle at seven
+   days and makes the fourteen-day rule hold; only the words inside are shuffled,
+   which is what stops the same ten arriving together every time. */
+function dailyWords(day){
+  const lastUsed = {}, famLast = {};
+  let out = [];
+  for (let d = 1; d <= day; d++){
+    const order = DAILY_FAMILIES.slice().sort(function(a, b){
+      const la = famLast[a] === undefined ? -1e9 : famLast[a];
+      const lb = famLast[b] === undefined ? -1e9 : famLast[b];
+      return la - lb || (a < b ? -1 : 1);
+    });
+    const rnd = dailyRandom(d);
+    out = [];
+    [order[0], order[1]].forEach(function(f){
+      const free = DAILY_POOL[f].filter(function(w){
+        return lastUsed[w] === undefined || d - lastUsed[w] >= DAILY_WINDOW;
+      });
+      const from = free.length >= DAILY_PER_FAMILY ? free : DAILY_POOL[f];
+      dailyTake(from, DAILY_PER_FAMILY, rnd).forEach(function(w){
+        lastUsed[w] = d; out.push(w);
+      });
+      famLast[f] = d;
+    });
+  }
+  return out;
+}
+
 /* =========================================================================
    GAME TEXT — Turkish.
    The only Turkish in the codebase, alongside the word sets above. Every
@@ -805,6 +953,21 @@ const TEXT = {
   playAgain:        "Tekrar oyna",
   youDrawToo:       "Sen de çiz",
   close:            "Kapat",
+
+  dailyTitle:       "Günlük oyun",
+  draw:             "Çiz",
+  dailyPlayed:      "Bugünü oynadın",
+  dailyScores:      "Günün skorları",
+  dailyBoardTitle:  "Günün skorları · {date}",
+  dailyNote:        "Herkes bugün aynı 20 kelimeyi çiziyor. Kelimeler açık, 4 sn.",
+  gateTitle:        "Önce sen çiz",
+  gateBody:         "Bugün herkes aynı kelimeleri çiziyor. Arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. Önce sen çiz, sonra tahmin et.",
+  pickTitle:        "Şimdi ne olsun?",
+  guessMineFirst:   "Önce kendi çizimlerimi tahmin edeyim",
+  guessTheirsFirst: "Önce {name} ne çizmiş bakayım",
+  nowGuessMine:     "Şimdi kendi çizimlerimi tahmin edeyim",
+  nowGuessTheirs:   "Şimdi {name} ne çizmiş bakayım",
+  dailyShare:       "Günlük · {date}",
   guessTooInvite:   "Sen de tahmin et:",
   inviteBlurb:      "20 çizim, 20 kelime. Hangisi neydi?"
 };
@@ -862,6 +1025,10 @@ const NAME_MAX = 10;     // not shown anywhere: the field simply stops accepting
 let myName  = "";        // asked when it is first needed, then kept on the device
 let scores  = [];        // [{name, score}] — sunucudan gelen tablo
 let scoreSent = false;   // has this round's score been posted yet
+let isDaily  = false;    // this round is the day's puzzle, at fixed settings
+let dailyDay = 0;
+let heldRound = null;   // the round not being played, while a daily duel runs
+let afterDraw = "";     // where the drawing phase should hand off to
 let recallStart = 0;     // when the grid first went up; the board ranks ties by this
 let recallMs  = 0;       // how long the round took, frozen once it is finished
 
@@ -898,6 +1065,7 @@ function loadStore(){
     const v = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
     if (!v || typeof v !== "object") return { name: "", rounds: {} };
     if (!v.rounds || typeof v.rounds !== "object") v.rounds = {};
+    if (!v.days || typeof v.days !== "object") v.days = {};
     if (typeof v.name !== "string") v.name = "";
     return v;
   } catch(e){ return { name: "", rounds: {} }; }
@@ -943,6 +1111,30 @@ function savedRound(code){
   return code ? (loadStore().rounds[code] || null) : null;
 }
 
+/* What this device has done with a given day. There is no archive -- only today
+   can be played -- so yesterday is kept purely so a late finish survives midnight,
+   and everything older is dropped. */
+function savedDay(day){
+  const s = loadStore();
+  return (s.days || {})[String(day)] || null;
+}
+
+function rememberDay(day, patch){
+  if (!day) return;
+  const store = loadStore();
+  store.days = store.days || {};
+  const rec = store.days[String(day)] || {};
+  Object.keys(patch).forEach(function(k){ rec[k] = patch[k]; });
+  store.days[String(day)] = rec;
+  Object.keys(store.days).forEach(function(k){ if (Number(k) < day - 1) delete store.days[k]; });
+  saveStore(store);
+}
+
+function drewToday(){
+  const rec = savedDay(dailyDayNumber());
+  return !!(rec && rec.drawn);
+}
+
 function rememberRound(code, patch){
   if (!code) return;
   const store = loadStore();
@@ -972,6 +1164,9 @@ function show(id){
   const list = document.querySelectorAll(".screen");
   for (let i = 0; i < list.length; i++) list[i].classList.toggle("on", list[i].id === id);
   if (typeof closeZoom === "function") closeZoom();
+  // The day's line goes stale the moment it is played, and every route back to the
+  // start screen has to show the new state, not just the ones that rebuild the page.
+  if (id === "home" && typeof buildDailyRow === "function") buildDailyRow();
   // The code can arrive from a save, a reload, or a link, so the chip is refreshed
   // on every screen change rather than at any one of those points.
   if (typeof updateCodeChip === "function") updateCodeChip();
@@ -1053,6 +1248,7 @@ function buildHome(){
 
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
+  buildDailyRow();
 }
 
 $("secs").addEventListener("input", function(){
@@ -1060,6 +1256,53 @@ $("secs").addEventListener("input", function(){
   $("secsOut").textContent = secsText(secs);
 });
 $("secs").addEventListener("change", rememberSettings);
+
+/* The day's puzzle sits above everything else. Once it is done it stops being a
+   button to play and becomes the result plus a way back to the board -- there is
+   no second attempt, which is the only thing that makes the score mean anything. */
+function buildDailyRow(){
+  const day = dailyDayNumber();
+  const rec = savedDay(day) || {};
+  const go = $("dailyGo");
+  $("dailyDate").textContent = dailyDateLabel(day);
+  if (rec.done){
+    go.textContent = TEXT.dailyScores;
+    go.classList.add("done");
+    $("dailyDate").textContent = dailyDateLabel(day) + " \u00b7 " + TEXT.dailyPlayed +
+      " " + rec.score + "/" + N;
+  } else {
+    go.textContent = rec.drawn ? TEXT.guessMyself : TEXT.draw;
+    go.classList.remove("done");
+  }
+}
+
+$("dailyGo").onclick = function(){
+  const day = dailyDayNumber();
+  const rec = savedDay(day) || {};
+  wakeAudio();
+  if (rec.done){ openDailyBoard(); return; }
+  if (rec.drawn && Array.isArray(rec.words) && rec.words.length === N){
+    resumeDaily(rec);                       // drawn already, never guessed
+    return;
+  }
+  startDaily();
+};
+
+// Pick the day back up from what was stored when the drawing phase ended.
+function resumeDaily(rec){
+  dailyDay = dailyDayNumber();
+  isDaily = true; modeId = "pool"; secs = 4; setId = null;
+  role = "solo"; drawerName = ""; lastCode = rec.code || "";
+  scores = []; scoreSent = false;
+  recallStart = rec.startedAt || 0; recallMs = 0;
+  words = rec.words.slice();
+  drawings = decodeDrawings(rec.drawings || []);
+  order = Array.isArray(rec.order) && rec.order.length === N
+    ? rec.order.slice() : shuffle(words.map(function(_, i){ return i; }));
+  picks = Array.isArray(rec.picks) && rec.picks.length === N ? rec.picks.slice() : new Array(N).fill(null);
+  selPos = -1;
+  buildRecall();
+}
 
 
 /* --------------------------------------------------------------- sound --- */
@@ -1175,6 +1418,7 @@ function startGame(){
   const s = randomSet();
   setId = s.id;
   lastSetId = s.id;
+  isDaily = false; dailyDay = 0; heldRound = null; afterDraw = "";
 
   role      = "solo";
   drawerName  = "";
@@ -1190,6 +1434,37 @@ function startGame(){
   selPos   = -1;
   closeSheet(); closeModal();
 
+  beginRound();
+}
+
+/* The day's puzzle. Everyone gets the same twenty words and the same settings, so
+   a score posted to the day board means the same thing for everybody. The settings
+   panel is deliberately ignored here. */
+function startDaily(){
+  dailyDay = dailyDayNumber();
+  isDaily  = true;
+  modeId   = "pool";
+  secs     = 4;
+  setId    = null;
+
+  role      = "solo";
+  drawerName  = "";
+  lastCode   = "";
+  recallStart = 0;
+  recallMs  = 0;
+  scores  = [];
+  scoreSent = false;
+  words    = dailyWords(dailyDay);
+  drawings = words.map(function(){ return []; });
+  order    = shuffle(words.map(function(_, i){ return i; }));
+  picks    = new Array(N).fill(null);
+  selPos   = -1;
+  closeSheet(); closeModal();
+
+  beginRound();
+}
+
+function beginRound(){
   show("countdown");
   const num = $("cdNum");
   const startAt = performance.now();
@@ -1348,8 +1623,15 @@ function nextWord(){
   cancelAnimationFrame(raf);
   live.clear();
   drawings[idx] = strokes.filter(function(s){ return s && s.length; });   // empty drawing = []
-  if (idx + 1 < N) startWord(idx + 1);
-  else show("between");
+  if (idx + 1 < N){ startWord(idx + 1); return; }
+
+  if (isDaily){
+    // Keep the drawings: the player may go and guess their friend's round first
+    // and come back to their own, possibly after a reload.
+    rememberDay(dailyDay, { drawn: true, words: words, drawings: encodeDrawings(drawings) });
+  }
+  if (afterDraw === "pick"){ afterDraw = ""; showPick(); return; }
+  show("between");
 }
 
 // rAF stops while the tab is in the background. Push wordStart forward by the
@@ -1690,6 +1972,49 @@ function paintPreview(cv, di){
   paintStrokes(ctx, drawings[di] || [], cv.width, Math.max(3, cv.width * 0.025));
 }
 
+/* ----------------------------------------------------------- daily duel --- */
+
+// Everything that makes one round what it is, so two can be held at once: yours
+// and the one a friend sent you.
+function snapshotRound(){
+  return {
+    modeId: modeId, secs: secs, setId: setId, role: role, drawerName: drawerName,
+    lastCode: lastCode, words: words, drawings: drawings, order: order, picks: picks,
+    selPos: selPos, score: score, recallStart: recallStart, recallMs: recallMs,
+    scoreSent: scoreSent, isDaily: isDaily, dailyDay: dailyDay, scores: scores
+  };
+}
+
+function restoreRound(s){
+  modeId = s.modeId; secs = s.secs; setId = s.setId; role = s.role;
+  drawerName = s.drawerName; lastCode = s.lastCode; words = s.words;
+  drawings = s.drawings; order = s.order; picks = s.picks; selPos = s.selPos;
+  score = s.score; recallStart = s.recallStart; recallMs = s.recallMs;
+  scoreSent = s.scoreSent; isDaily = s.isDaily; dailyDay = s.dailyDay; scores = s.scores;
+}
+
+function showPick(){
+  $("pickTheirs").textContent = heldRound && heldRound.drawerName
+    ? TEXT.guessTheirsFirst.replace("{name}", heldRound.drawerName)
+    : TEXT.guessMyself;
+  show("pick");
+}
+
+// Put the other round in play and take up where it was left.
+function swapRound(){
+  if (!heldRound) return;
+  const now = snapshotRound();
+  restoreRound(heldRound);
+  heldRound = now;
+  buildRecall();
+}
+
+$("gateDraw").onclick = function(){ wakeAudio(); afterDraw = "pick"; startDaily(); };
+$("gateHome").onclick = function(){ heldRound = null; clearUrl(); show("home"); };
+$("pickMine").onclick = function(){ buildRecall(); };
+$("pickTheirs").onclick = swapRound;
+$("switchRound").onclick = swapRound;
+
 /* ------------------------------------------------------------------ zoom --- */
 
 function openZoom(pos){
@@ -1787,10 +2112,21 @@ function buildResult(){
   // Guessing your own drawings first used to be a dead end: there was no way to
   // hand the round to anyone afterwards. Only the person who drew it can.
   $("inviteFriends").hidden = role === "guesser";   // only the person who drew it can hand it on
+  // During a daily duel there are two rounds in play; offer whichever is not done.
+  const other = $("switchRound");
+  other.hidden = !heldRound;
+  if (heldRound){
+    other.textContent = heldRound.role === "guesser" && heldRound.drawerName
+      ? TEXT.nowGuessTheirs.replace("{name}", heldRound.drawerName)
+      : TEXT.nowGuessMine;
+  }
   fillNameRow();
   // Record the finish before the board goes up: opening this code again on this
   // device should land here, on the score table, rather than on an empty grid.
   if (lastCode) rememberRound(lastCode, { done: true, score: score, ms: recallMs, order: order, picks: picks, name: myName });
+  // No second attempt at the day: closing it here is what makes the score mean
+  // something on a board everybody shares.
+  if (onDayBoard()) rememberDay(dailyDay, { done: true, score: score, ms: recallMs, order: order, picks: picks });
   showBoard();
   show("result");
   paintAll("resultGrid");
@@ -1803,9 +2139,11 @@ function sameName(a, b){
 }
 
 function showBoard(){
-  $("board").hidden = !lastCode;              // the board only exists for shared rounds
-  if (!lastCode) return;
-  $("boardTitle").textContent = boardHeading();
+  $("board").hidden = !hasBoard();
+  if (!hasBoard()) return;
+  $("boardTitle").textContent = onDayBoard()
+    ? TEXT.dailyBoardTitle.replace("{date}", dailyDateLabel(dailyDay))
+    : boardHeading();
   // A score needs a name to sit under. Without one the board is still readable,
   // it just has no row for this player until they add one.
   beepScores();
@@ -1855,9 +2193,22 @@ function renderScores(){
   if ($("scoresEmpty")) $("scoresEmpty").hidden = !bos;
 }
 
+// A round has its own board, keyed by its code; the day has one global board that
+// everyone who played that day lands on. Same shape, different address.
+/* The day board holds your score on your OWN drawings. Guessing a friend's daily
+   round is a different thing -- how well you read their scribbles depends on how they
+   draw -- so that goes to their round's own board, exactly like a free-play duel. */
+function onDayBoard(){ return isDaily && role !== "guesser"; }
+
+function boardUrl(){
+  return onDayBoard() ? "/api/daily/" + dailyDay : "/api/scores/" + encodeURIComponent(lastCode);
+}
+
+function hasBoard(){ return onDayBoard() ? !!dailyDay : !!lastCode; }
+
 function fetchScores(){
-  if (!lastCode) return;
-  api("/api/scores/" + encodeURIComponent(lastCode)).then(function(r){
+  if (!hasBoard()) return;
+  api(boardUrl()).then(function(r){
     if (r.ok && r.data && Array.isArray(r.data.scores)){ scores = r.data.scores; renderScores(); }
   }).catch(function(){ /* if the board fails, your own row still shows */ });
 }
@@ -1872,7 +2223,7 @@ let boardTimer = null;
 
 function startBoardPoll(){
   stopBoardPoll();
-  if (!lastCode) return;
+  if (!hasBoard()) return;
   boardTimer = setInterval(function(){
     const visible = $("result").classList.contains("on") || $("scores").classList.contains("on");
     if (!visible){ stopBoardPoll(); return; }   // stop once the screen is left
@@ -1890,6 +2241,21 @@ document.addEventListener("visibilitychange", function(){
   if (!document.hidden && boardTimer) fetchScores();
 });
 
+// Reached from the start screen once the day is done.
+function openDailyBoard(){
+  const day = dailyDayNumber();
+  const rec = savedDay(day) || {};
+  isDaily = true; dailyDay = day;
+  score = rec.score || 0;
+  recallMs = rec.ms || 0;
+  scores = [];
+  $("scoresTitle").textContent = TEXT.dailyBoardTitle.replace("{date}", dailyDateLabel(day));
+  renderScores();
+  fetchScores();
+  show("scores");
+  startBoardPoll();
+}
+
 /* the drawer watching the scores on their own link */
 function openScoresScreen(){
   $("scoresTitle").textContent = boardHeading();
@@ -1900,13 +2266,16 @@ function openScoresScreen(){
 }
 
 $("toScores").onclick  = openScoresScreen;
-$("scoresBack").onclick = function(){ stopBoardPoll(); show("send"); };
+$("scoresBack").onclick = function(){
+  stopBoardPoll();
+  show(isDaily && !lastCode ? "home" : "send");
+};
 
 function sendScore(){
-  if (!lastCode || !myName) return;
+  if (!hasBoard() || !myName) return;
   renderScores();                                 // show your own row without waiting
-  const rec = savedRound(lastCode) || {};
-  api("/api/scores/" + encodeURIComponent(lastCode), {
+  const rec = (onDayBoard() ? savedDay(dailyDay) : savedRound(lastCode)) || {};
+  api(boardUrl(), {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
@@ -1921,7 +2290,7 @@ function sendScore(){
   }).then(function(r){
     const patch = { sent: true, postedAs: myName };   // do not post it again on a revisit
     if (r.ok && r.data && r.data.token) patch.scoreToken = r.data.token;
-    rememberRound(lastCode, patch);
+    if (onDayBoard()) rememberDay(dailyDay, patch); else rememberRound(lastCode, patch);
     if (r.ok && r.data && Array.isArray(r.data.scores)){ scores = r.data.scores; renderScores(); }
   }).catch(function(){ /* already shown locally, fail quietly */ });
 }
@@ -1973,9 +2342,11 @@ function inviteText(){
    text, so the reader never sees who sent it or why. */
 function inviteMessage(){
   const who = role === "guesser" ? drawerName : myName;
-  const head = who
-    ? "Chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{name}", who)
-    : "Chizz \u{1F3A8}";
+  const head = onDayBoard()
+    ? "Chizz \u{1F3A8} " + TEXT.dailyShare.replace("{date}", dailyDateLabel(dailyDay))
+    : who
+      ? "Chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{name}", who)
+      : "Chizz \u{1F3A8}";
   return head + "\n" + TEXT.inviteBlurb + "\n\n" + inviteText();
 }
 
@@ -2132,6 +2503,7 @@ function postRound(name){
       setId: setId,
       mode: modeId,
       seconds: secs,
+      day: isDaily ? dailyDay : 0,
       name: name || "",
       words: words,
       drawings: encodeDrawings(drawings)
@@ -2141,6 +2513,7 @@ function postRound(name){
     lastCode = r.data.code;
     if (name) drawerName = name;
     rememberRound(lastCode, { mine: true, owner: r.data.owner || "", order: order, picks: picks });
+    if (isDaily) rememberDay(dailyDay, { code: lastCode });
     setUrlCode(lastCode);
     return lastCode;
   });
@@ -2275,8 +2648,18 @@ function loadGame(code){
     recallStart = rec && rec.startedAt ? rec.startedAt : 0;
     recallMs  = rec && rec.done && rec.ms ? rec.ms : 0;
     if (!resumable) rememberRound(code, { order: order });
+    isDaily = Number(v.day) > 0;
+    dailyDay = isDaily ? Number(v.day) : 0;
     buildHome();
     setUrlCode(code);                 // reloading returns here, including after a join by code
+
+    // Today's puzzle is the same twenty words for everyone, so looking at a
+    // friend's grid before drawing would show the reader the words. Hold it.
+    if (isDaily && dailyDay === dailyDayNumber() && !drewToday()){
+      heldRound = snapshotRound();
+      show("gate");
+      return;
+    }
 
     if (rec && rec.done){             // already played on this device: straight to the scores
       buildResult();

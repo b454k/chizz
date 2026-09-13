@@ -9,7 +9,7 @@
     "note": "A set is ten words from one family and ten from another. The two families must be easy to tell apart, so a player feels they have ruled out half the grid; the difficulty lives inside a family, where the shapes collide.",
     "why14": "A family comes round every 7 days, so a window of 8 to 14 days all cost the same: two fresh batches, 20 words per family. 14 is the top of that band. The next step up is 21, not 15 -- 15 through 21 all cost three batches, 30 words per family, so 15 would pay the full price of 21 and take six fewer days."
   },
-  "totalWords": 439,
+  "totalWords": 449,
   "families": [
     {
       "id": "boxy",
@@ -110,21 +110,27 @@
       "words": [
         "at nalı",
         "bere",
+        "beşik",
         "çan",
+        "deniz kabuğu",
         "denizanası",
         "gökkuşağı",
         "hamak",
         "hilal",
         "iglo",
+        "kapak",
         "kaplumbağa",
         "kase",
         "kask",
         "köprü",
         "kubbe",
+        "mağara",
         "mantar",
         "mıknatıs",
+        "midye",
         "paraşüt",
         "salıncak",
+        "semer",
         "tas",
         "tünel",
         "yay"
@@ -312,10 +318,12 @@
       "shape": "a closed loop with a hole: bracelets, tyres, chains",
       "words": [
         "anahtarlık",
+        "bant",
         "bileklik",
         "bilezik",
         "can simidi",
         "çelenk",
+        "çengelli iğne",
         "daire",
         "deniz simidi",
         "donut",
@@ -323,13 +331,17 @@
         "halka",
         "hula hoop",
         "kelepçe",
+        "kement",
         "kemer",
         "kolye",
         "kulp",
         "küpe",
         "lastik",
+        "makara",
         "paket lastiği",
+        "simit",
         "tasma",
+        "yüzük",
         "zincir"
       ]
     },
@@ -364,7 +376,6 @@
         "para",
         "portakal",
         "saat",
-        "simit",
         "soğan",
         "şeftali",
         "tabak",
@@ -372,7 +383,6 @@
         "tekerlek",
         "top",
         "üzüm",
-        "yüzük",
         "zil"
       ]
     },

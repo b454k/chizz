@@ -14,6 +14,14 @@ const LEGACY_DIFFS = {
   impossible: { mode: "typed", seconds: 1.5 }
 };
 const MAX_BYTES = 200 * 1024;
+// Day 1 is Tuesday 8 September 2026, midnight in Turkey, written in UTC.
+const EPOCH = Date.UTC(2026, 8, 7, 21, 0, 0);
+const DAY_MS = 86400000;
+function today(){ return Math.floor((Date.now() - EPOCH) / DAY_MS) + 1; }
+// A daily round is only worth anything on its own day, so it expires with it.
+function endOfDay(){
+  return Math.max(60, Math.round((EPOCH + today() * DAY_MS - Date.now()) / 1000));
+}
 const TTL = 30 * 24 * 60 * 60;   // 30 days
 const N = 20;
 
@@ -63,7 +71,12 @@ export async function onRequestPost({ request, env }) {
   try { d = JSON.parse(body); } catch (e) { return error("invalid JSON", 400); }
   if (!d || typeof d !== "object") return error("invalid body", 400);
 
-  if (typeof d.setId !== "string" || !/^set-(0[1-9]|[12][0-9]|30)$/.test(d.setId)) return error("invalid setId", 400);
+  // A daily round comes from the generated pool rather than a hand-made set, so it
+  // carries a day number instead of a set id.
+  const day = Number.isInteger(d.day) && d.day > 0 && d.day <= today() + 1 ? d.day : 0;
+  if (!day && (typeof d.setId !== "string" || !/^set-(0[1-9]|[12][0-9]|30)$/.test(d.setId))) {
+    return error("invalid setId", 400);
+  }
   const legacy = LEGACY_DIFFS[d.difficulty];
   const mode = MODES.indexOf(d.mode) >= 0 ? d.mode : (legacy ? legacy.mode : null);
   if (!mode) return error("invalid mode", 400);
@@ -86,7 +99,8 @@ export async function onRequestPost({ request, env }) {
   const owner = crypto.randomUUID().replace(/-/g, "");
 
   const record = JSON.stringify({
-    setId: d.setId,
+    setId: day ? null : d.setId,
+    day,
     mode,
     seconds,
     owner,
@@ -99,7 +113,7 @@ export async function onRequestPost({ request, env }) {
     const code = makeCode();
     const taken = await env.GAMES.get(code);
     if (taken) continue;                                  // collision, generate another
-    await env.GAMES.put(code, record, { expirationTtl: TTL });
+    await env.GAMES.put(code, record, { expirationTtl: day ? endOfDay() : TTL });
     return json({ code, owner });
   }
   return error("could not allocate a code, try again", 503);

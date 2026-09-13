@@ -1,4 +1,5 @@
-// GET /api/game/A7K2  ->  { setId, mode, seconds, name, words, drawings }
+// GET /api/game/A7K2  ->  { setId, day, mode, seconds, name, words, drawings }
+// day is 0 for a free-play round, or the day number for one of the daily puzzles.
 // 404 when the code is unknown or has expired.
 
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
