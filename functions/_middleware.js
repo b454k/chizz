@@ -46,17 +46,23 @@ export async function onRequest(context) {
   // The name is the only thing worth a lookup; a missing round still gets a preview,
   // and the picture endpoint answers 404 on its own if the code is dead.
   let name = "";
+  let day = 0;
   try {
     if (env.GAMES) {
       const record = await env.GAMES.get(code, { type: "json" });
-      if (record) name = typeof record.name === "string" ? record.name
-                       : typeof record.takmaAd === "string" ? record.takmaAd : "";
+      if (record) {
+        name = typeof record.name === "string" ? record.name
+             : typeof record.takmaAd === "string" ? record.takmaAd : "";
+        day = Number(record.day) > 0 ? Number(record.day) : 0;
+      }
     }
   } catch (e) { /* a preview without a name is still a preview */ }
 
-  const daily = dayOf ? DAILY + " · " : "";
-  const title = (name ? daily + DRAWINGS_OF.replace("{whose}", whose(name)) : daily + TITLE_SUFFIX)
-              + (name ? " · " + TITLE_SUFFIX : "");
+  // günlük · ayşe'nin çizimleri · chizz, with either middle part left out when it
+  // does not apply.
+  const title = (day ? DAILY + " · " : "")
+              + (name ? DRAWINGS_OF.replace("{whose}", whose(name)) + " · " : "")
+              + TITLE_SUFFIX;
   const page = url.origin + "/?o=" + code;
   const image = url.origin + "/api/card/" + code + ".png";
 
