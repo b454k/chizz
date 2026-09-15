@@ -2,7 +2,7 @@
 <html lang="tr">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Chizz</title>
+<title>chizz</title>
 <!-- Inline so it costs no request and keeps the "nothing loaded from outside" rule. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23131418'/%3E%3Ctext x='32' y='34' font-family='Helvetica,Arial,sans-serif' font-size='46' font-weight='700' fill='%23ff5c3d' text-anchor='middle' dominant-baseline='central'%3Ec%3C/text%3E%3C/svg%3E">
 <style>
@@ -327,7 +327,7 @@
   /* difficulty caption on the drawing and result screens: small, centred, faint */
   .lvl{
     text-align:center; font-size:11px; font-weight:700; letter-spacing:.2em;
-    text-transform:uppercase; color:var(--muted); opacity:.45;
+    color:var(--muted); opacity:.45;
     margin:10px 0 4px; flex:none;
   }
   #scoreSub{margin:10px 0 6px;}
@@ -380,7 +380,7 @@
   /* score tablosu */
   #board{margin:18px 0 4px;}
   #board h3{font-size:15px; margin:0 0 10px; color:var(--muted); font-weight:700;
-            letter-spacing:.06em; text-transform:uppercase;}
+            letter-spacing:.06em;}
   .brow{
     display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px;
     background:var(--panel); margin-bottom:6px;
@@ -881,109 +881,109 @@ const TEXT = {
   namePrompt:       "adın?",
   namePlaceholder:  "adın",
   continue:         "devam",
-  enterName:        "Önce adını yaz.",
-  joinBoard:        "Katıl",
-  saveName:         "Kaydet",
+  enterName:        "önce adını yaz.",
+  joinBoard:        "katıl",
+  saveName:         "kaydet",
   perWord:          "kelime başına süre",
   theme:            "tema",
   yourName:         "adın",
   nameHint:         "adını yaz",
-  nameSaved:        "Kaydedildi ✓",
+  nameSaved:        "kaydedildi ✓",
   themeDark:        "koyu",
   themeLight:       "açık",
   tagline:          "ne chizzmiştin?",
 
-  modeOpen:         "Kelimeler açık",
+  modeOpen:         "kelimeler açık",
   modeOpenDesc:     "kelime listesi önünde durur, her çizim için doğru olanı seçersin.",
-  modeHidden:       "Kelimeler gizli",
+  modeHidden:       "kelimeler gizli",
   modeHiddenDesc:   "liste yok. her çizimin kelimesini kendin hatırlayıp yazarsın.",
   recommended:      "önerilen: 3 sn",
   totalTime:        "toplam",
   enterCode:        "4 haneli kodu gir.",
 
-  backToMenu:       "Ana menüye dön",
-  back:             "Geri",
-  home:             "Ana ekran",
-  backHome:         "Ana ekrana dön",
+  backToMenu:       "ana menüye dön",
+  back:             "geri",
+  home:             "ana ekran",
+  backHome:         "ana ekrana dön",
 
   drawingsDone:     "20 çizim tamam.",
-  whatNow:          "Şimdi ne olsun?",
-  sendToFriend:     "Arkadaşına gönder",
-  guessMyself:      "Kendim tahmin edeyim",
-  guessMineToo:     "Kendim de tahmin edeyim",
+  whatNow:          "şimdi ne olsun?",
+  sendToFriend:     "arkadaşına gönder",
+  guessMyself:      "kendim tahmin edeyim",
+  guessMineToo:     "kendim de tahmin edeyim",
 
-  sendIntro:        "Çizimlerini o tahmin etsin. Kayıt 30 gün sonra kendiliğinden silinir.",
-  send:             "Gönder",
-  cancel:           "Vazgeç",
-  sending:          "Gönderiliyor…",
-  ready:            "Hazır.",
-  shareCodeOrLink:  "Kodu veya linki arkadaşına yolla.",
-  copyLink:         "Linki kopyala",
-  watchScores:      "Skorları izle",
-  linkCopied:       "Link kopyalandı ✓",
-  linkCopyFailed:   "Kopyalanamadı, linki elle seç.",
-  sendFailed:       "Gönderilemedi, tekrar dene.",
+  sendIntro:        "çizimlerini o tahmin etsin. kayıt 30 gün sonra kendiliğinden silinir.",
+  send:             "gönder",
+  cancel:           "vazgeç",
+  sending:          "gönderiliyor…",
+  ready:            "hazır.",
+  shareCodeOrLink:  "kodu veya linki arkadaşına yolla.",
+  copyLink:         "linki kopyala",
+  watchScores:      "skorları izle",
+  linkCopied:       "link kopyalandı ✓",
+  linkCopyFailed:   "kopyalanamadı, linki elle seç.",
+  sendFailed:       "gönderilemedi, tekrar dene.",
 
-  loadingDrawings:  "Çizimler yükleniyor…",
-  codeInvalid:      "Bu kod geçersiz veya süresi dolmuş",
-  fetchFailed:      "Çizimler getirilemedi",
-  checkConnection:  "İnternet bağlantını kontrol et.",
+  loadingDrawings:  "çizimler yükleniyor…",
+  codeInvalid:      "bu kod geçersiz veya süresi dolmuş",
+  fetchFailed:      "çizimler getirilemedi",
+  checkConnection:  "internet bağlantını kontrol et.",
 
-  whichWasWhich:    "Hangisi neydi?",
+  whichWasWhich:    "hangisi neydi?",
   whatDidDraw:      "{name} ne çizmiş?",
-  whatWasDrawn:     "Ne çizilmiş?",
-  hintTyped:        "Bir çizime dokun, cevabını yaz.",
-  hintPool:         "Bir çizime dokun, kelimesini seç. Tekrar dokunmak geri alır.",
-  pickWord:         "Kelime seç",
-  whatIsThis:       "Bu ne?",
-  save:             "Kaydet",
-  leaveBlank:       "Boş bırak",
-  finish:           "Bitir",
+  whatWasDrawn:     "ne çizilmiş?",
+  hintTyped:        "bir çizime dokun, cevabını yaz.",
+  hintPool:         "bir çizime dokun, kelimesini seç. tekrar dokunmak geri alır.",
+  pickWord:         "kelime seç",
+  whatIsThis:       "bu ne?",
+  save:             "kaydet",
+  leaveBlank:       "boş bırak",
+  finish:           "bitir",
 
-  leaveTitle:       "Oyundan çıkılsın mı?",
-  leaveBody:        "Çizimlerin ve cevapların kaybolur.",
-  finishTitle:      "Bitirdin mi?",
-  finishBody:       "Bitirince cevaplarını değiştiremezsin.",
-  keepGuessing:     "Tahmine devam et",
-  stay:             "Oyuna dön",
-  leave:            "Çık",
+  leaveTitle:       "oyundan çıkılsın mı?",
+  leaveBody:        "çizimlerin ve cevapların kaybolur.",
+  finishTitle:      "bitirdin mi?",
+  finishBody:       "yanlışlıkla tıklamadığından emin oluyorum",
+  keepGuessing:     "tahmine devam et",
+  stay:             "oyuna dön",
+  leave:            "çık",
 
   outOf:            "{n}'de {score}",
   inDrawingsOf:     "{whose} çizimlerinde ",
-  inTheseDrawings:  "Bu çizimlerde ",
+  inTheseDrawings:  "bu çizimlerde ",
   drawingsOf:       "{whose} çizimleri",
-  theseDrawings:    "Bu çizimler",
-  scores:           "Skorlar",
+  theseDrawings:    "bu çizimler",
+  scores:           "skorlar",
   scoresSuffix:     " · skorlar",
-  scoresNoteLive:   "Skora göre sıralı; eşitlikte hızlı olan önde. Arkadaşların bitirdikçe kendiliğinden güncellenir.",
-  scoresNoteResult: "Skora göre sıralı; eşitlikte hızlı olan önde. Arkadaşların bitirdikçe burada beliriyor.",
-  nobodyFinished:   "Henüz kimse bitirmedi.",
-  firstToPlay:      "Bu çizimleri ilk oynayan sensin.",
+  scoresNoteLive:   "skora göre sıralı; eşitlikte hızlı olan önde. arkadaşların bitirdikçe kendiliğinden güncellenir.",
+  scoresNoteResult: "skora göre sıralı; eşitlikte hızlı olan önde. arkadaşların bitirdikçe burada beliriyor.",
+  nobodyFinished:   "henüz kimse bitirmedi.",
+  firstToPlay:      "bu çizimleri ilk oynayan sensin.",
 
 
-  share:            "Paylaş",
-  copied:           "Panoya kopyalandı ✓",
-  copyFailedSelect: "Kopyalanamadı — aşağıdaki metni seç:",
-  playAgain:        "Tekrar oyna",
-  youDrawToo:       "Sen de çiz",
-  close:            "Kapat",
+  share:            "paylaş",
+  copied:           "panoya kopyalandı ✓",
+  copyFailedSelect: "kopyalanamadı — aşağıdaki metni seç:",
+  playAgain:        "tekrar oyna",
+  youDrawToo:       "sen de çiz",
+  close:            "kapat",
 
-  dailyTitle:       "Günlük oyun",
-  draw:             "Çiz",
-  dailyPlayed:      "Bugünü oynadın",
-  dailyScores:      "Günün skorları",
-  dailyBoardTitle:  "Günün skorları · {date}",
-  dailyNote:        "Herkes bugün aynı 20 kelimeyi çiziyor. Kelimeler açık, 3 sn.",
-  gateTitle:        "Önce sen çiz",
-  gateBody:         "Bugün herkes aynı kelimeleri çiziyor. Arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. Önce sen çiz, sonra tahmin et.",
-  pickTitle:        "Şimdi ne olsun?",
-  guessMineFirst:   "Önce kendi çizimlerimi tahmin edeyim",
-  guessTheirsFirst: "Önce {name} ne çizmiş bakayım",
-  nowGuessMine:     "Şimdi kendi çizimlerimi tahmin edeyim",
-  nowGuessTheirs:   "Şimdi {name} ne çizmiş bakayım",
-  dailyShare:       "Günlük · {date}",
-  guessTooInvite:   "Sen de tahmin et:",
-  inviteBlurb:      "20 çizim, 20 kelime. Hangisi neydi?"
+  dailyTitle:       "günlük oyun",
+  draw:             "çiz",
+  dailyPlayed:      "bugünü oynadın",
+  dailyScores:      "günün skorları",
+  dailyBoardTitle:  "günün skorları · {date}",
+  dailyNote:        "herkes bugün aynı 20 kelimeyi çiziyor. kelimeler açık, 3 sn.",
+  gateTitle:        "önce sen çiz",
+  gateBody:         "bugün herkes aynı kelimeleri çiziyor. arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. önce sen çiz, sonra tahmin et.",
+  pickTitle:        "şimdi ne olsun?",
+  guessMineFirst:   "önce kendi çizimlerimi tahmin edeyim",
+  guessTheirsFirst: "önce {name} ne çizmiş bakayım",
+  nowGuessMine:     "şimdi kendi çizimlerimi tahmin edeyim",
+  nowGuessTheirs:   "şimdi {name} ne çizmiş bakayım",
+  dailyShare:       "günlük · {date}",
+  guessTooInvite:   "sen de tahmin et:",
+  inviteBlurb:      "20 çizim, 20 kelime. hangisi neydi?"
 };
 
 // Fill every element that carries a text key.
@@ -1874,7 +1874,7 @@ function openSheet(pos){
   picks.forEach(function(w){ if (w) used[w] = true; });
   const pool = words.filter(function(w){ return !used[w]; })
                     .sort(function(a, b){ return a.localeCompare(b, "tr"); });
-  $("sheetTitle").textContent = "Bu ne?";
+  $("sheetTitle").textContent = "bu ne?";
   const box = $("chips");
   box.innerHTML = "";
   pool.forEach(function(w){
@@ -2372,8 +2372,8 @@ function shareText(){
   // said nothing about who drew it.
   const who = role === "guesser" ? drawerName : myName;
   const head = who
-    ? "Chizz 🎨 " + TEXT.drawingsOf.replace("{whose}", whose(who))
-    : "Chizz 🎨";
+    ? "chizz 🎨 " + TEXT.drawingsOf.replace("{whose}", whose(who))
+    : "chizz 🎨";
   let out = head + "\n" + roundLabel() + "\n" + score + "/" + N
           + " \u00b7 " + timeLabel(elapsedMs()) + "\n\n" + rows;
   // Anyone reading the score can play the same round straight from the message.
@@ -2393,10 +2393,10 @@ function inviteText(){
 function inviteMessage(){
   const who = role === "guesser" ? drawerName : myName;
   const head = onDayBoard()
-    ? "Chizz \u{1F3A8} " + TEXT.dailyShare.replace("{date}", dailyDateLabel(dailyDay))
+    ? "chizz \u{1F3A8} " + TEXT.dailyShare.replace("{date}", dailyDateLabel(dailyDay))
     : who
-      ? "Chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{whose}", whose(who))
-      : "Chizz \u{1F3A8}";
+      ? "chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{whose}", whose(who))
+      : "chizz \u{1F3A8}";
   return head + "\n" + TEXT.inviteBlurb + "\n\n" + inviteText();
 }
 

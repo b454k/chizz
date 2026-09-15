@@ -79,6 +79,11 @@ and its own board.
   round's code, which is still set after playing the daily, so opening the board from
   the start screen sent the arrow to the name screen and Vazgeç on to an unrelated
   screen. It now returns to wherever the board was opened from.
+- **All interface text is lowercase**, matching "ne chizzmiştin?": every label, button,
+  message and title, the share text ("chizz 🎨") and the link preview description. Two
+  CSS rules that forced captions into capitals are gone. Round codes stay uppercase
+  and names stay as typed — those are data, not interface. The Bitir question now says
+  "yanlışlıkla tıklamadığından emin oluyorum".
 
 ## 2026-09-11 — first publication
 

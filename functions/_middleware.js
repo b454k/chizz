@@ -10,7 +10,7 @@
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
 
 const TITLE_SUFFIX = "chizz";
-const DESCRIPTION = "20 çizim, 20 kelime. Hangisi neydi?";
+const DESCRIPTION = "20 çizim, 20 kelime. hangisi neydi?";
 const DRAWINGS_OF = "{whose} çizimleri";
 
 // Same rule as whose() in public/index.html; keep the two identical.
