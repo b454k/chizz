@@ -66,23 +66,35 @@ export async function onRequest(context) {
   const page = url.origin + "/?o=" + code;
   const image = url.origin + "/api/card/" + code + ".png";
 
+  // Only what the page does not already carry. og:type and og:site_name are in the
+  // document, and the title and descriptions below are rewritten where they stand --
+  // injecting a second copy would leave two of each, and which one a chat app reads
+  // is its own business.
   const tags = [
-    '<meta property="og:type" content="website">',
-    '<meta property="og:site_name" content="chizz">',
-    '<meta property="og:title" content="' + attr(title) + '">',
-    '<meta property="og:description" content="' + attr(DESCRIPTION) + '">',
     '<meta property="og:url" content="' + attr(page) + '">',
     '<meta property="og:image" content="' + attr(image) + '">',
     '<meta property="og:image:type" content="image/png">',
     '<meta property="og:image:width" content="800">',
     '<meta property="og:image:height" content="1000">',
     '<meta property="og:image:alt" content="' + attr(DESCRIPTION) + '">',
-    '<meta name="twitter:card" content="summary_large_image">',
-    '<meta name="description" content="' + attr(DESCRIPTION) + '">'
+    '<meta name="twitter:card" content="summary_large_image">'
   ].join("");
 
-  // The document has no explicit <head>, so the title tag is the anchor to hang them on.
-  return new HTMLRewriter()
-    .on("title", { element(el) { el.after(tags, { html: true }); } })
-    .transform(response);
+  const setContent = value => ({ element(el){ el.setAttribute("content", value); } });
+
+  try {
+    // The document has no explicit <head>, so the title tag is the anchor to hang the
+    // new tags on. The paired tags in public/index.html are what these selectors find:
+    // if they are ever renamed there, rename them here too.
+    return new HTMLRewriter()
+      .on("title", { element(el){ el.after(tags, { html: true }); } })
+      .on('meta[property="og:title"]', setContent(title))
+      .on('meta[property="og:description"]', setContent(DESCRIPTION))
+      .on('meta[name="description"]', setContent(DESCRIPTION))
+      .transform(response);
+  } catch (e) {
+    // A preview is worth less than the page. Anything unexpected in here hands back
+    // what the reader actually came for, rather than an error page.
+    return response;
+  }
 }
