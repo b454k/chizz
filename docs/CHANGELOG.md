@@ -72,6 +72,13 @@ and its own board.
   follows the name's last vowel, with a buffer n after a vowel — Ayşe'nin, Mert'in,
   Çağla'nın, Oğuz'un, Ümmü'nün — on the result line, the board heading, the share
   text and the link preview title.
+- **Bitir asks first.** A stray tap used to end the round at once, which on the daily
+  means the day is gone. It now asks "Bitirdin mi?"; "Tahmine devam et" or a tap outside
+  goes back to the grid.
+- **The day board's back arrow goes home.** It guessed its destination from the last
+  round's code, which is still set after playing the daily, so opening the board from
+  the start screen sent the arrow to the name screen and Vazgeç on to an unrelated
+  screen. It now returns to wherever the board was opened from.
 
 ## 2026-09-11 — first publication
 

@@ -203,18 +203,18 @@
   .chip2 .cl{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
 
   /* leave-game confirmation */
-  #confirm{
+  #confirm, #finishAsk{
     position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
     display:none; align-items:center; justify-content:center; padding:16px;
   }
-  #confirm.on{display:flex;}
-  #confirmCard{
+  #confirm.on, #finishAsk.on{display:flex;}
+  #confirmCard, #finishAskCard{
     background:var(--panel); border-radius:18px; padding:20px; width:100%; max-width:360px;
     box-shadow:0 20px 60px rgba(0,0,0,.28); text-align:center;
   }
-  #confirmCard b{display:block; font-size:19px; margin-bottom:6px;}
-  #confirmCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
-  #confirmCard .primary{margin:14px 0 8px;}
+  #confirmCard b, #finishAskCard b{display:block; font-size:19px; margin-bottom:6px;}
+  #confirmCard p, #finishAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
+  #confirmCard .primary, #finishAskCard .primary{margin:14px 0 8px;}
   #word{font-size:34px; font-weight:800; letter-spacing:-.02em; flex:1; min-width:0;
         overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   #counter{font-variant-numeric:tabular-nums; color:var(--muted); font-weight:700; font-size:15px;}
@@ -612,6 +612,15 @@
   </div>
 </div>
 
+<div id="finishAsk">
+  <div id="finishAskCard">
+    <b data-t="finishTitle"></b>
+    <p data-t="finishBody"></p>
+    <button class="primary" id="finishKeep" data-t="keepGuessing"></button>
+    <button class="ghost" id="finishYes" data-t="finish"></button>
+  </div>
+</div>
+
 <div id="modal">
   <div id="modalCard">
     <div class="grab"></div>
@@ -933,6 +942,9 @@ const TEXT = {
 
   leaveTitle:       "Oyundan çıkılsın mı?",
   leaveBody:        "Çizimlerin ve cevapların kaybolur.",
+  finishTitle:      "Bitirdin mi?",
+  finishBody:       "Bitirince cevaplarını değiştiremezsin.",
+  keepGuessing:     "Tahmine devam et",
   stay:             "Oyuna dön",
   leave:            "Çık",
 
@@ -2276,7 +2288,10 @@ document.addEventListener("visibilitychange", function(){
 });
 
 // Reached from the start screen once the day is done.
+let scoresFrom = "send";
+
 function openDailyBoard(){
+  scoresFrom = "home";
   const day = dailyDayNumber();
   const rec = savedDay(day) || {};
   isDaily = true; dailyDay = day;
@@ -2292,6 +2307,7 @@ function openDailyBoard(){
 
 /* the drawer watching the scores on their own link */
 function openScoresScreen(){
+  scoresFrom = "send";
   $("scoresTitle").textContent = boardHeading();
   renderScores();
   fetchScores();
@@ -2302,7 +2318,7 @@ function openScoresScreen(){
 $("toScores").onclick  = openScoresScreen;
 $("scoresBack").onclick = function(){
   stopBoardPoll();
-  show(isDaily && !lastCode ? "home" : "send");
+  show(scoresFrom);
 };
 
 function sendScore(){
@@ -2782,7 +2798,15 @@ $("joinCode").addEventListener("keydown", function(e){
 
 $("start").onclick    = startGame;   // the countdown wakes the audio itself
 $("toRecall").onclick = buildRecall;
-$("finish").onclick   = function(){ closeSheet(); closeModal(); buildResult(); };
+// A stray tap on Bitir used to end the round on the spot, which for the daily means
+// the day is gone. Ask first.
+$("finish").onclick   = function(){ $("finishAsk").classList.add("on"); };
+$("finishKeep").onclick = function(){ $("finishAsk").classList.remove("on"); };
+$("finishAsk").onclick = function(e){ if (e.target === $("finishAsk")) $("finishAsk").classList.remove("on"); };
+$("finishYes").onclick = function(){
+  $("finishAsk").classList.remove("on");
+  closeSheet(); closeModal(); buildResult();
+};
 
 $("share").onclick = function(){
   const t = shareText();
