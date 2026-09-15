@@ -46,26 +46,31 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 
 | id | Purpose |
 |---|---|
-| `home` | Title, two mode buttons, a settings panel, a start button, and a 4-character code field with a join button |
+| `home` | Title, then two sections with a heading each: the day's puzzle with a way into its board, and `sınırsız` -- two mode buttons side by side, a settings panel, a start button, and a 4-character code field with a join button |
 | `countdown` | Full-screen 3 → 2 → 1, one second each |
 | `draw` | The drawing phase |
 | `between` | After 20 drawings: send to a friend, or guess them yourself |
 | `send` | Duel submission: sending / code + link / errors |
 | `loading` | Fetching a round opened from a code or link |
-| `scores` | Live score board for a round you drew and shared |
+| `scores` | The day's global board, the only score table with a screen of its own |
 | `recall` | The shuffled grid of 20 drawings, where answers are given |
-| `result` | Score, correct/incorrect grid, score board, share button |
+| `result` | Score, correct/incorrect grid, score board, share button. Also used unmarked -- the drawings with the board under them -- for a round that has been sent but not yet guessed |
 
-Two overlays sit outside the screen system: `#sheet` (the word pool) and `#modal`
-(the typed-answer card). A third, `#confirm`, asks before abandoning a round.
+Overlays sit outside the screen system: `#sheet` (the word pool), `#modal` (the
+typed-answer card) and `#reveal` (the word alone before each drawing), plus three
+questions -- `#confirm` before abandoning a round, `#finishAsk` before ending the
+guessing, and `#timeAsk` before the first unlimited round of the day.
 
 ## 4. Flow
 
 ### Solo
 
-1. `home` — pick a mode, adjust the settings if you want, press start
+1. `home` — pick a mode, adjust the settings if you want, press start. The first
+   unlimited round of the day answers the question "her kelime için 3 saniyen olacak"
+   before the countdown, with başla and değiştir
 2. `countdown` — 3, 2, 1
-3. `draw` — 20 words, one at a time, auto-advancing
+3. `draw` — 20 words, one at a time, auto-advancing, each opening with half a second
+   of the word alone
 4. `between` — choose to guess yourself or send to a friend
 5. `recall` — assign a word to each drawing
 6. `result` — score, per-cell correction, share text
@@ -77,8 +82,11 @@ those two points and nowhere else.
 ### Duel, drawer's side
 
 At `between`, the send option posts the round to `/api/save`, which returns a
-4-character code. The screen shows the code, a shareable link, a copy button, and a
-watch-scores button that opens the live score board for that code.
+4-character code. The screen shows the code, a shareable link, a copy button, and one
+way back to the drawings: `çizimlere dön` while the round is unguessed, which shows the
+drawings with the board under them and a way into guessing, or `çizimlerine geri dön`
+once it has been guessed, which returns to the result. There is no separate score
+screen to watch: the board is under the drawings it is about.
 
 ### Duel, guesser's side
 
@@ -89,8 +97,8 @@ mode and seconds are used, not the ones set on this device. The result screen re
 name field instead of a row; filling it in posts the score. A draw-your-own button
 starts a fresh round.
 
-The drawer's side also gains an invite button on `result`, so guessing your own
-drawings first is no longer a dead end.
+Guessing your own drawings first is not a dead end either: `paylaş` copies the score
+and the invite link together, and it is the only share action on the screen.
 
 ### Leaving a round
 
@@ -113,6 +121,15 @@ Two variables, set independently rather than bundled into fixed levels.
 **Seconds per word** — a slider from **1 to 10 seconds in half-second steps**,
 defaulting to 3, which is also the recommended speed named under the slider.
 
+The daily ignores both settings: it is always `typed` at 3 seconds. Everyone plays the
+same twenty words, and a shared board only means something if the terms are the same
+for everybody on it. That is why the mode buttons and the slider sit inside the
+`sınırsız` section rather than above both games.
+
+Because the setting outlives the visit, the first unlimited round of each day says what
+it is — `her kelime için 3 saniyen olacak` — offering başla and değiştir. The device
+remembers the day it last asked, so it is asked once a day and not before every round.
+
 There is deliberately no difficulty grade. One existed briefly, read back from these
 two settings, but it was a label placed on top of choices the player had already made
 and it contradicted the recommended speed by calling it the hardest.
@@ -133,6 +150,10 @@ on read — `easy`→pool/4s, `medium`→pool/2.5s, `hard`→typed/2.5s,
 
 ## 6. Drawing phase
 
+- Each word opens with **half a second of the word alone, full screen**. The pen does
+  not answer until it lifts, and the word's own time starts after it, so nothing is
+  taken from the drawing. On a phone the thumb is usually already resting on the paper,
+  and a stroke meant for nothing used to land before the word had been read.
 - The word is large at the top, a draining progress bar beneath it, `7 / 20` at the right.
 - The canvas is square and sized to the largest square fitting the available area.
 - One pen. No undo, no eraser, no colours.
@@ -241,8 +262,8 @@ clipboard API is unavailable — which is the case over plain HTTP, so the fallb
 not theoretical.
 
 ```
-Chizz 🎨
-Kelimeler gizli · 3 sn
+chizz 🎨 günlük · 16/09/2026
+kelimeler gizli · 3 sn
 12/20 · 47 sn
 
 🟩🟩🟥🟩
@@ -255,7 +276,11 @@ Sen de tahmin et:
 https://chizz.party/?o=A7K2
 ```
 
-Guessing someone else's round, the first line also names the drawer.
+Guessing someone else's round, the first line also names the drawer. A daily round
+carries `günlük` and its date on that line wherever it is shared from — the drawings,
+the score, the invite, the link preview — because whether a round is the day's puzzle
+is the first thing a reader needs to know. Sharing is one button: `paylaş` copies the
+score and the invite link together.
 The grid is **5 rows of 4** in the recall order, matching the 4-column phone layout —
 it used to be 4 rows of 5, which was not the shape the player had been looking at.
 The invite line is only added once the round has a code. **The set is deliberately not
@@ -331,6 +356,7 @@ holds:
 |---|---|
 | `name` | The name typed on this device. Editable on the result screen at any time; changing it renames the rounds this device saved |
 | `mode`, `secs`, `theme` | The settings chosen on the home screen |
+| `hintDay` | The day the time-per-word reminder was last shown, so it is shown once a day |
 | `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
 | `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
@@ -441,6 +467,11 @@ file shared by every round, so the tags have to be added per request: the pictur
 name of whoever drew it, and the canonical link. It hangs them off the `<title>` tag,
 there being no explicit `<head>` in the document. Anything that is not the page with a
 valid code -- `/api` included -- passes straight through untouched.
+
+The address on its own is a different card, and a static one: `index.html` carries its
+own description and `og:title`, and an icon at `/icon.svg`. The icon used to be a
+`data:` URI — a browser draws that in a tab, but link previews and search results fetch
+the icon by URL and skip an inlined one, so the card came up with a globe on it.
 
 One cost: middleware runs for every request to the site, so every page load is now a
 function invocation rather than a plain static hit. The free tier allows 100,000 a day.

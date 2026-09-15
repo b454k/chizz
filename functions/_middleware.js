@@ -12,6 +12,7 @@ const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
 const TITLE_SUFFIX = "chizz";
 const DESCRIPTION = "20 çizim, 20 kelime. hangisi neydi?";
 const DRAWINGS_OF = "{whose} çizimleri";
+const DAILY = "günlük";
 
 // Same rule as whose() in public/index.html; keep the two identical.
 function whose(name){
@@ -53,7 +54,9 @@ export async function onRequest(context) {
     }
   } catch (e) { /* a preview without a name is still a preview */ }
 
-  const title = name ? DRAWINGS_OF.replace("{whose}", whose(name)) + " · " + TITLE_SUFFIX : TITLE_SUFFIX;
+  const daily = dayOf ? DAILY + " · " : "";
+  const title = (name ? daily + DRAWINGS_OF.replace("{whose}", whose(name)) : daily + TITLE_SUFFIX)
+              + (name ? " · " + TITLE_SUFFIX : "");
   const page = url.origin + "/?o=" + code;
   const image = url.origin + "/api/card/" + code + ".png";
 

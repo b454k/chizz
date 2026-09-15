@@ -3,6 +3,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>chizz</title>
+<!-- What the address alone should say when it is pasted somewhere. A round's link
+     gets its own title, description and picture from functions/_middleware.js. -->
+<meta name="description" content="20 kelime, 20 çizim, her biri için birkaç saniye. sonra: hangisi neydi? arkadaşlarınla oyna.">
+<meta property="og:title" content="chizz">
+<meta property="og:description" content="20 kelime, 20 çizim, her biri için birkaç saniye. sonra: hangisi neydi? arkadaşlarınla oyna.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="chizz">
+<meta name="theme-color" content="#131418">
+<!-- A file rather than a data: URI, because link previews and search results fetch
+     the icon by URL and skip an inlined one -- which is why the card showed a globe. -->
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
 <!-- Inline so it costs no request and keeps the "nothing loaded from outside" rule. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23131418'/%3E%3Ctext x='32' y='34' font-family='Helvetica,Arial,sans-serif' font-size='46' font-weight='700' fill='%23ff5c3d' text-anchor='middle' dominant-baseline='central'%3Ec%3C/text%3E%3C/svg%3E">
 <style>
@@ -76,7 +88,7 @@
   #dailyRow{
     display:flex; align-items:center; gap:12px;
     border:2px solid var(--accent); border-radius:14px;
-    padding:12px 12px 12px 15px; margin:0 0 14px;
+    padding:12px 12px 12px 15px; margin:0;
     background:var(--panel);
   }
   #dailyRow .dtext{flex:1; min-width:0;}
@@ -93,17 +105,28 @@
     margin:0 0 22px;
   }
 
-  /* One per row rather than side by side: the names and their explanations need
-     the width, and there are only two of them. */
-  .diffs{display:grid; grid-template-columns:1fr; gap:10px;}
+  /* The start screen holds two different games: the day's puzzle, one go for
+     everybody on the same words, and the one you can play as often as you like.
+     They are kept apart so neither is read as a setting of the other. */
+  .hsec{margin:0 0 30px;}
+  .hsec:last-child{margin-bottom:0;}
+  .hsectitle{
+    font-size:12px; font-weight:800; letter-spacing:.16em; color:var(--muted);
+    margin:0 0 10px;
+  }
+  #dailyBoard{margin-top:10px; padding:11px; font-size:14px;}
+
+  /* Side by side, the way the choice is made: kelimeler açık on the left,
+     kelimeler gizli on the right. */
+  .diffs{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .diff{
-    border:2px solid var(--line); border-radius:14px; padding:13px 15px; text-align:left;
+    border:2px solid var(--line); border-radius:14px; padding:12px 13px; text-align:left;
     background:var(--panel);
   }
   .diff .mname{display:block; text-transform:lowercase; font-size:16px;}
   .diff .mdesc{
-    display:block; margin-top:3px; color:var(--muted);
-    font-size:13px; line-height:1.4; font-weight:500;
+    display:block; margin-top:4px; color:var(--muted);
+    font-size:12px; line-height:1.35; font-weight:500;
   }
   .diff.sel .mdesc{color:var(--ink); opacity:.75;}
   .diff.sel{border-color:var(--ink); background:var(--panel2);}
@@ -203,18 +226,19 @@
   .chip2 .cl{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
 
   /* leave-game confirmation */
-  #confirm, #finishAsk{
+  #confirm, #finishAsk, #timeAsk{
     position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
     display:none; align-items:center; justify-content:center; padding:16px;
   }
-  #confirm.on, #finishAsk.on{display:flex;}
-  #confirmCard, #finishAskCard{
+  #confirm.on, #finishAsk.on, #timeAsk.on{display:flex;}
+  #confirmCard, #finishAskCard, #timeAskCard{
+    box-sizing:border-box;   /* the padding has to fit inside 100%, or the card runs off a narrow phone */
     background:var(--panel); border-radius:18px; padding:20px; width:100%; max-width:360px;
     box-shadow:0 20px 60px rgba(0,0,0,.28); text-align:center;
   }
-  #confirmCard b, #finishAskCard b{display:block; font-size:19px; margin-bottom:6px;}
-  #confirmCard p, #finishAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
-  #confirmCard .primary, #finishAskCard .primary{margin:14px 0 8px;}
+  #confirmCard b, #finishAskCard b, #timeAskCard b{display:block; font-size:19px; margin-bottom:6px;}
+  #confirmCard p, #finishAskCard p, #timeAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
+  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary{margin:14px 0 8px;}
   #word{font-size:34px; font-weight:800; letter-spacing:-.02em; flex:1; min-width:0;
         overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   #counter{font-variant-numeric:tabular-nums; color:var(--muted); font-weight:700; font-size:15px;}
@@ -222,6 +246,17 @@
   #bar{height:100%; background:var(--accent); transform-origin:left center; transform:scaleX(1);}
   #stage{flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding-bottom:14px;}
   #pad{background:var(--paper); border:2px solid var(--line); border-radius:16px; touch-action:none; display:block;}
+
+  /* the word alone, before the pen goes live */
+  #reveal{
+    position:fixed; inset:0; z-index:35; background:var(--bg);
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  #reveal.on{display:flex;}
+  #revealWord{
+    font-size:46px; font-weight:800; letter-spacing:-.03em; line-height:1.1;
+    text-align:center; word-break:break-word;
+  }
 
   /* ara ekranlar */
   .mid{align-items:center; justify-content:center; text-align:center;}
@@ -407,35 +442,43 @@
       <h1>chizz</h1>
       <p class="tagline" data-t="tagline"></p>
 
-      <div id="dailyRow">
-        <div class="dtext">
-          <b data-t="dailyTitle"></b>
-          <span id="dailyDate"></span>
+      <div class="hsec">
+        <h2 class="hsectitle" data-t="dailyTitle"></h2>
+        <div id="dailyRow">
+          <div class="dtext">
+            <b id="dailyDate"></b>
+            <span id="dailyState"></span>
+          </div>
+          <button id="dailyGo"></button>
         </div>
-        <button id="dailyGo"></button>
-      </div>
-      <div class="diffs" id="modes"></div>
-
-      <div class="settings">
-        <div class="srow">
-          <span class="lbl" data-t="perWord"></span>
-          <output id="secsOut"></output>
-        </div>
-        <input type="range" id="secs" min="1" max="10" step="0.5" data-tal="perWord">
-        <p class="shint" data-t="recommended"></p>
-        <div class="srow">
-          <span class="lbl" data-t="theme"></span>
-          <div class="seg" id="themes"></div>
-        </div>
+        <button class="ghost" id="dailyBoard" data-t="dailyScores"></button>
       </div>
 
-      <button class="primary" id="start" data-t="start"></button>
-      <div id="joinRow">
-        <input class="txt" id="joinCode" maxlength="4" data-tph="codePlaceholder"
-               autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">
-        <button id="joinGo" data-t="join"></button>
+      <div class="hsec">
+        <h2 class="hsectitle" data-t="unlimited"></h2>
+        <div class="diffs" id="modes"></div>
+
+        <div class="settings">
+          <div class="srow">
+            <span class="lbl" data-t="perWord"></span>
+            <output id="secsOut"></output>
+          </div>
+          <input type="range" id="secs" min="1" max="10" step="0.5" data-tal="perWord">
+          <p class="shint" data-t="recommended"></p>
+          <div class="srow">
+            <span class="lbl" data-t="theme"></span>
+            <div class="seg" id="themes"></div>
+          </div>
+        </div>
+
+        <button class="primary" id="start" data-t="start"></button>
+        <div id="joinRow">
+          <input class="txt" id="joinCode" maxlength="4" data-tph="codePlaceholder"
+                 autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">
+          <button id="joinGo" data-t="join"></button>
+        </div>
+        <p class="err" id="joinErr"></p>
       </div>
-      <p class="err" id="joinErr"></p>
     </div>
   </section>
 
@@ -507,8 +550,7 @@
         <div id="link"></div>
         <button class="primary" id="linkCopy" style="margin:0 0 10px" data-t="copyLink"></button>
         <p id="linkNote" class="err" style="color:var(--ok)"></p>
-        <button class="ghost" id="toScores" style="margin-bottom:10px" data-t="watchScores"></button>
-        <button class="ghost" id="doneRecall" style="margin-bottom:10px" data-t="guessMineToo"></button>
+        <button class="ghost" id="doneRecall" style="margin-bottom:10px"></button>
         <button class="ghost" id="doneHome" data-t="home"></button>
       </div>
     </div>
@@ -585,7 +627,7 @@
       <p id="copyNote"></p>
       <textarea id="fallback" rows="7" readonly></textarea>
       <button class="ghost" id="switchRound" hidden style="margin:0 0 10px"></button>
-      <button class="ghost" id="inviteFriends" hidden style="margin:0 0 10px" data-t="sendToFriend"></button>
+      <button class="ghost" id="reviewGuess" hidden style="margin:0 0 10px" data-t="guessMineToo"></button>
       <div class="btnrow">
         <button class="ghost" id="again" data-t="playAgain"></button>
         <button class="ghost" id="home2" data-t="home"></button>
@@ -620,6 +662,16 @@
     <button class="ghost" id="finishYes" data-t="finish"></button>
   </div>
 </div>
+
+<div id="timeAsk">
+  <div id="timeAskCard">
+    <b id="timeAskText"></b>
+    <button class="primary" id="timeStart" data-t="start"></button>
+    <button class="ghost" id="timeChange" data-t="change"></button>
+  </div>
+</div>
+
+<div id="reveal"><span id="revealWord"></span></div>
 
 <div id="modal">
   <div id="modalCard">
@@ -892,6 +944,9 @@ const TEXT = {
   themeDark:        "koyu",
   themeLight:       "açık",
   tagline:          "ne chizzmiştin?",
+  unlimited:        "sınırsız",
+  change:           "değiştir",
+  timeNotice:       "her kelime için {n} saniyen olacak",
 
   modeOpen:         "kelimeler açık",
   modeOpenDesc:     "kelime listesi önünde durur, her çizim için doğru olanı seçersin.",
@@ -919,7 +974,8 @@ const TEXT = {
   ready:            "hazır.",
   shareCodeOrLink:  "kodu veya linki arkadaşına yolla.",
   copyLink:         "linki kopyala",
-  watchScores:      "skorları izle",
+  toDrawings:       "çizimlere dön",
+  backToDrawings:   "çizimlerine geri dön",
   linkCopied:       "link kopyalandı ✓",
   linkCopyFailed:   "kopyalanamadı, linki elle seç.",
   sendFailed:       "gönderilemedi, tekrar dene.",
@@ -973,7 +1029,8 @@ const TEXT = {
   dailyPlayed:      "bugünü oynadın",
   dailyScores:      "günün skorları",
   dailyBoardTitle:  "günün skorları · {date}",
-  dailyNote:        "herkes bugün aynı 20 kelimeyi çiziyor. kelimeler açık, 3 sn.",
+  dailyNote:        "herkes bugün aynı 20 kelimeyi çiziyor. kelimeler gizli, 3 sn.",
+  dailyMode:        "kelimeler gizli · 3 sn",
   gateTitle:        "önce sen çiz",
   gateBody:         "bugün herkes aynı kelimeleri çiziyor. arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. önce sen çiz, sonra tahmin et.",
   pickTitle:        "şimdi ne olsun?",
@@ -1059,6 +1116,7 @@ let scoreSent = false;   // has this round's score been posted yet
 let isDaily  = false;    // this round is the day's puzzle, at fixed settings
 let dailyDay = 0;
 let afterDraw = "";     // where the drawing phase should hand off to
+let viewOnly = false;   // reading a board without having finished the round below it
 let recallStart = 0;     // when the grid first went up; the board ranks ties by this
 let recallMs  = 0;       // how long the round took, frozen once it is finished
 
@@ -1295,16 +1353,22 @@ function buildDailyRow(){
   const rec = savedDay(day) || {};
   const go = $("dailyGo");
   $("dailyDate").textContent = dailyDateLabel(day);
+  $("dailyState").textContent = rec.done
+    ? TEXT.dailyPlayed + " " + rec.score + "/" + N
+    : TEXT.dailyMode;
   if (rec.done){
     go.textContent = TEXT.dailyScores;
     go.classList.add("done");
-    $("dailyDate").textContent = dailyDateLabel(day) + " \u00b7 " + TEXT.dailyPlayed +
-      " " + rec.score + "/" + N;
   } else {
     go.textContent = rec.drawn ? TEXT.guessMyself : TEXT.draw;
     go.classList.remove("done");
   }
+  // The day's board is worth reading before playing too. Once the day is done the
+  // button above opens it, so the second way in would only be a duplicate.
+  $("dailyBoard").hidden = !!rec.done;
 }
+
+$("dailyBoard").onclick = function(){ openDailyBoard(); };
 
 $("dailyGo").onclick = function(){
   const day = dailyDayNumber();
@@ -1328,7 +1392,7 @@ function resumeDaily(rec){
              : (Array.isArray(rec.order) && rec.order.length === N ? rec : null);
   const done = !!(rec.done || round.done);
   dailyDay = dailyDayNumber();
-  isDaily = true; modeId = "pool"; secs = 3; setId = null;
+  isDaily = true; modeId = "typed"; secs = 3; setId = null;
   role = "solo"; drawerName = ""; lastCode = rec.code || "";
   scores = []; scoreSent = !!rec.sent;
   recallStart = round.startedAt || 0;
@@ -1483,7 +1547,7 @@ function startGame(){
 function startDaily(){
   dailyDay = dailyDayNumber();
   isDaily  = true;
-  modeId   = "pool";
+  modeId   = "typed";
   secs     = 3;
   setId    = null;
 
@@ -1591,7 +1655,7 @@ function padPoint(e){
 }
 
 pad.addEventListener("pointerdown", function(e){
-  if (!$("draw").classList.contains("on")) return;
+  if (!$("draw").classList.contains("on") || revealing) return;
   e.preventDefault();
   try { pad.setPointerCapture(e.pointerId); } catch(err){}
   const stroke = [padPoint(e)];
@@ -1638,6 +1702,34 @@ function startDrawPhase(){
   startWord(0);
 }
 
+/* The word used to appear at the top of a blank page with the clock already
+   running, which on a phone is easy to start drawing over before reading it. It
+   now gets half a second on its own, and the pen is dead until that is over. */
+const REVEAL_MS = 500;
+let revealing = false;
+let revealPending = false;
+let revealTimer = 0;
+
+function revealThenDraw(i){
+  revealing = true;
+  $("revealWord").textContent = words[i];
+  $("reveal").classList.add("on");
+  clearTimeout(revealTimer);
+  revealTimer = setTimeout(function(){
+    $("reveal").classList.remove("on");
+    revealing = false;
+    wordStart = performance.now();     // the word's own time starts here, not before
+    raf = requestAnimationFrame(tick);
+  }, REVEAL_MS);
+}
+
+function clearReveal(){
+  clearTimeout(revealTimer);
+  revealing = false;
+  revealPending = false;
+  $("reveal").classList.remove("on");
+}
+
 function startWord(i){
   idx = i;
   strokes = [];
@@ -1647,8 +1739,7 @@ function startWord(i){
   $("word").textContent = words[i];
   $("counter").textContent = (i + 1) + " / " + N;
   $("bar").style.transform = "scaleX(1)";
-  wordStart = performance.now();
-  raf = requestAnimationFrame(tick);
+  revealThenDraw(i);
 }
 
 function tick(){
@@ -1691,11 +1782,20 @@ function pauseTimer(){
   if (!$("draw").classList.contains("on") || pausedAt) return;
   cancelAnimationFrame(raf);
   pausedAt = performance.now();          // freeze the timer while the dialog is open
+  // Asked to leave while the word is still up: hold the reveal too, or the drawing
+  // time would run out behind the dialog.
+  if (revealing){ clearTimeout(revealTimer); revealPending = true; }
 }
 
 function resumeTimer(){
   // do nothing unless we actually paused, or a second rAF loop starts and time runs twice as fast
   if (!pausedAt || !$("draw").classList.contains("on")) return;
+  if (revealPending){                    // paused before the word had been shown
+    revealPending = false;
+    pausedAt = 0;
+    revealThenDraw(idx);
+    return;
+  }
   wordStart += performance.now() - pausedAt;
   pausedAt = 0;
   raf = requestAnimationFrame(tick);
@@ -1715,6 +1815,7 @@ function confirmExit(){
   $("confirm").classList.remove("on");
   cancelAnimationFrame(raf);
   clearTimeout(cdTimer);
+  clearReveal();
   pausedAt = 0;
   live.clear();
   closeSheet(); closeModal(); closeZoom();
@@ -1787,6 +1888,7 @@ function makeCell(pos, di){
 }
 
 function buildRecall(){
+  viewOnly = false;
   const g = $("recallGrid");
   resetGridObserver();
   g.innerHTML = "";
@@ -2113,6 +2215,7 @@ $("modal").onclick      = function(e){ if (e.target === $("modal")){ selPos = -1
 /* ----------------------------------------------------------- result screen --- */
 
 function buildResult(){
+  viewOnly = false;
   if (!recallMs) recallMs = elapsedMs();      // stop the clock before anything is drawn
   score = 0;
   order.forEach(function(di, pos){ if (isCorrect(picks[pos], words[di])) score++; });
@@ -2154,9 +2257,9 @@ function buildResult(){
   });
 
   $("again").textContent = role === "guesser" ? TEXT.youDrawToo : TEXT.playAgain;
-  // Guessing your own drawings first used to be a dead end: there was no way to
-  // hand the round to anyone afterwards. Only the person who drew it can.
-  $("inviteFriends").hidden = role === "guesser";   // only the person who drew it can hand it on
+  // One way to hand the round on: paylaş, which copies the score and the link
+  // together. A second button beside it only made the two look like different things.
+  $("reviewGuess").hidden = true;
   fillNameRow();
   // Record the finish before the board goes up: opening this code again on this
   // device should land here, on the score table, rather than on an empty grid.
@@ -2178,6 +2281,41 @@ function buildResult(){
   paintAll("resultGrid");
 }
 
+/* The drawings and the board, for the drawer who sent the round on and has not
+   guessed it yet. The same screen as the result, minus the marking: the board
+   belongs under the drawings it is about, not on a screen of its own. */
+function buildReview(){
+  viewOnly = true;
+  $("score").textContent = "";
+  $("scoreSub").textContent = roundLabel();
+  $("copyNote").textContent = "";
+  $("fallback").style.display = "none";
+
+  const g = $("resultGrid");
+  resetGridObserver();
+  g.innerHTML = "";
+  order.forEach(function(di, pos){
+    const cell = makeCell(pos, di);
+    const good = document.createElement("span");
+    good.className = "good";
+    good.textContent = words[di];
+    cell.querySelector(".cap").appendChild(good);
+    cell.classList.add("tappable");
+    cell.onclick = function(){ openZoom(pos); };
+    g.appendChild(cell);
+  });
+
+  $("again").textContent = TEXT.playAgain;
+  $("switchRound").hidden = true;
+  $("reviewGuess").hidden = false;
+  fillNameRow();
+  showBoard();
+  show("result");
+  paintAll("resultGrid");
+}
+
+$("reviewGuess").onclick = function(){ buildRecall(); };
+
 /* ------------------------------------------------------- score tablosu --- */
 
 function sameName(a, b){
@@ -2193,7 +2331,7 @@ function showBoard(){
   // A score needs a name to sit under. Without one the board is still readable,
   // it just has no row for this player until they add one.
   beepScores();
-  if (myName && !scoreSent){ scoreSent = true; sendScore(); }
+  if (myName && !scoreSent && !viewOnly){ scoreSent = true; sendScore(); }
   renderScores();
   fetchScores();
   startBoardPoll();
@@ -2214,7 +2352,7 @@ function renderScores(){
   const liste = rankScores(scores);
   // Always show your own row: KV listing is eventually consistent, so a score
   // just written may not be in the list yet.
-  if (myName && !liste.some(function(s){ return sameName(s.name, myName); })){
+  if (myName && !viewOnly && !liste.some(function(s){ return sameName(s.name, myName); })){
     liste.push({ name: myName, score: score, ms: elapsedMs() });
   }
   const sirali = rankScores(liste);
@@ -2288,12 +2426,13 @@ document.addEventListener("visibilitychange", function(){
 });
 
 // Reached from the start screen once the day is done.
-let scoresFrom = "send";
 
 function openDailyBoard(){
-  scoresFrom = "home";
   const day = dailyDayNumber();
   const rec = savedDay(day) || {};
+  // Readable before the day is played, in which case there is no row to add and
+  // nothing to post -- only everyone else's scores to look at.
+  viewOnly = !rec.done;
   isDaily = true; dailyDay = day;
   score = rec.score || 0;
   recallMs = rec.ms || 0;
@@ -2305,20 +2444,11 @@ function openDailyBoard(){
   startBoardPoll();
 }
 
-/* the drawer watching the scores on their own link */
-function openScoresScreen(){
-  scoresFrom = "send";
-  $("scoresTitle").textContent = boardHeading();
-  renderScores();
-  fetchScores();
-  show("scores");
-  startBoardPoll();
-}
-
-$("toScores").onclick  = openScoresScreen;
+// The only board with a screen to itself is the day's, which is global and has no
+// drawings of its own. Every other score table sits under the drawings it is about.
 $("scoresBack").onclick = function(){
   stopBoardPoll();
-  show(scoresFrom);
+  show("home");
 };
 
 function sendScore(){
@@ -2371,9 +2501,7 @@ function shareText(){
   // Guessing your own round used to fall through to the bare title, so sharing it
   // said nothing about who drew it.
   const who = role === "guesser" ? drawerName : myName;
-  const head = who
-    ? "chizz 🎨 " + TEXT.drawingsOf.replace("{whose}", whose(who))
-    : "chizz 🎨";
+  const head = "chizz 🎨" + dailyTag() + (who ? " " + TEXT.drawingsOf.replace("{whose}", whose(who)) : "");
   let out = head + "\n" + roundLabel() + "\n" + score + "/" + N
           + " \u00b7 " + timeLabel(elapsedMs()) + "\n\n" + rows;
   // Anyone reading the score can play the same round straight from the message.
@@ -2390,13 +2518,16 @@ function inviteText(){
    something in words, because a message containing nothing but a URL is swallowed
    whole by the link preview -- WhatsApp shows the card and not a single line of
    text, so the reader never sees who sent it or why. */
+/* Whether a round is the day's puzzle is the first thing a reader needs to know, so
+   it goes into every line this game shares -- the drawings, the score, the invite --
+   rather than only the ones posted from the day board. */
+function dailyTag(){
+  return isDaily && dailyDay ? " " + TEXT.dailyShare.replace("{date}", dailyDateLabel(dailyDay)) : "";
+}
+
 function inviteMessage(){
   const who = role === "guesser" ? drawerName : myName;
-  const head = onDayBoard()
-    ? "chizz \u{1F3A8} " + TEXT.dailyShare.replace("{date}", dailyDateLabel(dailyDay))
-    : who
-      ? "chizz \u{1F3A8} " + TEXT.drawingsOf.replace("{whose}", whose(who))
-      : "chizz \u{1F3A8}";
+  const head = "chizz \u{1F3A8}" + dailyTag() + (who ? " " + TEXT.drawingsOf.replace("{whose}", whose(who)) : "");
   return head + "\n" + TEXT.inviteBlurb + "\n\n" + inviteText();
 }
 
@@ -2488,6 +2619,7 @@ function sendShow(which){
   $("sendForm").hidden = which !== "form";
   $("sendBusy").hidden = which !== "busy";
   $("sendDone").hidden = which !== "done";
+  if (which === "done") sendBackLabel();
 }
 
 $("toSend").onclick = function(){
@@ -2525,9 +2657,19 @@ function openShareScreen(from){
   show("send");
 }
 
-$("inviteFriends").onclick = function(){ openShareScreen("result"); };
 $("doneHome").onclick = function(){ show("home"); };
-$("doneRecall").onclick = function(){ buildRecall(); };
+
+/* One way back from the send screen, and it always lands on the drawings: with the
+   score table under them if the round has been guessed, and with a way into
+   guessing if it has not. A board never gets a screen of its own. */
+function sendBackLabel(){
+  const rec = (lastCode && savedRound(lastCode)) || {};
+  $("doneRecall").textContent = rec.done ? TEXT.backToDrawings : TEXT.toDrawings;
+}
+$("doneRecall").onclick = function(){
+  const rec = (lastCode && savedRound(lastCode)) || {};
+  if (rec.done) buildResult(); else buildReview();
+};
 
 function sendNameReady(){
   const ok = !!$("sendName").value.trim();
@@ -2796,7 +2938,26 @@ $("joinCode").addEventListener("keydown", function(e){
 
 /* ------------------------------------------------------------------ wiring --- */
 
-$("start").onclick    = startGame;   // the countdown wakes the audio itself
+/* The time per word is a setting that outlives the visit, so the first unlimited
+   round of the day says what it is before the countdown starts. Once a day only:
+   past that it is nagging, not news. */
+function hintedToday(){ return loadStore().hintDay === dailyDayNumber(); }
+function rememberHint(){
+  const store = loadStore();
+  store.hintDay = dailyDayNumber();
+  saveStore(store);
+}
+function closeTimeAsk(){ $("timeAsk").classList.remove("on"); }
+
+$("start").onclick = function(){     // the countdown wakes the audio itself
+  if (hintedToday()){ startGame(); return; }
+  $("timeAskText").textContent = TEXT.timeNotice.replace("{n}", String(secs).replace(".", ","));
+  $("timeAsk").classList.add("on");
+};
+$("timeStart").onclick = function(){ closeTimeAsk(); rememberHint(); startGame(); };
+// Changing the time is an answer to the question, so it is not asked again either.
+$("timeChange").onclick = function(){ closeTimeAsk(); rememberHint(); $("secs").focus(); };
+$("timeAsk").onclick = function(e){ if (e.target === $("timeAsk")) closeTimeAsk(); };
 $("toRecall").onclick = buildRecall;
 // A stray tap on Bitir used to end the round on the spot, which for the daily means
 // the day is gone. Ask first.
@@ -2809,7 +2970,7 @@ $("finishYes").onclick = function(){
 };
 
 $("share").onclick = function(){
-  const t = shareText();
+  const t = viewOnly ? inviteMessage() : shareText();
   copyText(t).then(function(ok){
     if (ok){
       $("copyNote").textContent = TEXT.copied;

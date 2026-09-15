@@ -1,4 +1,4 @@
-import { dayNumber as today, endOfDay } from "../../lib/day.js";
+import { dayNumber as today } from "../../lib/day.js";
 
 // POST /api/save  ->  { code: "A7K2" }
 // Cloudflare Pages Function. KV binding name: GAMES
@@ -107,7 +107,11 @@ export async function onRequestPost({ request, env }) {
     const code = makeCode();
     const taken = await env.GAMES.get(code);
     if (taken) continue;                                  // collision, generate another
-    await env.GAMES.put(code, record, { expirationTtl: day ? endOfDay() : TTL });
+    // A daily round used to be thrown away at midnight, which killed the link the
+    // moment the day turned -- a group chat would open it the next morning and find
+    // nothing. Guessing a round is never tied to the clock; only drawing the day's
+    // words is, and that is decided on the client.
+    await env.GAMES.put(code, record, { expirationTtl: TTL });
     return json({ code, owner });
   }
   return error("could not allocate a code, try again", 503);

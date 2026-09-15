@@ -1,5 +1,60 @@
 # Changelog
 
+## 2026-09-16 — two games, one screen each
+
+A pass over every screen, after watching people play. Most of it removes a second way
+of doing something that already had one.
+
+### The start screen
+
+- Split in two, with a heading each: **günlük oyun** and **sınırsız**. The settings sat
+  under both and read as though they applied to the daily, which ignores them.
+- The two modes sit **side by side**, kelimeler açık on the left, kelimeler gizli on
+  the right, rather than stacked.
+- **The day board is readable before playing.** It used to appear only once the day was
+  done, so nobody could see what they were playing against.
+- **The first unlimited round of the day says how long each word gets**, with başla and
+  değiştir. The setting outlives the visit, so people were starting a round at a time
+  they had chosen days earlier without noticing. Asked once a day: more is nagging.
+
+### Playing
+
+- **Half a second with the word alone, full screen, before every drawing**, in every
+  mode. The word used to appear over an already-blank page with the clock running, and
+  on a phone a thumb is often already on the paper. The pen is dead until the word
+  lifts, so a stray first stroke cannot land on the next word. The word's own time
+  starts after it, so nothing is taken from the drawing.
+- **The daily is now kelimeler gizli**: the words are not shown, they are typed, with
+  the same one-typo forgiveness as the unlimited game. Everyone plays the same twenty
+  words, so the harder reading of them is the one worth ranking.
+
+### Sharing and scores
+
+- **One share button.** paylaş copies the score and the link together; arkadaşına
+  gönder sat beside it looking like a different thing, and was not.
+- **A score table never appears away from the drawings it belongs to.** The separate
+  scores screen is gone. The only board with a screen of its own is the day's, which is
+  global and has no drawings behind it. The send screen now offers **çizimlere dön**,
+  the drawings with the board under them and a way into guessing, or **çizimlerine geri
+  dön** once the round has been guessed. It used to offer "kendim de tahmin edeyim"
+  even to someone who had just done exactly that.
+- **A daily link outlives its day.** Daily rounds were thrown away at midnight, so a
+  round shared in a group chat in the evening opened to nothing in the morning. They
+  keep the usual thirty days now: guessing is never tied to the clock, only drawing the
+  day's words is.
+- **Anything shared from a daily round says günlük**, with the date: the drawings, the
+  score, the invite and the link preview. Before, only a score posted from the day
+  board said so.
+
+### The bare address
+
+- chizz.party pasted on its own showed a globe and a sentence scraped out of the page.
+  It now carries its own description and og:title, and **an icon file** at `/icon.svg`.
+  The icon was a `data:` URI, which a browser renders in a tab but link previews and
+  search results do not fetch.
+- Dialog cards are border-box, so a long line no longer runs off the side of a narrow
+  phone.
+
 ## 2026-09-13 — daily puzzle
 
 Added alongside free play rather than replacing it. Free play keeps its thirty
