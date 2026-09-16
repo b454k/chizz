@@ -643,9 +643,6 @@
       <div class="headrow">
         <button class="back" id="scoresBack" data-tal="back">←</button>
         <h2 id="scoresTitle"></h2>
-        <button class="chip2" id="scoresChip" hidden>
-          <span class="cc"></span><span class="cl" data-t="share"></span>
-        </button>
       </div>
     </div>
     <div class="scroll">
@@ -1898,7 +1895,8 @@ document.addEventListener("pointerdown", wakeAudio, { once: true });
 
 /* ----------------------------------------------------------- code chip --- */
 
-function chips2(){ return [$("recallChip"), $("scoresChip")]; }
+// The grid's chip is the only one: the day's board has no round to name.
+function chips2(){ return [$("recallChip")]; }
 
 function updateCodeChip(){
   chips2().forEach(function(el){
@@ -1911,12 +1909,11 @@ function updateCodeChip(){
 function copyInvite(el){
   if (!lastCode) return;
   const label = el.querySelector(".cl");
-  const from = $("scores").classList.contains("on") ? "scores" : "recall";
   copyText(inviteMessage()).then(function(ok){
     if (!ok){
       // Telling someone to select the link by hand is no use here: the chip does
       // not show one. Put them on the screen that does.
-      openShareScreen(from);
+      openShareScreen("recall");
       return;
     }
     label.textContent = TEXT.linkCopied;
