@@ -148,11 +148,11 @@
   .nlabel{color:var(--muted); font-size:13px; font-weight:600; margin:0 0 6px;}
 
   /* arşiv: what this device has finished, with the drawings from each round */
-  #archive .arow{
+  .arow{
     border:2px solid var(--line); border-radius:14px; padding:12px 13px; margin:0 0 10px;
     background:var(--panel); width:100%; text-align:left; display:block;
   }
-  #archive .arow:active{background:var(--panel2);}
+  .arow:active{background:var(--panel2);}
   .ahead{display:flex; align-items:baseline; gap:8px; margin:0 0 9px;}
   .ahead .awhen{color:var(--muted); font-size:13px; font-weight:600;}
   .ahead .awho{color:var(--muted); font-size:13px; font-weight:600; flex:1; min-width:0;
@@ -169,9 +169,7 @@
   }
   .athumb canvas{position:absolute; inset:0; width:100%; height:100%;}
   #archiveEmpty{color:var(--muted); font-size:14px; margin:0;}
-  #archiveHint{margin:8px 0 0; text-align:center;}
-  /* the same line, on the screen the day's board has to itself */
-  #scores .head p{text-align:center;}
+  #archiveOpen{margin-top:4px;}
   #archiveScreen .scroll{padding-bottom:20px;}
   #nameNote{color:var(--ok); font-weight:600; font-size:13px; min-height:18px; margin:4px 0 0;}
   .seg{display:flex; gap:6px;}
@@ -542,8 +540,9 @@
       </div>
 
       <div class="hsec" id="archiveSec" hidden>
-        <button class="ghost" id="archiveOpen" data-t="archive"></button>
-        <p class="shint" id="archiveHint" data-t="archiveHint"></p>
+        <h2 class="hsectitle" data-t="archive"></h2>
+        <div id="archive"></div>
+        <button class="ghost" id="archiveOpen" hidden data-t="archiveMore"></button>
       </div>
 
       <!-- Theme belongs to the app, not to the round about to be played, so it sits at
@@ -648,7 +647,6 @@
           <span class="cc"></span><span class="cl" data-t="share"></span>
         </button>
       </div>
-      <p data-t="scoresNoteLive"></p>
     </div>
     <div class="scroll">
       <div id="scoresTable">
@@ -671,11 +669,11 @@
         <button class="back" id="archiveBack" data-tal="back">←</button>
         <h2 data-t="archive"></h2>
       </div>
-      <p data-t="archiveHint"></p>
+      <p id="archiveHint" data-t="archiveHint"></p>
     </div>
     <div class="scroll">
       <p id="archiveEmpty" hidden data-t="archiveEmpty"></p>
-      <div id="archive"></div>
+      <div id="archiveFull"></div>
     </div>
   </section>
 
@@ -1105,7 +1103,8 @@ const TEXT = {
   unlimited:        "sınırsız",
   archive:          "arşiv",
   archiveEmpty:     "bitirdiğin oyunlar burada birikir.",
-  archiveHint:      "son 30 günde bitirdiğin oyunlar",
+  archiveHint:      "son 30 günde çizdiklerin",
+  archiveMore:      "daha fazla göster",
   archiveMine:      "çizdim",
   archiveTheirs:    "tahmin ettim",
   archiveDaily:     "günlük",
@@ -1179,7 +1178,6 @@ const TEXT = {
   colTime:          "süre",
   colScore:         "skor",
   scoresSuffix:     " · skorlar",
-  scoresNoteLive:   "skora göre sıralı; eşitlikte hızlı olan önde. arkadaşların bitirdikçe kendiliğinden güncellenir.",
   scoresNoteResult: "arkadaşların bitirdikçe burada beliriyor.",
   nobodyFinished:   "henüz kimse bitirmedi.",
   firstToPlay:      "henüz kimse tahmin etmedi.",
@@ -1386,11 +1384,15 @@ function rememberDay(day, patch){
   saveStore(store);
 }
 
-/* Where the player is, for the three screens the address cannot describe: the "what
-   now" screen after drawing, whose round has no code yet; the drawings shown with
-   their board; and the day's score board, which belongs to no round. Every other
-   screen is worked out from the code in the address, which is the better record
-   because it survives being sent to somebody else. */
+/* Where the player is, for the screens the address cannot describe: the "what now"
+   screen after drawing, whose round has no code yet; the drawings shown with their
+   board; the day's score board, which belongs to no round; and the archive. Every other
+   screen is worked out from the code in the address, which is the better record because
+   it survives being sent to somebody else.
+
+   This is what a reload uses to stay put. Opening the app is a different matter -- see
+   the boot at the foot of the file, which starts at the start unless a round is left
+   unfinished. */
 const PLACES = { between: 1, send: 1, review: 1, scores: 1, archiveScreen: 1 };
 
 /* Screens on the way to somewhere else. They must not record a place, and must not
@@ -1595,14 +1597,15 @@ function buildHome(){
 /* The way in, and whether there is anything behind it. A button opening an empty page is
    worse than no button, so it waits until this device has finished something. */
 function archiveButton(){
-  const store = loadStore();
-  const any = Object.keys(store.rounds || {}).some(function(c){
-    return store.rounds[c] && store.rounds[c].done;
-  });
-  $("archiveSec").hidden = !any;
+  const codes = finishedCodes();
+  $("archiveSec").hidden = codes.length === 0;
+  if (!codes.length) return;
+  buildArchive("archive", 2);
+  // A way through only when there is something through it.
+  $("archiveOpen").hidden = codes.length <= 2;
 }
 
-$("archiveOpen").onclick = function(){ buildArchive(); show("archiveScreen"); };
+$("archiveOpen").onclick = function(){ buildArchive("archiveFull", 0); show("archiveScreen"); };
 $("archiveBack").onclick = function(){ goBack("home"); };
 
 /* ------------------------------------------------------------- arşiv --- */
@@ -1649,15 +1652,24 @@ function archiveWhen(at){
   return p(d.getDate()) + "/" + p(d.getMonth() + 1);
 }
 
-function buildArchive(){
-  const box = $("archive");
-  if (!box) return;
+/* The rounds this device has finished, newest first. */
+function finishedCodes(){
   const store = loadStore();
-  const codes = Object.keys(store.rounds || {})
+  return Object.keys(store.rounds || {})
     .filter(function(c){ return store.rounds[c] && store.rounds[c].done; })
     .sort(function(a, b){ return (store.rounds[b].at || 0) - (store.rounds[a].at || 0); });
+}
 
-  $("archiveEmpty").hidden = codes.length > 0;
+/* Into whichever list is asked for: the short one on the start screen, or the whole
+   thing on its own page. A limit of 0 means all of them. */
+function buildArchive(boxId, limit){
+  const box = $(boxId);
+  if (!box) return;
+  const store = loadStore();
+  const all = finishedCodes();
+  const codes = limit ? all.slice(0, limit) : all;
+
+  if ($("archiveEmpty")) $("archiveEmpty").hidden = all.length > 0;
   if (archiveIO) archiveIO.disconnect();
   if (archiveRO) archiveRO.disconnect();
   archiveIO = typeof IntersectionObserver !== "undefined"
@@ -3542,23 +3554,18 @@ buildHome();
   const m = /[?&]o=([^&]+)/.exec(location.search || "");
   if (m){ loadGame(decodeURIComponent(m[1])); return; }
 
-  // Otherwise, back to the screen the player was on, when it is one the address
-  // cannot describe and the thing it was showing is still here.
+  /* Otherwise the start screen, with one exception: twenty drawings that have not been
+     saved anywhere yet. Those would be lost, so they are put back.
+
+     The day's board and the archive are deliberately not restored here. Reloading while
+     looking at one returns to it -- that is the trail, and it happens inside the visit --
+     but opening the app is not the same act as refreshing a page, and landing on a score
+     board instead of the start screen is not what anyone asked for. */
   const place = savedPlace();
-  if (!place) return;
-  const store = loadStore();
-  const pending = store.pending;
-  if (place.screen === "between" && pending && Array.isArray(pending.words) && pending.words.length === N){
+  if (!place || place.screen !== "between") return;
+  const pending = loadStore().pending;
+  if (pending && Array.isArray(pending.words) && pending.words.length === N){
     resumePending(pending);
-    return;
-  }
-  if (place.screen === "scores" && place.day && place.day === dailyDayNumber()){
-    openDailyBoard();
-    return;
-  }
-  if (place.screen === "archiveScreen"){
-    buildArchive();
-    show("archiveScreen");
   }
 })();
 })();
