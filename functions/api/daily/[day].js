@@ -106,6 +106,10 @@ export async function onRequestGet({ params, env }) {
     && Date.now() - summary.scannedAt < REPAIR_AFTER;
   if (fresh) return json({ day, scores: rank(summary.scores) });
 
+  // No summary means nobody has played the day yet: every score post writes one. Listing
+  // here found nothing and repeated on every poll, since an empty day never writes one.
+  if (!summary || !Array.isArray(summary.scores)) return json({ day, scores: [] });
+
   const merged = mergeBoards(summary, await scanBoard(env, day));
   const had = summary && Array.isArray(summary.scores) ? summary.scores.length : 0;
   if (merged.length > 0 && merged.length >= had) {

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-09-16 — a KV list a second
+
+Cloudflare warned that half of the day's free KV allowance was gone with almost nobody
+playing. Its analytics named the operation: **675 lists** against a limit of 1,000, and
+**674 reads that found nothing** — one of each, paired.
+
+That pair is an empty score board being polled. A board read looks for the summary the
+score posts write, and when there was none it listed the per-player keys to reconcile.
+An empty board never writes a summary, so it never stopped: one list a second for as long
+as günün skorları, çizimlerine dön or an unnamed result stayed on screen. Eleven minutes
+of that is the whole day's 675.
+
+- A board read with no summary now answers empty and lists nothing. Every score post
+  writes the summary in the same request as the player's row, so there were no rows for
+  the list to find. Measured against the real handlers: an empty board polled for a
+  minute went from 60 reads and 60 lists to 60 reads and none.
+- The five-minute reconcile of a board that already has scores is unchanged.
+
+Not fixed here, and worth knowing: the board still polls once a second, a round is saved
+when its guessing starts rather than when it is shared, and opening a round link reads
+the round twice (once for the link preview, once for the game).
+
 ## 2026-09-16 — two games, one screen each
 
 A pass over every screen, after watching people play. Most of it removes a second way

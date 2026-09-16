@@ -52,9 +52,9 @@ function rank(scores) {
 }
 
 // How stale a summary may get before a read reconciles it against the per-player
-// keys. Every reader polls this endpoint every 6s, so this is what keeps the
+// keys. Every reader polls this endpoint once a second, so this is what keeps the
 // listing cost bounded: one list (and one write) per round per window, however
-// many people are watching.
+// many people are watching. A board with no summary is not reconciled at all.
 const REPAIR_AFTER = 5 * 60 * 1000;
 
 // KV caches a read at the network location that served it. A write only clears the
@@ -120,7 +120,12 @@ export async function onRequestGet({ params, env }) {
     && Date.now() - summary.scannedAt < REPAIR_AFTER;
   if (fresh) return json({ scores: rank(summary.scores) });
 
-  // Either there is no summary yet, or it is old enough to be worth reconciling.
+  // No summary means nobody has posted: every score post writes one in the same request
+  // as the player's row. Listing here found nothing and, because an empty board never
+  // writes a summary, did it again on every poll -- a KV list a second per open screen.
+  if (!summary || !Array.isArray(summary.scores)) return json({ scores: [] });
+
+  // The summary is old enough to be worth reconciling.
   // A summary written while listing was lagging can be missing players outright;
   // this is what puts them back, and without it an incomplete board would stay
   // incomplete until somebody happened to finish the round again.
