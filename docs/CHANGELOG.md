@@ -37,6 +37,9 @@ of doing something that already had one.
   ten drawn at random came out half birds and the day read as a round about birds rather
   than about a shape. Over three years of days the cap holds: never more than two, and
   94% of days have none, against days of five, seven and nine before.
+- The four families that gave words to `winged` were topped back up: `tümsek` to
+  `domed`, `dal` and `şiş kebap` to `stick`, `kızak`, `sörf tahtası` and `köpekbalığı`
+  to `horizontal`. The pool stands at 461 words.
 - A family is now eligible only if it can field a legal ten — eight free non-birds under
   the cap — so a day can never be asked for words it cannot supply. For every family but
   the winged one this is the same test as before, and the seeded shuffle is untouched, so

@@ -35,7 +35,7 @@
       ]
     ]
   },
-  "totalWords": 455,
+  "totalWords": 461,
   "families": [
     {
       "id": "boxy",
@@ -157,6 +157,7 @@
         "paraşüt",
         "semer",
         "tas",
+        "tümsek",
         "tünel",
         "yay"
       ]
@@ -224,15 +225,18 @@
         "karavan",
         "kayık",
         "kertenkele",
+        "kızak",
         "koltuk",
         "koyun",
         "köpek",
+        "köpekbalığı",
         "kurt",
         "masa",
         "minibüs",
         "otobüs",
         "sedye",
         "sehpa",
+        "sörf tahtası",
         "tekne",
         "tilki",
         "timsah",
@@ -423,6 +427,7 @@
         "çatal",
         "çekiç",
         "çivi",
+        "dal",
         "diş fırçası",
         "fırça",
         "flüt",
@@ -445,6 +450,7 @@
         "sopa",
         "sosis",
         "spatula",
+        "şiş kebap",
         "tarak",
         "tebeşir",
         "testere",

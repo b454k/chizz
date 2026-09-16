@@ -31,13 +31,13 @@ tidying at some point.)
 | family | the shape | words |
 |---|---|---:|
 | `boxy` | a rectangle with corners: boxes, screens, books, bags | 43 |
-| `horizontal` | long and low, wider than tall: vehicles, big animals, furniture | 39 |
+| `horizontal` | long and low, wider than tall: vehicles, big animals, furniture | 41 |
+| `winged` | wings out to the sides: birds, insects, and anything that throws two halves wide | 41 |
 | `curved` | a flowing curve with no corners: clouds, hearts, snakes, body parts | 38 |
 | `stick` | a long thin rod: pens, tools, cutlery, fish | 38 |
 | `round` | a closed circle: balls, fruit, faces, clock faces | 35 |
 | `vertical` | tall and narrow, standing up: poles, bottles, trees, towers | 35 |
 | `handled` | a body with a stalk or handle: cups, jugs, tools you hold | 32 |
-| `winged` | wings out to the sides: birds and insects | 31 |
 | `peaked` | a triangle or cone, pointed at the top: hats, mountains, sails | 30 |
 | `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 30 |
 | `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 26 |
@@ -45,7 +45,7 @@ tidying at some point.)
 | `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 24 |
 | `oval` | small and egg-shaped: seeds, nuts, pebbles | 22 |
 
-**455 words.** Checked: no word is in two families, no rejected word is back, and every
+**461 words.** Checked: no word is in two families, no rejected word is back, and every
 word the free game uses is in here. `tools/check-words.js` checks all of it, including
 that the copy of the pool inside `public/index.html` matches this record exactly.
 
@@ -61,6 +61,12 @@ barely moved — `domed` 8.8 to 9.3 days, `stick` 6.2 to 6.3, `horizontal` uncha
 
 The family is no longer only birds and insects: it is anything whose drawing throws two
 halves wide, which is what the shape was always about.
+
+The families that gave those four words up were topped back up: `tümsek` to `domed`,
+`dal` and `şiş kebap` to `stick`, `kızak`, `sörf tahtası` and `köpekbalığı` to
+`horizontal`. Not replacing them would have cost little — `domed` 8.8 days between
+appearances instead of 9.3, `stick` 6.2 instead of 6.3, `horizontal` unchanged — but
+`domed` is the smallest family and was the one that could least afford it.
 
 Ten were added to give `domed` and `ring` room to breathe — `bere`, `midye`,
 `deniz kabuğu`, `mağara`, `semer`, `beşik` and `kapak` to `domed`; `çelenk`, `kement`,
