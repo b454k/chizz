@@ -68,6 +68,10 @@ where you were.
   there still returns to the start screen. Saving them stroke by stroke would cost more
   than it buys.
 - The two mode boxes no longer sit flush against the settings panel under them.
+- **The drawings shown before guessing name nothing.** çizimlere dön borrowed the
+  result screen, captions and all, so a round that had not been guessed yet was
+  displayed with every answer written under it. The review grid carries no captions,
+  and the zoom holds its tongue until the round is over.
 
 ### The bare address
 

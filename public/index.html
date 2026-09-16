@@ -2240,17 +2240,21 @@ function openZoom(pos){
   paintPreview($("zoomPrev"), di);
   const cap = $("zoomCap");
   cap.innerHTML = "";
-  const guess = picks[pos] && String(picks[pos]).trim();
-  if (!isCorrect(picks[pos], words[di])){
-    const bad = document.createElement("span");
-    bad.className = "bad";
-    bad.textContent = guess ? guess : "\u2014";
-    cap.appendChild(bad);
+  // A bigger look at the drawing is fine at any time; the word is not. viewOnly means
+  // the round below has not been guessed yet, so there is nothing to tell.
+  if (!viewOnly){
+    const guess = picks[pos] && String(picks[pos]).trim();
+    if (!isCorrect(picks[pos], words[di])){
+      const bad = document.createElement("span");
+      bad.className = "bad";
+      bad.textContent = guess ? guess : "\u2014";
+      cap.appendChild(bad);
+    }
+    const good = document.createElement("span");
+    good.className = "good";
+    good.textContent = words[di];
+    cap.appendChild(good);
   }
-  const good = document.createElement("span");
-  good.className = "good";
-  good.textContent = words[di];
-  cap.appendChild(good);
   $("zoom").classList.add("on");
 }
 
@@ -2365,12 +2369,10 @@ function buildReview(){
   const g = $("resultGrid");
   resetGridObserver();
   g.innerHTML = "";
+  // No captions. This screen is reached before the round has been guessed, so a word
+  // written under its drawing would be the answer handed over.
   order.forEach(function(di, pos){
     const cell = makeCell(pos, di);
-    const good = document.createElement("span");
-    good.className = "good";
-    good.textContent = words[di];
-    cell.querySelector(".cap").appendChild(good);
     cell.classList.add("tappable");
     cell.onclick = function(){ openZoom(pos); };
     g.appendChild(cell);
