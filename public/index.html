@@ -118,7 +118,7 @@
 
   /* Side by side, the way the choice is made: kelimeler açık on the left,
      kelimeler gizli on the right. */
-  .diffs{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .diffs{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 14px;}
   .diff{
     border:2px solid var(--line); border-radius:14px; padding:12px 13px; text-align:left;
     background:var(--panel);
@@ -1218,6 +1218,65 @@ function rememberDay(day, patch){
   saveStore(store);
 }
 
+/* Where the player is, for the three screens the address cannot describe: the "what
+   now" screen after drawing, whose round has no code yet; the drawings shown with
+   their board; and the day's score board, which belongs to no round. Every other
+   screen is worked out from the code in the address, which is the better record
+   because it survives being sent to somebody else. */
+const PLACES = { between: 1, send: 1, review: 1, scores: 1 };
+
+/* Screens on the way to somewhere else. They must not record a place, and must not
+   clear one either: fetching a round puts the loading screen up first, which was
+   erasing the memory of where the player had been before it could be read. */
+const PASSING = { loading: 1, countdown: 1, draw: 1 };
+
+function rememberPlace(screen){
+  if (PASSING[screen]) return;
+  const store = loadStore();
+  if (!PLACES[screen]){
+    if (store.place){ delete store.place; saveStore(store); }
+    return;
+  }
+  store.place = { screen: screen, code: lastCode || "", day: isDaily ? dailyDay : 0 };
+  saveStore(store);
+}
+
+function savedPlace(){ return loadStore().place || null; }
+
+/* Twenty drawings with nowhere to live yet: a round gets its code when it is sent or
+   when guessing starts, so until then a reload would throw the drawings away. */
+function rememberPending(){
+  const store = loadStore();
+  store.pending = {
+    setId: setId, modeId: modeId, secs: secs,
+    words: words, drawings: encodeDrawings(drawings)
+  };
+  saveStore(store);
+}
+
+function clearPending(){
+  const store = loadStore();
+  if (!store.pending) return;
+  delete store.pending;
+  saveStore(store);
+}
+
+function resumePending(rec){
+  isDaily = false; dailyDay = 0; afterDraw = "";
+  setId = SETS.some(function(s){ return s.id === rec.setId; }) ? rec.setId : SETS[0].id;
+  modeId = MODES.some(function(m){ return m.id === rec.modeId; }) ? rec.modeId : modeId;
+  secs = clampSecs(rec.secs);
+  role = "solo"; drawerName = ""; lastCode = "";
+  scores = []; scoreSent = false;
+  recallStart = 0; recallMs = 0;
+  words = rec.words.slice();
+  drawings = decodeDrawings(rec.drawings || []);
+  order = shuffle(words.map(function(_, i){ return i; }));
+  picks = new Array(N).fill(null);
+  selPos = -1;
+  show("between");
+}
+
 function drewToday(){
   const rec = savedDay(dailyDayNumber());
   return !!(rec && rec.drawn);
@@ -1252,9 +1311,15 @@ function show(id){
   const list = document.querySelectorAll(".screen");
   for (let i = 0; i < list.length; i++) list[i].classList.toggle("on", list[i].id === id);
   if (typeof closeZoom === "function") closeZoom();
-  // The day's line goes stale the moment it is played, and every route back to the
-  // start screen has to show the new state, not just the ones that rebuild the page.
-  if (id === "home" && typeof buildDailyRow === "function") buildDailyRow();
+  if (id === "home"){
+    // Leaving a round leaves its address behind as well. Without this a reload on the
+    // start screen walks back into the round the player has just stepped out of.
+    if (typeof clearUrl === "function") clearUrl();
+    // The day's line goes stale the moment it is played, and every route back to the
+    // start screen has to show the new state, not just the ones that rebuild the page.
+    if (typeof buildDailyRow === "function") buildDailyRow();
+  }
+  if (typeof rememberPlace === "function") rememberPlace(id);
   // The code can arrive from a save, a reload, or a link, so the chip is refreshed
   // on every screen change rather than at any one of those points.
   if (typeof updateCodeChip === "function") updateCodeChip();
@@ -1519,6 +1584,8 @@ function randomSet(){
 }
 
 function startGame(){
+  clearPending();
+  clearUrl();                 // this round has no code yet; the last one's must not linger
   const s = randomSet();
   setId = s.id;
   lastSetId = s.id;
@@ -1545,6 +1612,8 @@ function startGame(){
    a score posted to the day board means the same thing for everybody. The settings
    panel is deliberately ignored here. */
 function startDaily(){
+  clearPending();
+  clearUrl();
   dailyDay = dailyDayNumber();
   isDaily  = true;
   modeId   = "typed";
@@ -1760,6 +1829,8 @@ function nextWord(){
     // Keep the drawings: the player may go and guess their friend's round first
     // and come back to their own, possibly after a reload.
     rememberDay(dailyDay, { drawn: true, words: words, drawings: encodeDrawings(drawings) });
+  } else {
+    rememberPending();
   }
   if (afterDraw === "pick"){ afterDraw = ""; showPick(); return; }
   show("between");
@@ -1819,8 +1890,8 @@ function confirmExit(){
   pausedAt = 0;
   live.clear();
   closeSheet(); closeModal(); closeZoom();
-  clearUrl();
-  show("home");
+  clearPending();
+  show("home");                    // which clears the address on the way
 }
 
 $("backDraw").onclick    = askExit;
@@ -2311,6 +2382,9 @@ function buildReview(){
   fillNameRow();
   showBoard();
   show("result");
+  // This screen borrows the result's section, so the place has to be named here: what
+  // show() recorded is "result", which would send a reload to the link screen instead.
+  rememberPlace("review");
   paintAll("resultGrid");
 }
 
@@ -2707,6 +2781,7 @@ function postRound(name){
     // Guessing may have started before this save returned, when there was no code to
     // stamp the start time on, so it travels with the save.
     rememberRound(lastCode, { mine: true, owner: r.data.owner || "", order: order, picks: picks, startedAt: recallStart || 0 });
+    clearPending();                 // it has a code now; that is the better record
     if (isDaily) rememberDay(dailyDay, { code: lastCode });
     setUrlCode(lastCode);
     return lastCode;
@@ -2860,6 +2935,14 @@ function loadGame(code){
     if (rec && rec.done){             // already played on this device: straight to the scores
       buildResult();
       return;
+    }
+    // A round of this device's own can be looked at two ways -- the link screen or the
+    // drawings with their board -- and the address says nothing about which. The place
+    // does, so a reload stays where the player was.
+    const place = savedPlace();
+    if (place && place.code === code && rec && rec.mine){
+      if (place.screen === "review"){ buildReview(); return; }
+      if (place.screen === "send"){ openShareScreen("home"); return; }
     }
     // Drawn today but neither round started: a reload on the choice screen returns to it.
     const day = todaysDuel ? (savedDay(dailyDay) || {}) : null;
@@ -3022,10 +3105,25 @@ applyTheme();
 applyText();
 buildHome();
 
-// did we arrive through a duel link?
+// Did we arrive through a duel link? That is the strongest record of where to be,
+// because it describes the round rather than this device's last move.
 (function(){
   const m = /[?&]o=([^&]+)/.exec(location.search || "");
-  if (m) loadGame(decodeURIComponent(m[1]));
+  if (m){ loadGame(decodeURIComponent(m[1])); return; }
+
+  // Otherwise, back to the screen the player was on, when it is one the address
+  // cannot describe and the thing it was showing is still here.
+  const place = savedPlace();
+  if (!place) return;
+  const store = loadStore();
+  const pending = store.pending;
+  if (place.screen === "between" && pending && Array.isArray(pending.words) && pending.words.length === N){
+    resumePending(pending);
+    return;
+  }
+  if (place.screen === "scores" && place.day && place.day === dailyDayNumber()){
+    openDailyBoard();
+  }
 })();
 })();
 </script>

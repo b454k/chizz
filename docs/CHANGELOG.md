@@ -46,6 +46,29 @@ of doing something that already had one.
   score, the invite and the link preview. Before, only a score posted from the day
   board said so.
 
+### Reloading
+
+Every screen was walked through with a reload, and the answer now is: you come back to
+where you were.
+
+- **Leaving a round leaves its address behind.** ana ekran from the link screen kept
+  `?o=CODE` in the bar, so a reload walked straight back into the round that had just
+  been left. Showing the start screen now clears it, which fixes every route home at
+  once rather than the one that was noticed.
+- **The screens the address cannot describe are remembered on the device**: the "what
+  now" screen after drawing, whose round has no code yet; the drawings shown with their
+  board; and the day's score board, which belongs to no round. Each is restored only if
+  the thing it was showing is still there.
+- **Twenty drawings are no longer lost to a reload.** A round gets its code when it is
+  sent or when guessing starts; before that the drawings lived only in memory. They are
+  kept on the device until the round has a code of its own, and dropped when it does,
+  when a new round starts, or when the round is abandoned.
+- The one screen that cannot survive a reload is the **drawing phase itself**: the
+  strokes, the word order and the clock are not written down mid-round, and a reload
+  there still returns to the start screen. Saving them stroke by stroke would cost more
+  than it buys.
+- The two mode boxes no longer sit flush against the settings panel under them.
+
 ### The bare address
 
 - chizz.party pasted on its own showed a globe and a sentence scraped out of the page.
