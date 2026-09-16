@@ -2,21 +2,33 @@
 <html lang="tr">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>chizz</title>
-<!-- What the address alone should say when it is pasted somewhere. A round's link
-     gets its own title, description and picture from functions/_middleware.js. -->
-<meta name="description" content="20 kelime, 20 çizim, her biri için birkaç saniye. sonra: hangisi neydi? arkadaşlarınla oyna.">
+<title>chizz · çizim hafıza oyunu</title>
+<!-- What the address alone should say when it is pasted somewhere or found in a search.
+     A round's link gets its own title, description and picture from
+     functions/_middleware.js, which rewrites these tags where they stand.
+
+     The description names chizz because a search for the name shows whatever text on the
+     page contains it -- a description without the word lost to the game's own labels.
+     The title is more than the bare name because search engines rewrite a one-word title
+     (and capitalised it). -->
+<meta name="description" content="chizz: 20 kelime, 20 çizim, her biri için birkaç saniye. sonra hangi çizim hangi kelimeydi? arkadaşlarınla oyna ya da günlük oyunda herkesle yarış.">
 <meta property="og:title" content="chizz">
-<meta property="og:description" content="20 kelime, 20 çizim, her biri için birkaç saniye. sonra: hangisi neydi? arkadaşlarınla oyna.">
+<meta property="og:description" content="20 kelime, 20 çizim, her biri için birkaç saniye. sonra hangi çizim hangi kelimeydi? arkadaşlarınla oyna ya da günlük oyunda herkesle yarış.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="chizz">
+<meta property="og:url" content="https://chizz.party/">
+<meta property="og:image" content="https://chizz.party/icon-512.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#131418">
-<!-- A file rather than a data: URI, because link previews and search results fetch
-     the icon by URL and skip an inlined one -- which is why the card showed a globe. -->
+<!-- Files, not data: URIs. Search results and link previews fetch the icon by URL, and
+     most of them only take /favicon.ico or a PNG. tools/make-icons.js draws them. -->
+<link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/icon.svg">
-<!-- Inline so it costs no request and keeps the "nothing loaded from outside" rule. -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23131418'/%3E%3Ctext x='32' y='34' font-family='Helvetica,Arial,sans-serif' font-size='46' font-weight='700' fill='%23ff5c3d' text-anchor='middle' dominant-baseline='central'%3Ec%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"chizz","url":"https://chizz.party/"}</script>
 <style>
   :root{
     color-scheme:dark;
@@ -131,6 +143,8 @@
   }
   .diff.sel .mdesc{color:var(--ink); opacity:.75;}
   .diff.sel{border-color:var(--ink); background:var(--panel2);}
+  #chooseModes{margin:6px 0 14px; text-align:left;}
+  #answersNote{color:var(--muted); font-size:14px; text-align:center; padding:14px;}
 
   /* settings on the home screen */
   .settings{
@@ -252,19 +266,20 @@
   .chip2 .cl{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
 
   /* leave-game confirmation */
-  #confirm, #finishAsk, #timeAsk{
+  #confirm, #finishAsk, #timeAsk, #nameAsk{
     position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
     display:none; align-items:center; justify-content:center; padding:16px;
   }
-  #confirm.on, #finishAsk.on, #timeAsk.on{display:flex;}
-  #confirmCard, #finishAskCard, #timeAskCard{
+  #confirm.on, #finishAsk.on, #timeAsk.on, #nameAsk.on{display:flex;}
+  #confirmCard, #finishAskCard, #timeAskCard, #nameAskCard{
     box-sizing:border-box;   /* the padding has to fit inside 100%, or the card runs off a narrow phone */
     background:var(--panel); border-radius:18px; padding:20px; width:100%; max-width:360px;
     box-shadow:0 20px 60px rgba(0,0,0,.28); text-align:center;
   }
-  #confirmCard b, #finishAskCard b, #timeAskCard b{display:block; font-size:19px; margin-bottom:6px;}
-  #confirmCard p, #finishAskCard p, #timeAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
-  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary{margin:14px 0 8px;}
+  #confirmCard b, #finishAskCard b, #timeAskCard b, #nameAskCard b{display:block; font-size:19px; margin-bottom:6px;}
+  #confirmCard p, #finishAskCard p, #timeAskCard p, #nameAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
+  #nameAskCard .txt{margin:14px 0 0; text-align:center;}
+  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary, #nameAskCard .primary{margin:14px 0 8px;}
   #word{font-size:34px; font-weight:800; letter-spacing:-.02em; flex:1; min-width:0;
         overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   #counter{font-variant-numeric:tabular-nums; color:var(--muted); font-weight:700; font-size:15px;}
@@ -472,6 +487,11 @@
   }
   .brow:last-child{border-bottom:none;}
   .brow.me{background:var(--panel2); box-shadow:inset 3px 0 0 var(--accent);}
+  .brow.opens{cursor:pointer;}
+  .brow.opens .nm{text-decoration:underline; text-decoration-color:var(--muted);
+                  text-underline-offset:3px;}
+  .bhint{color:var(--muted); font-size:12px; margin:0; padding:8px 14px;
+         border-bottom:1px solid var(--line); text-align:center;}
   .bhead .rk, .brow .rk{width:24px; color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;}
   .bhead .nm, .brow .nm{flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .bhead .tm, .brow .tm{width:64px; text-align:right; color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums;}
@@ -497,7 +517,7 @@
   #modalPrev{background:var(--paper);}
 </style>
 
-<div id="app">
+<div id="app" data-nosnippet>
 
   <!-- ============ ANA EKRAN ============ -->
   <section class="screen on" id="home">
@@ -563,6 +583,32 @@
       <p data-t="gateBody"></p>
       <button class="primary" id="gateDraw" data-t="draw"></button>
       <button class="ghost" id="gateHome" data-t="home"></button>
+    </div>
+  </section>
+
+  <!-- A friend's round, opened: how to guess it. Asked every time a round is opened
+       before its guessing has started; the drawer's own choice does not bind anyone. -->
+  <section class="screen mid" id="choose">
+    <div class="stack">
+      <h2 id="chooseTitle"></h2>
+      <p id="chooseBody"></p>
+      <div class="diffs" id="chooseModes"></div>
+      <button class="ghost" id="chooseHome" data-t="home"></button>
+    </div>
+  </section>
+
+  <!-- One player's answers on a round's board, reached by tapping their name. -->
+  <section class="screen" id="answers">
+    <div class="head">
+      <div class="headrow">
+        <button class="back" id="answersBack" data-tal="back">←</button>
+        <h2 id="answersTitle"></h2>
+      </div>
+      <p id="answersSub"></p>
+    </div>
+    <div class="scroll">
+      <p id="answersNote" hidden></p>
+      <div class="grid" id="answersGrid"></div>
     </div>
   </section>
 
@@ -703,7 +749,7 @@
       <!-- Outside the board, so the name can be set even on a round that has no
            score table: it still decides what a shared link says. -->
       <div id="nameBlock">
-        <p class="nlabel" data-t="yourName"></p>
+        <p class="nlabel" id="nameLabel" data-t="yourName"></p>
         <div class="namerow" id="nameRow">
           <input class="txt" id="nameField" maxlength="10" data-tph="nameHint"
                  autocorrect="off" spellcheck="false" enterkeyhint="done">
@@ -715,6 +761,7 @@
       <p class="bcode" id="boardCode" hidden></p>
       <div id="board" hidden>
         <h3 id="boardTitle"></h3>
+        <p class="bhint" id="boardHint" hidden data-t="tapForAnswers"></p>
         <p id="boardEmpty" hidden data-t="firstToPlay"></p>
         <div class="bhead" id="boardHead">
           <span class="rk">#</span>
@@ -753,6 +800,18 @@
     <p data-t="leaveBody"></p>
     <button class="primary" id="confirmStay" data-t="stay"></button>
     <button class="ghost" id="confirmLeave" data-t="leave"></button>
+  </div>
+</div>
+
+<!-- Asked once, after the first drawing on a device. There is no way past it without a
+     name: the score table and every shared line carry one. -->
+<div id="nameAsk">
+  <div id="nameAskCard">
+    <b data-t="nameAskTitle"></b>
+    <p data-t="nameAskBody"></p>
+    <input class="txt" id="nameAskField" maxlength="10" data-tph="namePlaceholder"
+           autocorrect="off" spellcheck="false" enterkeyhint="done">
+    <button class="primary off" id="nameAskGo" data-t="saveName"></button>
   </div>
 </div>
 
@@ -1092,6 +1151,15 @@ const TEXT = {
   perWord:          "kelime başına süre",
   theme:            "tema",
   yourName:         "adın",
+  chooseTitle:      "nasıl tahmin etmek istersin?",
+  tapForAnswers:    "üzerine tıklayarak arkadaşlarının cevaplarını görebilirsin",
+  answersOf:        "{whose} cevapları",
+  loadingAnswers:   "cevaplar yükleniyor…",
+  noAnswers:        "bu cevaplar kaydedilmemiş.",
+  changeName:       "adını değiştirmek ister misin?",
+  nameAskTitle:     "adın ne?",
+  nameAskBody:      "skor tablolarında ve paylaştığın linklerde bu adla görüneceksin.",
+  archiveUnsaved:   "henüz kaydedilmedi",
   nameHint:         "adını yaz",
   nameSaved:        "kaydedildi ✓",
   themeDark:        "koyu",
@@ -1381,52 +1449,99 @@ function rememberDay(day, patch){
   saveStore(store);
 }
 
-/* Where the player is, for the screens the address cannot describe: the "what now"
-   screen after drawing, whose round has no code yet; the drawings shown with their
-   board; the day's score board, which belongs to no round; and the archive. Every other
-   screen is worked out from the code in the address, which is the better record because
-   it survives being sent to somebody else.
+/* Every screen the player arrives at is an entry in the browser's own history, carrying
+   the screen and the round it belongs to. That one record is what the back button walks,
+   what a reload reads to come back to the screen it was on, and what a fresh visit lacks
+   -- which is how the two are told apart.
 
-   This is what a reload uses to stay put. Opening the app is a different matter -- see
-   the boot at the foot of the file, which starts at the start unless a round is left
-   unfinished. */
-const PLACES = { between: 1, send: 1, review: 1, scores: 1, archiveScreen: 1 };
+   A drawing round owns a single entry from its countdown on, so the back button can be
+   caught there and asked about instead of silently throwing the drawings away. */
+const ROUND_SCREENS = { send: 1, review: 1, result: 1, recall: 1, gate: 1, pick: 1, choose: 1, answers: 1 };
 
-/* Screens on the way to somewhere else. They must not record a place, and must not
-   clear one either: fetching a round puts the loading screen up first, which was
-   erasing the memory of where the player had been before it could be read. */
-const PASSING = { loading: 1, countdown: 1, draw: 1 };
+let historyQuiet = false;    // the next arrival replaces the entry rather than adding one
+let leavingRound = false;    // a deliberate exit from a round, not a back press to catch
 
-/* Where the player has been, so "back" can mean the screen before rather than a guess
-   written into each button. Screens only passed through are left out of it, and so is a
-   repeat of the screen already on top. */
-const screenTrail = [];
-
-function trailPush(screen){
-  if (PASSING[screen]) return;
-  if (screenTrail[screenTrail.length - 1] === screen) return;
-  screenTrail.push(screen);
-  if (screenTrail.length > 12) screenTrail.shift();
+function historyUrl(screen){
+  return location.pathname +
+    (ROUND_SCREENS[screen] && lastCode ? "?o=" + encodeURIComponent(lastCode) : "");
 }
 
+function recordArrival(screen){
+  if (screen === "loading" || screen === "draw") return;   // on the way, or inside the round's entry
+  if (screen === "countdown") screen = "draw";
+  const here = history.state || {};
+  const state = { screen: screen, code: ROUND_SCREENS[screen] ? lastCode : "", depth: here.depth || 0 };
+  if (screen === "answers") state.who = answersOf;
+  try {
+    // Replace when restoring, when nothing has changed, or when a round ends: a finished
+    // or abandoned round is not a step to go back into.
+    if (historyQuiet || (here.screen === screen && here.code === state.code) || here.screen === "draw"){
+      history.replaceState(state, "", historyUrl(screen));
+    } else {
+      state.depth = (here.depth || 0) + 1;
+      history.pushState(state, "", historyUrl(screen));
+    }
+  } catch (e) { /* private modes that refuse history: the game still works */ }
+  historyQuiet = false;
+}
+
+/* Back, for the arrows drawn on the page: the same step the browser's own button takes,
+   so the two can never disagree. With nothing earlier in this visit to go back to, the
+   fallback screen instead. */
 function goBack(fallback){
-  screenTrail.pop();                       // the screen we are on
-  const prev = screenTrail.pop();          // the one before it
-  show(prev || fallback || "home");
+  if (history.state && history.state.depth > 0) history.back();
+  else show(fallback || "home");
 }
 
-function rememberPlace(screen){
-  if (PASSING[screen]) return;
-  const store = loadStore();
-  if (!PLACES[screen]){
-    if (store.place){ delete store.place; saveStore(store); }
+/* Put a history entry's screen back on, without adding another entry for it. */
+function restoreEntry(st){
+  $("finishAsk").classList.remove("on");
+  $("timeAsk").classList.remove("on");
+  historyQuiet = true;
+  const s = st && st.screen;
+  if (s === "scores"){ openDailyBoard(); return; }
+  if (s === "archiveScreen"){ buildArchive("archiveFull", 0); show("archiveScreen"); return; }
+  // The link form before the round is saved has no code yet: its drawings are the unsaved ones.
+  if (s === "between" || (s === "send" && !st.code)){
+    const p = loadStore().pending;
+    if (p && Array.isArray(p.words) && p.words.length === N){
+      resumePending(p);
+      if (s === "send"){ historyQuiet = true; openShareScreen("between"); }
+      return;
+    }
+  }
+  if (ROUND_SCREENS[s] && st.code){
+    // The round already in memory: put the screen back as it was.
+    if (st.code === lastCode && words && words.length === N){
+      if (s === "result"){ buildResult(); return; }
+      if (s === "review"){ buildReview(); return; }
+      if (s === "recall"){ buildRecall(); return; }
+      if (s === "send"){ openShareScreen("home"); return; }
+      if (s === "pick"){ showPick(); return; }
+      if (s === "gate"){ show("gate"); return; }
+      if (s === "choose"){ showChoose(); return; }
+      if (s === "answers" && st.who){ openAnswers(st.who); return; }
+    }
+    loadGame(st.code, s, st.who);
     return;
   }
-  store.place = { screen: screen, code: lastCode || "", day: isDaily ? dailyDay : 0 };
-  saveStore(store);
+  show("home");
 }
 
-function savedPlace(){ return loadStore().place || null; }
+window.addEventListener("popstate", function(e){
+  const drawing = $("draw").classList.contains("on") || $("countdown").classList.contains("on");
+  if (drawing && !leavingRound){
+    // A half-drawn round is not something to step out of by accident: put the round's
+    // entry back, and ask, exactly as the arrow on the drawing screen does.
+    try {
+      history.pushState({ screen: "draw", code: "", depth: ((e.state && e.state.depth) || 0) + 1 }, "", location.pathname);
+    } catch (err) {}
+    askExit();
+    return;
+  }
+  leavingRound = false;
+  restoreEntry(e.state || { screen: "home", depth: 0 });
+});
 
 /* Twenty drawings with nowhere to live yet: a round gets its code when it is sent or
    when guessing starts, so until then a reload would throw the drawings away. */
@@ -1434,7 +1549,7 @@ function rememberPending(){
   const store = loadStore();
   store.pending = {
     setId: setId, modeId: modeId, secs: secs,
-    words: words, drawings: encodeDrawings(drawings)
+    words: words, drawings: encodeDrawings(drawings), at: Date.now()
   };
   saveStore(store);
 }
@@ -1460,6 +1575,8 @@ function resumePending(rec){
   picks = new Array(N).fill(null);
   selPos = -1;
   show("between");
+  // A reload can land here with the name question unanswered; it is still required.
+  if (!myName) askName();
 }
 
 function drewToday(){
@@ -1479,8 +1596,13 @@ function rememberRound(code, patch){
 
 // Put the round in the address bar so a reload returns to it instead of the home
 // screen. replaceState, not pushState: the back button should still leave.
+/* The code arrives after the send screen's history entry was made, so that one entry is
+   given its code here. Every other screen gets its address as it is arrived at. */
 function setUrlCode(code){
-  try { history.replaceState(null, "", location.pathname + "?o=" + encodeURIComponent(code)); } catch(e){}
+  try {
+    const st = Object.assign({}, history.state || {}, { code: code });
+    history.replaceState(st, "", location.pathname + "?o=" + encodeURIComponent(code));
+  } catch(e){}
 }
 
 function shuffle(a){
@@ -1492,20 +1614,20 @@ function shuffle(a){
   return a;
 }
 
-function show(id){
+function show(id, as){
   const list = document.querySelectorAll(".screen");
   for (let i = 0; i < list.length; i++) list[i].classList.toggle("on", list[i].id === id);
   if (typeof closeZoom === "function") closeZoom();
   if (id === "home"){
-    // Leaving a round leaves its address behind as well. Without this a reload on the
-    // start screen walks back into the round the player has just stepped out of.
-    if (typeof clearUrl === "function") clearUrl();
     // The day's line goes stale the moment it is played, and every route back to the
     // start screen has to show the new state, not just the ones that rebuild the page.
     if (typeof buildDailyRow === "function") buildDailyRow();
+    // So is arşiv: a round drawn or finished since the page was built belongs in it.
+    if (typeof archiveButton === "function") archiveButton();
   }
-  if (typeof trailPush === "function") trailPush(id);
-  if (typeof rememberPlace === "function") rememberPlace(id);
+  // "as" is for a screen that borrows another's section: the drawings-with-board screen
+  // is the result's section, but it is not the result.
+  if (typeof recordArrival === "function") recordArrival(as || id);
   // The code can arrive from a save, a reload, or a link, so the chip is refreshed
   // on every screen change rather than at any one of those points.
   if (typeof updateCodeChip === "function") updateCodeChip();
@@ -1558,19 +1680,46 @@ function isCorrect(cevap, kelime){
 
 /* ---------------------------------------------------------- ana ekran --- */
 
+function modeCard(m){
+  const b = document.createElement("button");
+  b.className = "diff";
+  const name = document.createElement("b");
+  name.className = "mname";
+  name.textContent = TEXT[m.key];
+  const desc = document.createElement("span");
+  desc.className = "mdesc";
+  desc.textContent = TEXT[m.desc];
+  b.appendChild(name); b.appendChild(desc);
+  return b;
+}
+
+/* A friend's round, before its guessing starts: kelimeler açık or gizli. The choice is
+   kept with the round, so a guess left half done comes back the way it was begun. */
+function showChoose(){
+  $("chooseTitle").textContent = drawerName ? TEXT.whatDidDraw.replace("{name}", drawerName) : TEXT.whatWasDrawn;
+  $("chooseBody").textContent = TEXT.chooseTitle;
+  const box = $("chooseModes");
+  box.innerHTML = "";
+  MODES.forEach(function(m){
+    const b = modeCard(m);
+    b.onclick = function(){
+      modeId = m.id;
+      rememberRound(lastCode, { modeId: m.id });
+      buildRecall();
+    };
+    box.appendChild(b);
+  });
+  show("choose");
+}
+
+$("chooseHome").onclick = function(){ show("home"); };
+
 function buildHome(){
   const box = $("modes");
   box.innerHTML = "";
   MODES.forEach(function(m){
-    const b = document.createElement("button");
-    b.className = "diff" + (m.id === modeId ? " sel" : "");
-    const name = document.createElement("b");
-    name.className = "mname";
-    name.textContent = TEXT[m.key];
-    const desc = document.createElement("span");
-    desc.className = "mdesc";
-    desc.textContent = TEXT[m.desc];
-    b.appendChild(name); b.appendChild(desc);
+    const b = modeCard(m);
+    if (m.id === modeId) b.classList.add("sel");
     b.onclick = function(){ modeId = m.id; rememberSettings(); buildHome(); };
     box.appendChild(b);
   });
@@ -1594,12 +1743,12 @@ function buildHome(){
 /* The way in, and whether there is anything behind it. A button opening an empty page is
    worse than no button, so it waits until this device has finished something. */
 function archiveButton(){
-  const codes = finishedCodes();
-  $("archiveSec").hidden = codes.length === 0;
-  if (!codes.length) return;
+  const items = archiveItems();
+  $("archiveSec").hidden = items.length === 0;
+  if (!items.length) return;
   buildArchive("archive", 2);
   // A way through only when there is something through it.
-  $("archiveOpen").hidden = codes.length <= 2;
+  $("archiveOpen").hidden = items.length <= 2;
 }
 
 $("archiveOpen").onclick = function(){ buildArchive("archiveFull", 0); show("archiveScreen"); };
@@ -1649,12 +1798,17 @@ function archiveWhen(at){
   return p(d.getDate()) + "/" + p(d.getMonth() + 1);
 }
 
-/* The rounds this device has finished, newest first. */
-function finishedCodes(){
+/* What the archive holds, newest first: every round this device finished, every round it
+   drew that nobody has guessed yet, and a drawing never saved at all. The last has no code,
+   so it is carried as the drawing itself. */
+function archiveItems(){
   const store = loadStore();
-  return Object.keys(store.rounds || {})
-    .filter(function(c){ return store.rounds[c] && store.rounds[c].done; })
-    .sort(function(a, b){ return (store.rounds[b].at || 0) - (store.rounds[a].at || 0); });
+  const items = Object.keys(store.rounds || {})
+    .filter(function(c){ const r = store.rounds[c]; return r && (r.done || r.mine); })
+    .map(function(c){ return { code: c, at: store.rounds[c].at || 0 }; });
+  const p = store.pending;
+  if (p && Array.isArray(p.words) && p.words.length === N) items.push({ pending: p, at: p.at || 0 });
+  return items.sort(function(a, b){ return b.at - a.at; });
 }
 
 /* Into whichever list is asked for: the short one on the start screen, or the whole
@@ -1663,8 +1817,8 @@ function buildArchive(boxId, limit){
   const box = $(boxId);
   if (!box) return;
   const store = loadStore();
-  const all = finishedCodes();
-  const codes = limit ? all.slice(0, limit) : all;
+  const all = archiveItems();
+  const items = limit ? all.slice(0, limit) : all;
 
   if ($("archiveEmpty")) $("archiveEmpty").hidden = all.length > 0;
   if (archiveIO) archiveIO.disconnect();
@@ -1680,23 +1834,24 @@ function buildArchive(boxId, limit){
     : null;
 
   box.innerHTML = "";
-  codes.forEach(function(code){
-    const rec = store.rounds[code];
+  items.forEach(function(item){
+    const rec = item.pending ? { mine: true } : store.rounds[item.code];
     const row = document.createElement("button");
     row.className = "arow";
-    row.dataset.code = code;
+    if (item.code) row.dataset.code = item.code;
 
     const head = document.createElement("div");
     head.className = "ahead";
     const when = document.createElement("span");
     when.className = "awhen";
-    when.textContent = archiveWhen(rec.at);
+    when.textContent = archiveWhen(item.at);
     const who = document.createElement("span");
     who.className = "awho";
     who.textContent = rec.mine ? TEXT.archiveMine : TEXT.archiveTheirs;
     const score = document.createElement("span");
     score.className = "ascore";
-    score.textContent = (rec.score || 0) + "/" + N;
+    // Nobody has guessed it yet, so there is no score to show -- not a score of zero.
+    score.textContent = rec.done ? (rec.score || 0) + "/" + N : "\u2014";
     head.appendChild(when); head.appendChild(who); head.appendChild(score);
 
     const strip = document.createElement("div");
@@ -1710,14 +1865,24 @@ function buildArchive(boxId, limit){
 
     const code2 = document.createElement("div");
     code2.className = "acode";
-    code2.textContent = code + (rec.ms ? " \u00b7 " + timeLabel(rec.ms) : "");
+    code2.textContent = item.pending
+      ? TEXT.archiveUnsaved
+      : item.code + (rec.ms ? " \u00b7 " + timeLabel(rec.ms) : "");
 
     row.appendChild(head);
     row.appendChild(strip);
     row.appendChild(code2);
-    row.onclick = function(){ loadGame(code); };
     box.appendChild(row);
 
+    if (item.pending){
+      // Drawn here and never saved: the drawings are on the device, and with no code there
+      // is no board, so it opens where a just-drawn round opens.
+      row.onclick = function(){ resumePending(item.pending); };
+      paintArchiveRow(row, { drawings: decodeDrawings(item.pending.drawings || []), day: 0 });
+      return;
+    }
+    // Finished opens the result; drawn but not yet guessed opens the drawings with the board.
+    row.onclick = function(){ loadGame(item.code, rec.done ? "" : "review"); };
     if (archiveIO) archiveIO.observe(row); else fillArchiveRow(row);
   });
 }
@@ -1820,7 +1985,6 @@ function resumeDaily(rec){
     ? kept.picks.slice() : new Array(N).fill(null);
   selPos = -1;
   // No code yet means guessing never started; the save on the way in sets one.
-  if (lastCode) setUrlCode(lastCode); else clearUrl();
   if (done) buildResult(); else buildRecall();
 }
 
@@ -1936,7 +2100,6 @@ function randomSet(){
 
 function startGame(){
   clearPending();
-  clearUrl();                 // this round has no code yet; the last one's must not linger
   const s = randomSet();
   setId = s.id;
   lastSetId = s.id;
@@ -1964,7 +2127,6 @@ function startGame(){
    panel is deliberately ignored here. */
 function startDaily(){
   clearPending();
-  clearUrl();
   dailyDay = dailyDayNumber();
   isDaily  = true;
   modeId   = "typed";
@@ -2253,8 +2415,11 @@ function nextWord(){
   } else {
     rememberPending();
   }
-  if (afterDraw === "pick"){ afterDraw = ""; showPick(); return; }
-  show("between");
+  if (afterDraw === "pick"){ afterDraw = ""; showPick(); }
+  else show("between");
+  // The first round drawn on a device is where a name is asked for, over whatever
+  // screen comes next. Once there is one it is never asked again.
+  if (!myName) askName();
 }
 
 // rAF stops while the tab is in the background. Push wordStart forward by the
@@ -2312,7 +2477,14 @@ function confirmExit(){
   live.clear();
   closeSheet(); closeModal(); closeZoom();
   clearPending();
-  show("home");                    // which clears the address on the way
+  // The round's own entry goes with it: back from wherever this lands must not lead into
+  // a round that no longer exists.
+  if (history.state && history.state.screen === "draw" && history.state.depth > 0){
+    leavingRound = true;
+    history.back();
+  } else {
+    show("home");
+  }
 }
 
 $("backDraw").onclick    = askExit;
@@ -2644,12 +2816,12 @@ function showPick(){
 }
 
 $("gateDraw").onclick = function(){ wakeAudio(); afterDraw = "pick"; startDaily(); };
-$("gateHome").onclick = function(){ clearUrl(); show("home"); };
+$("gateHome").onclick = function(){ show("home"); };
 $("pickMine").onclick = function(){ resumeDaily(savedDay(dailyDayNumber())); };
 $("pickTheirs").onclick = function(){
   const day = savedDay(dailyDayNumber()) || {};
   // After a reload on this screen the friend's round is already the one loaded.
-  if (role === "guesser" && lastCode === day.duelCode) buildRecall();
+  if (role === "guesser" && lastCode === day.duelCode){ if (recallStart) buildRecall(); else showChoose(); }
   else if (day.duelCode) loadGame(day.duelCode);
 };
 $("switchRound").onclick = goToOther;
@@ -2728,25 +2900,7 @@ function buildResult(){
   g.innerHTML = "";
   order.forEach(function(di, pos){
     const cell = makeCell(pos, di);
-    const ok = isCorrect(picks[pos], words[di]);
-    cell.classList.add(ok ? "right" : "wrong");
-    const cap = cell.querySelector(".cap");
-    if (ok){
-      const s = document.createElement("span");
-      s.className = "good";
-      s.textContent = words[di];
-      cap.appendChild(s);
-    } else {
-      const bad = document.createElement("span");
-      bad.className = "bad";
-      bad.textContent = (picks[pos] && String(picks[pos]).trim()) ? picks[pos] : "—";
-      const good = document.createElement("span");
-      good.className = "good";
-      good.textContent = words[di];
-      cap.appendChild(bad);
-      cap.appendChild(document.createElement("br"));
-      cap.appendChild(good);
-    }
+    markCell(cell, picks[pos], words[di]);
     cell.classList.add("tappable");
     cell.onclick = function(){ openZoom(pos); };
     g.appendChild(cell);
@@ -2778,6 +2932,78 @@ function buildResult(){
   paintAll("resultGrid");
 }
 
+/* A cell marked against its word: green with the word when the answer is right, red
+   with the answer struck through and the word under it when not. */
+function markCell(cell, answer, word){
+  const ok = isCorrect(answer, word);
+  cell.classList.add(ok ? "right" : "wrong");
+  const cap = cell.querySelector(".cap");
+  if (!ok){
+    const bad = document.createElement("span");
+    bad.className = "bad";
+    bad.textContent = (answer && String(answer).trim()) ? answer : "\u2014";
+    cap.appendChild(bad);
+    cap.appendChild(document.createElement("br"));
+  }
+  const good = document.createElement("span");
+  good.className = "good";
+  good.textContent = word;
+  cap.appendChild(good);
+  return ok;
+}
+
+/* What this device answered, by drawing rather than by grid position: the grid is
+   shuffled per player, so only the drawing's own index means the same thing to everyone. */
+function answersByDrawing(){
+  const out = new Array(N).fill("");
+  order.forEach(function(di, pos){ out[di] = picks[pos] ? String(picks[pos]) : ""; });
+  return out;
+}
+
+/* A round's board can be opened row by row once this device has guessed the round: the
+   answers are the words. Never the day's board, and never before guessing. */
+function boardOpens(){ return !onDayBoard() && !viewOnly && !!lastCode; }
+
+let answersOf = "";         // whose answers the answers screen shows
+
+function openAnswers(name){
+  answersOf = name;
+  $("answersTitle").textContent = TEXT.answersOf.replace("{whose}", whose(name));
+  $("answersSub").textContent = "";
+  $("answersGrid").innerHTML = "";
+  const note = $("answersNote");
+  show("answers");
+  // This device's own row needs no request: the answers are here.
+  if (myName && sameName(name, myName) && order.length === N){ fillAnswers(answersByDrawing()); return; }
+  note.hidden = false;
+  note.textContent = TEXT.loadingAnswers;
+  api("/api/scores/" + encodeURIComponent(lastCode) + "?name=" + encodeURIComponent(name)).then(function(r){
+    if (answersOf !== name || !$("answers").classList.contains("on")) return;
+    if (r.ok && r.data && Array.isArray(r.data.answers) && r.data.answers.length === N) fillAnswers(r.data.answers);
+    else note.textContent = TEXT.noAnswers;
+  }).catch(function(){
+    if (answersOf === name) note.textContent = TEXT.fetchFailed;
+  });
+}
+
+function fillAnswers(list){
+  $("answersNote").hidden = true;
+  const g = $("answersGrid");
+  resetGridObserver();
+  g.innerHTML = "";
+  let right = 0;
+  // In this device's grid order, so the drawings sit where the reader last saw them.
+  order.forEach(function(di, pos){
+    const cell = makeCell(pos, di);
+    if (markCell(cell, list[di], words[di])) right++;
+    g.appendChild(cell);
+  });
+  $("answersSub").textContent = right + "/" + N;
+  paintAll("answersGrid");
+}
+
+$("answersBack").onclick = function(){ goBack("result"); };
+
 /* The drawings and the board, for the drawer who sent the round on and has not
    guessed it yet. The same screen as the result, minus the marking: the board
    belongs under the drawings it is about, not on a screen of its own. */
@@ -2808,10 +3034,7 @@ function buildReview(){
      The name is asked on the result, where there is a score to put under it. */
   $("nameBlock").hidden = true;
   showBoard();
-  show("result");
-  // This screen borrows the result's section, so the place has to be named here: what
-  // show() recorded is "result", which would send a reload to the link screen instead.
-  rememberPlace("review");
+  show("result", "review");
   paintAll("resultGrid");
 }
 
@@ -2878,10 +3101,15 @@ function renderScores(){
       const tm = document.createElement("span"); tm.className = "tm"; tm.textContent = s.ms > 0 ? timeLabel(s.ms) : "";
       const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = s.score + "/" + N;
       row.appendChild(rk); row.appendChild(nm); row.appendChild(tm); row.appendChild(sc);
+      if (box === $("boardList") && boardOpens()){
+        row.classList.add("opens");
+        row.onclick = function(){ openAnswers(s.name); };
+      }
       box.appendChild(row);
     });
   });
   const bos = sirali.length === 0;
+  if ($("boardHint")) $("boardHint").hidden = bos || !boardOpens();
   if ($("boardEmpty"))  $("boardEmpty").hidden  = !bos;
   if ($("scoresEmpty")) $("scoresEmpty").hidden = !bos;
   // Column names over nothing at all would be a table pretending to have rows.
@@ -2974,6 +3202,8 @@ function sendScore(){
       name: myName,
       score: score,
       ms: elapsedMs(),
+      // So friends can tap this row and see them. The day's board has no use for them.
+      answers: onDayBoard() ? undefined : answersByDrawing(),
       // What this round was last posted under, and the proof it was us, so a
       // rename moves the row rather than adding a second one.
       was: rec.postedAs || "",
@@ -3311,7 +3541,7 @@ $("linkCopy").onclick = function(){
   });
 };
 
-function loadGame(code){
+function loadGame(code, want, who){
   code = String(code || "").toUpperCase();
   show("loading");
   $("loadTitle").textContent = TEXT.loadingDrawings;
@@ -3343,6 +3573,7 @@ function loadGame(code){
     // the answers: it is reshuffled on every visit, so putting old picks against
     // a fresh order would pin every answer to the wrong drawing.
     const rec = savedRound(code);
+    if (rec && MODES.some(function(m){ return m.id === rec.modeId; })) modeId = rec.modeId;
     const resumable = !!(rec && Array.isArray(rec.order) && rec.order.length === N);
     role      = rec && rec.mine ? "drawer" : "guesser";
     scoreSent = !!(rec && rec.sent);
@@ -3357,7 +3588,6 @@ function loadGame(code){
     isDaily = Number(v.day) > 0;
     dailyDay = isDaily ? Number(v.day) : 0;
     buildHome();
-    setUrlCode(code);                 // reloading returns here, including after a join by code
 
     const todaysDuel = isDaily && dailyDay === dailyDayNumber() && role === "guesser";
     if (todaysDuel) rememberDay(dailyDay, { duelCode: code, duelName: drawerName });
@@ -3369,18 +3599,16 @@ function loadGame(code){
       return;
     }
 
+    if (rec && rec.done && want === "answers" && who){ openAnswers(who); return; }
     if (rec && rec.done){             // already played on this device: straight to the scores
       buildResult();
       return;
     }
     // A round of this device's own can be looked at two ways -- the link screen or the
-    // drawings with their board -- and the address says nothing about which. The place
-    // does, so a reload stays where the player was.
-    const place = savedPlace();
-    if (place && place.code === code && rec && rec.mine){
-      if (place.screen === "review"){ buildReview(); return; }
-      if (place.screen === "send"){ openShareScreen("home"); return; }
-    }
+    // drawings with their board -- and the address says nothing about which. The history
+    // entry, or the archive, does.
+    if (rec && rec.mine && want === "review"){ buildReview(); return; }
+    if (rec && rec.mine && want === "send"){ openShareScreen("home"); return; }
     // Drawn today but neither round started: a reload on the choice screen returns to it.
     const day = todaysDuel ? (savedDay(dailyDay) || {}) : null;
     if (day && !day.code && !day.done && !recallStart){
@@ -3400,8 +3628,11 @@ function loadGame(code){
       show("send");
       return;
     }
-    buildRecall();                    // straight into guessing; the name comes later
+    // A friend's round not started yet: how to guess it comes first, every time.
+    if (!recallStart){ showChoose(); return; }
+    buildRecall();                    // back into guessing; the name comes later
   }).catch(function(e){
+    historyQuiet = false;
     $("loadTitle").textContent = e && e.message === "notfound"
       ? TEXT.codeInvalid
       : TEXT.fetchFailed;
@@ -3415,9 +3646,30 @@ function loadGame(code){
    to be shared, both carry it. */
 function fillNameRow(){
   $("nameField").value = myName;
+  $("nameLabel").textContent = myName ? TEXT.changeName : TEXT.yourName;
   $("nameSave").textContent = myName ? TEXT.saveName : TEXT.joinBoard;
   $("nameNote").textContent = "";
 }
+
+/* The name question after drawing. Required: the card has no way out but a name, and the
+   screen behind it cannot be reached until one is given. */
+function askName(){
+  $("nameAskField").value = "";
+  $("nameAskGo").classList.add("off");
+  $("nameAsk").classList.add("on");
+  setTimeout(function(){ try { $("nameAskField").focus(); } catch (e) {} }, 60);
+}
+
+$("nameAskField").addEventListener("input", function(){
+  $("nameAskGo").classList.toggle("off", !$("nameAskField").value.trim());
+});
+$("nameAskField").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); $("nameAskGo").click(); }
+});
+$("nameAskGo").onclick = function(){
+  if (!setName($("nameAskField").value)){ $("nameAskField").focus(); return; }
+  $("nameAsk").classList.remove("on");
+};
 
 $("nameSave").onclick = function(){
   // Nothing to post from a round that has not been played: the field is hidden there,
@@ -3441,11 +3693,7 @@ $("nameField").addEventListener("keydown", function(e){
   if (e.key === "Enter"){ e.preventDefault(); $("nameSave").click(); }
 });
 
-$("loadHome").onclick = function(){ clearUrl(); show("home"); };
-
-function clearUrl(){
-  try { history.replaceState(null, "", location.pathname); } catch(e){}
-}
+$("loadHome").onclick = function(){ show("home"); };
 
 $("joinGo").onclick = function(){
   const code = $("joinCode").value.trim().toUpperCase();
@@ -3506,8 +3754,8 @@ $("share").onclick = function(){
   });
 };
 
-$("again").onclick = function(){ clearTimeout(cdTimer); clearUrl(); startGame(); };
-$("home2").onclick = function(){ clearTimeout(cdTimer); clearUrl(); closeSheet(); closeModal(); show("home"); };
+$("again").onclick = function(){ clearTimeout(cdTimer); startGame(); };
+$("home2").onclick = function(){ clearTimeout(cdTimer); closeSheet(); closeModal(); show("home"); };
 
 /* iOS stopped honouring user-scalable=no years ago, so the meta tag alone leaves
    double-tap zoom working. Worse, once it has zoomed there is no way back out,
@@ -3545,25 +3793,24 @@ applyTheme();
 applyText();
 buildHome();
 
-// Did we arrive through a duel link? That is the strongest record of where to be,
-// because it describes the round rather than this device's last move.
+/* Where to start.
+
+   A reload -- or coming back to this page with the back or forward button -- lands on a
+   history entry that says which screen it was, so that screen comes back. A round link
+   opened fresh loads that round. Anything else is a fresh visit and starts at the start,
+   with an entry of its own so there is a start screen to come back to. */
 (function(){
+  const st = history.state;
+  if (st && st.screen){ restoreEntry(st); return; }
+
   const m = /[?&]o=([^&]+)/.exec(location.search || "");
-  if (m){ loadGame(decodeURIComponent(m[1])); return; }
-
-  /* Otherwise the start screen, with one exception: twenty drawings that have not been
-     saved anywhere yet. Those would be lost, so they are put back.
-
-     The day's board and the archive are deliberately not restored here. Reloading while
-     looking at one returns to it -- that is the trail, and it happens inside the visit --
-     but opening the app is not the same act as refreshing a page, and landing on a score
-     board instead of the start screen is not what anyone asked for. */
-  const place = savedPlace();
-  if (!place || place.screen !== "between") return;
-  const pending = loadStore().pending;
-  if (pending && Array.isArray(pending.words) && pending.words.length === N){
-    resumePending(pending);
+  if (m){
+    historyQuiet = true;      // opened from a link: back should leave, not step into the app
+    loadGame(decodeURIComponent(m[1]));
+    return;
   }
+
+  try { history.replaceState({ screen: "home", code: "", depth: 0 }, "", location.pathname); } catch (e) {}
 })();
 })();
 </script>

@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="chizz">
+  <!-- The "c" is an arc, not a letter, so it needs no font. tools/make-icons.js draws the
+       same shape into the PNG and ICO files; change both together. -->
   <rect width="64" height="64" rx="14" fill="#131418"/>
-  <text x="32" y="34" font-family="Helvetica,Arial,sans-serif" font-size="46" font-weight="700"
-        fill="#ff5c3d" text-anchor="middle" dominant-baseline="central">c</text>
+  <path d="M41.49 23.51A12 12 0 1 0 41.49 40.49" fill="none" stroke="#ff5c3d" stroke-width="8" stroke-linecap="round"/>
 </svg>

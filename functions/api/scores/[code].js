@@ -1,5 +1,10 @@
 // GET  /api/scores/A7K2  -> { scores: [{name, score, ms, ts}, ...] }, best first
-// POST /api/scores/A7K2  body {name, score, ms} -> same response
+// GET  /api/scores/A7K2?name=Ayşe -> { answers: [20 strings] | null }
+// POST /api/scores/A7K2  body {name, score, ms, answers} -> same response as the first
+//
+// A player's answers live in the value of their own key, which was empty before. The
+// board never carries them: they are read one player at a time, when someone taps
+// that player's name, so a board polled once a second costs nothing more.
 //
 // Two layers: every player writes to their own key (<CODE>:s:<name>), so two
 // people finishing at the same moment cannot overwrite each other. After a write
@@ -18,6 +23,7 @@ const MAX_PLAYERS = 200;
 // still derives to itself under the longer cap.
 const NAME_MAX = 10;
 const MAX_MS = 6 * 60 * 60 * 1000;   // 6 hours; beyond that the timing is meaningless
+const ANSWER_MAX = 40;               // a typed answer; a word from the list is far shorter
 
 const TURKISH_FOLD = { "ç": "c", "ğ": "g", "ı": "i", "ö": "o", "ş": "s", "ü": "u" };
 
@@ -108,10 +114,25 @@ async function scanBoard(env, code) {
   return rank(scores);
 }
 
-export async function onRequestGet({ params, env }) {
+export async function onRequestGet({ params, request, env }) {
   if (!env.GAMES) return json({ error: "storage not bound" }, 500);
   const code = String(params.code || "").trim().toUpperCase();
   if (!CODE_PATTERN.test(code)) return json({ error: "code not found" }, 404);
+
+  // One player's answers: a single get. Rows posted before answers were kept have an
+  // empty value, and answer null.
+  const who = new URL(request.url).searchParams.get("name");
+  if (who !== null) {
+    const name = who.trim().slice(0, NAME_MAX);
+    if (!name) return json({ answers: null });
+    const raw = await env.GAMES.get(code + ":s:" + nameKey(name));
+    let answers = null;
+    try {
+      const v = raw ? JSON.parse(raw) : null;
+      if (v && Array.isArray(v.answers) && v.answers.length === N) answers = v.answers;
+    } catch (e) { /* an empty or foreign value is just no answers */ }
+    return json({ answers });
+  }
 
   const summary = await env.GAMES.get(code + ":board", { type: "json", cacheTtl: BOARD_CACHE });
   const fresh = summary
@@ -198,7 +219,13 @@ export async function onRequestPost({ params, request, env }) {
   }
   if (!token) token = crypto.randomUUID().replace(/-/g, "");
 
-  await env.GAMES.put(code + ":s:" + key, "", {
+  // Answers by drawing, in the drawer's order: answers[i] is what this player said the
+  // i-th drawing was. Anything malformed is dropped rather than failing the score.
+  const answers = Array.isArray(d.answers) && d.answers.length === N
+    ? d.answers.map(function (a) { return typeof a === "string" ? a.trim().slice(0, ANSWER_MAX) : ""; })
+    : null;
+
+  await env.GAMES.put(code + ":s:" + key, answers ? JSON.stringify({ answers }) : "", {
     metadata: { name, score: d.score, ms: keepMs, ts, token },
     expirationTtl: TTL
   });

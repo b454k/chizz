@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-09-16 — back, reload, arşiv, and friends' answers
+
+A friend drew a round, landed on the start screen by mistake, and had no way back to
+her drawings: the back button left the site, and arşiv only listed finished rounds.
+
+### Back and reload
+- Every screen is now an entry in the browser's history. The back button works, and
+  goes where the `←` on the page goes -- both walk the same entries. Back during a
+  drawing asks "oyundan çıkılsın mı?" instead of throwing the drawings away.
+- A reload stays on the screen it was on, günün skorları and arşiv included (both used
+  to fall to the start screen), and so does the link form before a link exists.
+- The place memory and screen trail that stood in for this are gone.
+
+### arşiv
+- Lists every round drawn on the device: finished ones, ones nobody has guessed yet
+  (score shown as —, opening the drawings with the board), and a drawing never saved
+  (opening "arkadaşına gönder / kendim tahmin edeyim").
+
+### Name
+- Asked in a pop-up right after the first round drawn on a device, and required.
+  Never asked again once there is one.
+- The result screen's name field reads "adını değiştirmek ister misin?" when a name
+  exists.
+
+### Friends' answers
+- On the result of a round, tapping a name on the board opens that player's answers,
+  marked against the words. A line under the board's title says so. Not on the day's
+  board, and not before this device has guessed the round.
+- Each score post now carries the player's answers in the value of their own KV key.
+  Reading them is one `get`, only on a tap; the polled board is unchanged. Scores
+  posted before this have no answers to show.
+
+### A friend's round asks how to guess it
+- Opening a friend's link asks kelimeler açık or kelimeler gizli every time, instead of
+  using the drawer's mode. A half-finished guess resumes with the mode it was begun with.
+
+### Search result and link preview
+- `/favicon.ico` answered with the page, so search results showed a globe. There are
+  now real icon files (ICO and PNG), drawn by `tools/make-icons.js`.
+- The description did not contain "chizz", so a search for the name showed the game's
+  button labels run together instead. The description now starts with the name, the
+  title is "chizz · çizim hafıza oyunu" (a bare "chizz" was rewritten as "Chizz"), the
+  game's markup is marked `data-nosnippet`, and the address has an og:image. Search
+  engines only pick this up when they next crawl the site.
+
 ## 2026-09-16 — a KV list a second
 
 Cloudflare warned that half of the day's free KV allowance was gone with almost nobody

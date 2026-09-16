@@ -55,11 +55,14 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 | `scores` | The day's global board, the only score table with a screen of its own |
 | `recall` | The shuffled grid of 20 drawings, where answers are given |
 | `result` | Score, correct/incorrect grid, score board, share button. Also used unmarked -- the drawings with the board under them -- for a round that has been sent but not yet guessed |
+| `choose` | A friend's round, opened: kelimeler açık or kelimeler gizli, asked every time before its guessing starts |
+| `answers` | One player's answers on a round's board, marked against the words, reached by tapping their name |
 
 Overlays sit outside the screen system: `#sheet` (the word pool), `#modal` (the
 typed-answer card) and `#reveal` (the word alone before each drawing), plus three
 questions -- `#confirm` before abandoning a round, `#finishAsk` before ending the
-guessing, and `#timeAsk` before the first unlimited round of the day.
+guessing, `#timeAsk` before the first unlimited round of the day, and `#nameAsk` for a
+name after the first round drawn on a device.
 
 ## 4. Flow
 
@@ -75,9 +78,10 @@ guessing, and `#timeAsk` before the first unlimited round of the day.
 5. `recall` — assign a word to each drawing
 6. `result` — score, per-cell correction, share text
 
-Nothing is asked before the round starts. A name is only needed to hand the round
-to someone else or to take a place on a score board, so it is asked at exactly
-those two points and nowhere else.
+Nothing is asked before the round starts. A device with no name yet is asked for one
+as soon as its first round is drawn, over the screen that follows, and cannot go on
+without giving one. After that it is never asked again, only offered for changing on
+the result screen.
 
 ### Duel, drawer's side
 
@@ -90,9 +94,10 @@ screen to watch: the board is under the drawings it is about.
 
 ### Duel, guesser's side
 
-Opening `?o=<code>`, or entering a code on `home`, fetches the round and goes
-straight to `recall`. There is no drawing phase and no name prompt. The round's own
-mode and seconds are used, not the ones set on this device. The result screen reads
+Opening `?o=<code>`, or entering a code on `home`, fetches the round and asks how to
+guess it: kelimeler açık or kelimeler gizli, **every time**, whatever the drawer played
+with. The choice is kept with the round, so a guess left half done resumes the way it
+was begun instead of asking again. There is no drawing phase and no name prompt. The result screen reads
 "in <drawer>'s drawings, 12/20". If the device has no name yet the board shows a
 name field instead of a row; filling it in posts the score. A draw-your-own button
 starts a fresh round.
@@ -105,7 +110,21 @@ and the invite link together, and it is the only share action on the screen.
 Both `draw` and `recall` have a `←` button. It opens a confirmation whose default
 action is to stay. **While the confirmation is
 open the word timer is paused** and resumes from where it stopped, so the dialog never
-costs the player time.
+costs the player time. The phone's or browser's own back button asks the same question
+during the countdown and the drawing.
+
+### Back and reload
+
+Every screen the player arrives at is an entry in the browser's history, carrying the
+screen and its round's code (and, on `answers`, whose answers). The browser's back
+button and every `←` on the page walk those entries, so both go to the screen the
+player actually came from. A reload reads the entry it is on and puts that screen back:
+the start screen, günün skorları, arşiv, the between screen and the unsaved link form
+(from the unsaved drawing on the device), and every screen of a round (by loading the
+round again). A drawing round owns one entry from its countdown on, replaced by whatever
+follows it, so back never leads into a round that has ended or been abandoned. A fresh
+visit has no entry and starts at the start; a round link opened fresh starts in that
+round, and back from there leaves the site.
 
 ## 5. Modes and settings
 
@@ -318,7 +337,7 @@ the whole HTML page in reply to an API call.
 
 `GET /api/game/:code` — returns the stored round, `404` for an unknown or expired code.
 
-`GET/POST /api/scores/:code` — body `{name, score, ms}`. **The board is ranked best
+`GET/POST /api/scores/:code` — body `{name, score, ms, answers}`. **The board is ranked best
 score first, ties broken by the faster time**, then by who finished first; rows
 written before times were recorded have no `ms` and fall in behind timed ones on a
 tie. Each player writes to their own key (`<CODE>:s:<name>`) so two people finishing
@@ -328,6 +347,11 @@ readers. This keeps reads to a single `get`: the board is polled live, and calli
 are normalised the same way answers are, so case and accent variants are one player,
 and are capped at 10 characters. A score can only be written against a code that
 exists. Re-playing keeps your original finishing position and your original time.
+
+`answers` is the player's 20 answers indexed by drawing, each cut to 40 characters, and
+is stored as the value of the player's own key -- empty before answers were kept. The
+board never carries it. `GET /api/scores/:code?name=<name>` returns `{answers}` for one
+player, `null` when there are none: one `get`, made only when someone taps a name.
 
 Everything is written with a **30-day TTL** and expires by itself. Stored data is the
 set id, mode, seconds, an optional name, the 20 words and the 20 drawings. No email,
@@ -339,6 +363,11 @@ On the result screen of a shared round, and on the drawer's `scores` screen, the
 polls every 2 seconds while the screen is visible, pausing when the tab is hidden and
 refreshing immediately on return. Your own row is inserted locally so it appears
 before KV's listing catches up.
+
+On the result of a round this device has guessed, every row opens that player's answers,
+and a line under the board's title says so: "üzerine tıklayarak arkadaşlarının
+cevaplarını görebilirsin". Not on the day's board, and not on the drawings-with-board
+screen before the round has been guessed, where the answers would be the words.
 
 ## 13. Failure behaviour
 
@@ -362,7 +391,8 @@ holds:
 | `name` | The name typed on this device. Editable on the result screen at any time; changing it renames the rounds this device saved |
 | `mode`, `secs`, `theme` | The settings chosen on the home screen |
 | `hintDay` | The day the time-per-word reminder was last shown, so it is shown once a day |
-| `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
+| `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, the mode chosen for guessing a friend's round, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
+| `pending` | A drawn round not saved anywhere yet, with when it was drawn: it is what a reload on the between screen returns to, and it is listed in arşiv |
 | `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. Entries older than the
@@ -376,9 +406,11 @@ What this buys:
 - **A finished round reopens on its score table**, with the original time, instead of
   offering to play it again.
 - **The drawer comes back to their share screen** with the same code and link; a reload
-  used to lose the link entirely. The round's code is written into the address bar with
-  `replaceState`, so a reload has something to return to while the back button still
-  leaves.
+  used to lose the link entirely. See *Back and reload* in section 4.
+- **arşiv lists every round drawn here**, not only finished ones: a finished round opens
+  its result, a round nobody has guessed opens its drawings with the board, and a drawing
+  never saved opens the between screen. A round drawn and then left on the start screen
+  by mistake is one tap away.
 - **A daily duel survives a reload at every step.** Whose round you are dueling is read
   from `days[N]`, never from memory, and switching between your round and theirs always
   rewrites the address bar. A reload on the choice screen returns to it; a reload in
@@ -416,10 +448,11 @@ where previously only an explicit share did. The free tier allows 1,000 writes a
 
 ## 16. Where the name is asked
 
-On the result screen, under the grid: the score about to go on the board and the link
-about to be shared both carry it, so that is where it belongs. Nothing is asked on the
-way into a round. The field is always there, prefilled, and clearing it is allowed; the
-button reads Katıl when there is no name yet and Kaydet when there is.
+Once, required, right after the first round drawn on a device: the rounds it shares and
+the scores it posts all carry it. After that, on the result screen, under the grid,
+headed "adını değiştirmek ister misin?" when a name exists and "adın" when it does not
+(a guesser who has never drawn). The field is prefilled; the button reads katıl when
+there is no name yet and kaydet when there is.
 
 It sits outside the score board, so a round with no board of its own can still be
 named -- the name still decides what a shared link says.
@@ -474,9 +507,17 @@ there being no explicit `<head>` in the document. Anything that is not the page 
 valid code -- `/api` included -- passes straight through untouched.
 
 The address on its own is a different card, and a static one: `index.html` carries its
-own description and `og:title`, and an icon at `/icon.svg`. The icon used to be a
-`data:` URI — a browser draws that in a tab, but link previews and search results fetch
-the icon by URL and skip an inlined one, so the card came up with a globe on it.
+own title, description, og: tags and image, which the middleware rewrites in place for a
+round rather than adding second copies.
+
+- **Icons are files**: `/favicon.ico` (16, 32, 48), `/apple-touch-icon.png`,
+  `/icon-512.png` (the address's og:image) and `/icon.svg`, all drawn by
+  `tools/make-icons.js` as geometry, so no font is involved. Search engines ask for
+  `/favicon.ico`, which used to answer with the page itself -- hence the globe.
+- **The description names chizz** and the title is "chizz · çizim hafıza oyunu". A search
+  for the name showed page text containing the word instead of a description that lacked
+  it, and a one-word title was rewritten (as "Chizz"). The game's own markup carries
+  `data-nosnippet`, and a WebSite JSON-LD block gives the site name.
 
 One cost: middleware runs for every request to the site, so every page load is now a
 function invocation rather than a plain static hit. The free tier allows 100,000 a day.

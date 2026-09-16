@@ -66,19 +66,11 @@ export async function onRequest(context) {
   const page = url.origin + "/?o=" + code;
   const image = url.origin + "/api/card/" + code + ".png";
 
-  // Only what the page does not already carry. og:type and og:site_name are in the
-  // document, and the title and descriptions below are rewritten where they stand --
+  // Only what the page does not already carry. The page has its own title, url, image
+  // and card tags for the bare address, and those are rewritten below where they stand --
   // injecting a second copy would leave two of each, and which one a chat app reads
   // is its own business.
-  const tags = [
-    '<meta property="og:url" content="' + attr(page) + '">',
-    '<meta property="og:image" content="' + attr(image) + '">',
-    '<meta property="og:image:type" content="image/png">',
-    '<meta property="og:image:width" content="800">',
-    '<meta property="og:image:height" content="1000">',
-    '<meta property="og:image:alt" content="' + attr(DESCRIPTION) + '">',
-    '<meta name="twitter:card" content="summary_large_image">'
-  ].join("");
+  const tags = '<meta property="og:image:alt" content="' + attr(DESCRIPTION) + '">';
 
   const setContent = value => ({ element(el){ el.setAttribute("content", value); } });
 
@@ -91,6 +83,11 @@ export async function onRequest(context) {
       .on('meta[property="og:title"]', setContent(title))
       .on('meta[property="og:description"]', setContent(DESCRIPTION))
       .on('meta[name="description"]', setContent(DESCRIPTION))
+      .on('meta[property="og:url"]', setContent(page))
+      .on('meta[property="og:image"]', setContent(image))
+      .on('meta[property="og:image:width"]', setContent("800"))
+      .on('meta[property="og:image:height"]', setContent("1000"))
+      .on('meta[name="twitter:card"]', setContent("summary_large_image"))
       .transform(response);
   } catch (e) {
     // A preview is worth less than the page. Anything unexpected in here hands back
