@@ -115,6 +115,7 @@
     margin:0 0 10px;
   }
   #dailyBoard{margin-top:10px; padding:11px; font-size:14px;}
+  #themeSec{border-top:2px solid var(--line); padding:14px 0 4px; margin-top:26px;}
 
   /* Side by side, the way the choice is made: kelimeler açık on the left,
      kelimeler gizli on the right. */
@@ -447,20 +448,46 @@
   }
 
   /* score tablosu */
-  #board{margin:18px 0 4px;}
-  #board h3{font-size:15px; margin:0 0 10px; color:var(--muted); font-weight:700;
-            letter-spacing:.06em;}
-  .brow{
-    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px;
-    background:var(--panel); margin-bottom:6px;
+  /* The board is a table, and has to read as one thing rather than as more buttons:
+     its own panel, a heading strip, and hairlines between the rows. */
+  #board{
+    margin:20px 0 14px; border:2px solid var(--line); border-radius:16px;
+    background:var(--panel); overflow:hidden;
   }
-  .brow.me{background:var(--panel2); box-shadow:inset 0 0 0 2px var(--accent);}
-  .brow .rk{width:22px; color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;}
-  .brow .nm{flex:1; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .brow .tm{color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; margin-right:10px;}
-  .brow .sc{font-weight:800; font-variant-numeric:tabular-nums;}
-  #boardEmpty, #scoresEmpty{color:var(--muted); font-size:14px; padding:4px 0 8px;}
-  .bnote{color:var(--muted); font-size:12px; margin:8px 0 0;}
+  #board h3{
+    font-size:13px; margin:0; padding:12px 14px 10px; color:var(--muted); font-weight:800;
+    letter-spacing:.12em; background:var(--panel2); border-bottom:2px solid var(--line);
+  }
+  /* the column names, so a row of numbers says what it is */
+  .bhead{
+    display:flex; align-items:center; gap:10px; padding:7px 14px;
+    font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--muted);
+    border-bottom:1px solid var(--line);
+  }
+  .brow{
+    display:flex; align-items:center; gap:10px; padding:11px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .brow:last-child{border-bottom:none;}
+  .brow.me{background:var(--panel2); box-shadow:inset 3px 0 0 var(--accent);}
+  .bhead .rk, .brow .rk{width:24px; color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;}
+  .bhead .nm, .brow .nm{flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .bhead .tm, .brow .tm{width:64px; text-align:right; color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums;}
+  .bhead .sc, .brow .sc{width:52px; text-align:right; font-weight:800; font-variant-numeric:tabular-nums;}
+  .bhead .nm, .bhead .tm, .bhead .sc{font-weight:800; font-size:11px;}
+  #boardEmpty, #scoresEmpty{color:var(--muted); font-size:14px; padding:14px;}
+  .bnote{color:var(--muted); font-size:12px; margin:0; padding:10px 14px 12px;
+         border-top:1px solid var(--line);}
+  /* the round's own code, above its table */
+  .bcode{color:var(--muted); font-size:12px; font-weight:800; letter-spacing:.14em;
+         margin:18px 0 6px;}
+  /* The day's board has a screen to itself, so it is wrapped in the same table. The
+     frame belongs to the wrapper, which is hidden outright when there is nothing in it:
+     an empty bordered rectangle is worse than no rectangle. */
+  #scoresTable{
+    border:2px solid var(--line); border-radius:16px;
+    background:var(--panel); overflow:hidden; margin:0 0 14px;
+  }
   #nameRow{display:flex; gap:10px; margin-bottom:10px;}
   #nameRow .txt{flex:1; text-align:center; font-weight:700; letter-spacing:.08em;}
   #nameGo{width:auto; padding:14px 20px; border:2px solid var(--line); border-radius:14px; font-weight:700;}
@@ -499,10 +526,6 @@
           </div>
           <input type="range" id="secs" min="1" max="10" step="0.5" data-tal="perWord">
           <p class="shint" data-t="recommended"></p>
-          <div class="srow">
-            <span class="lbl" data-t="theme"></span>
-            <div class="seg" id="themes"></div>
-          </div>
         </div>
 
         <button class="primary" id="start" data-t="start"></button>
@@ -518,6 +541,15 @@
         <h2 class="hsectitle" data-t="archive"></h2>
         <p id="archiveEmpty" hidden data-t="archiveEmpty"></p>
         <div id="archive"></div>
+      </div>
+
+      <!-- Theme belongs to the app, not to the round about to be played, so it sits at
+           the foot of the screen rather than among the settings for a game. -->
+      <div id="themeSec">
+        <div class="srow">
+          <span class="lbl" data-t="theme"></span>
+          <div class="seg" id="themes"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -616,8 +648,16 @@
       <p data-t="scoresNoteLive"></p>
     </div>
     <div class="scroll">
-      <p id="scoresEmpty" hidden data-t="nobodyFinished"></p>
-      <div id="scoresList"></div>
+      <div id="scoresTable">
+        <div class="bhead" id="scoresHead">
+          <span class="rk">#</span>
+          <span class="nm" data-t="colName"></span>
+          <span class="tm" data-t="colTime"></span>
+          <span class="sc" data-t="colScore"></span>
+        </div>
+        <p id="scoresEmpty" hidden data-t="nobodyFinished"></p>
+        <div id="scoresList"></div>
+      </div>
     </div>
   </section>
 
@@ -659,9 +699,16 @@
         <p id="nameNote"></p>
       </div>
 
+      <p class="bcode" id="boardCode" hidden></p>
       <div id="board" hidden>
         <h3 id="boardTitle"></h3>
         <p id="boardEmpty" hidden data-t="firstToPlay"></p>
+        <div class="bhead" id="boardHead">
+          <span class="rk">#</span>
+          <span class="nm" data-t="colName"></span>
+          <span class="tm" data-t="colTime"></span>
+          <span class="sc" data-t="colScore"></span>
+        </div>
         <div id="boardList"></div>
         <p class="bnote" data-t="scoresNoteResult"></p>
       </div>
@@ -1108,6 +1155,10 @@ const TEXT = {
   drawingsOf:       "{whose} çizimleri",
   theseDrawings:    "bu çizimler",
   scores:           "skorlar",
+  gameCode:         "oyun kodu {code}",
+  colName:          "isim",
+  colTime:          "süre",
+  colScore:         "skor",
   scoresSuffix:     " · skorlar",
   scoresNoteLive:   "skora göre sıralı; eşitlikte hızlı olan önde. arkadaşların bitirdikçe kendiliğinden güncellenir.",
   scoresNoteResult: "arkadaşların bitirdikçe burada beliriyor.",
@@ -1328,6 +1379,24 @@ const PLACES = { between: 1, send: 1, review: 1, scores: 1 };
    erasing the memory of where the player had been before it could be read. */
 const PASSING = { loading: 1, countdown: 1, draw: 1 };
 
+/* Where the player has been, so "back" can mean the screen before rather than a guess
+   written into each button. Screens only passed through are left out of it, and so is a
+   repeat of the screen already on top. */
+const screenTrail = [];
+
+function trailPush(screen){
+  if (PASSING[screen]) return;
+  if (screenTrail[screenTrail.length - 1] === screen) return;
+  screenTrail.push(screen);
+  if (screenTrail.length > 12) screenTrail.shift();
+}
+
+function goBack(fallback){
+  screenTrail.pop();                       // the screen we are on
+  const prev = screenTrail.pop();          // the one before it
+  show(prev || fallback || "home");
+}
+
 function rememberPlace(screen){
   if (PASSING[screen]) return;
   const store = loadStore();
@@ -1417,6 +1486,7 @@ function show(id){
     // start screen has to show the new state, not just the ones that rebuild the page.
     if (typeof buildDailyRow === "function") buildDailyRow();
   }
+  if (typeof trailPush === "function") trailPush(id);
   if (typeof rememberPlace === "function") rememberPlace(id);
   // The code can arrive from a save, a reload, or a link, so the chip is refreshed
   // on every screen change rather than at any one of those points.
@@ -2714,6 +2784,14 @@ function sameName(a, b){
 }
 
 function showBoard(){
+  /* Which round these drawings belong to. It is set before the board's own check, so it
+     shows on the screen reached straight after sending a round off -- where the person
+     waiting for friends is the one who needs the code. */
+  const line = $("boardCode");
+  if (line){
+    line.hidden = !lastCode;
+    line.textContent = lastCode ? TEXT.gameCode.replace("{code}", lastCode) : "";
+  }
   $("board").hidden = !hasBoard();
   if (!hasBoard()) return;
   $("boardTitle").textContent = onDayBoard()
@@ -2766,6 +2844,9 @@ function renderScores(){
   const bos = sirali.length === 0;
   if ($("boardEmpty"))  $("boardEmpty").hidden  = !bos;
   if ($("scoresEmpty")) $("scoresEmpty").hidden = !bos;
+  // Column names over nothing at all would be a table pretending to have rows.
+  if ($("boardHead"))   $("boardHead").hidden   = bos;
+  if ($("scoresHead"))  $("scoresHead").hidden  = bos;
 }
 
 // A round has its own board, keyed by its code; the day has one global board that
@@ -2839,7 +2920,7 @@ function openDailyBoard(){
 // drawings of its own. Every other score table sits under the drawings it is about.
 $("scoresBack").onclick = function(){
   stopBoardPoll();
-  show("home");
+  goBack("home");
 };
 
 function sendScore(){
@@ -3025,9 +3106,8 @@ $("toSend").onclick = function(){
 
 let sendFrom = "between";
 $("sendBack").onclick = function(){
-  // Coming from the grid means going back into it, not to a dead screen.
-  if (sendFrom === "recall") show("recall");
-  else show(sendFrom);
+  // Whatever screen this was reached from, including the grid it was left in.
+  goBack(sendFrom || "home");
 };
 
 // The screen that shows the code and the link in full. Reached from the result
