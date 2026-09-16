@@ -252,7 +252,7 @@
      leaves. The layer is laid over the square and takes the taps until the fade begins.
      REVEAL_EDGE below keeps the same gap on either side; the size is measured to fit. */
   #reveal{
-    position:fixed; z-index:35; display:none;
+    position:fixed; inset:0; z-index:35; display:none;
     align-items:center; justify-content:center;
     /* The pen is never blocked: the word is something to read, not a door to wait at. */
     pointer-events:none;
@@ -1845,9 +1845,9 @@ let revealTimer = 0;
 
 /* The biggest size at which the word still fits the square, found by halving rather
    than guessed: one number cannot suit both "ev" and "çamaşır makinesi". */
-const REVEAL_EDGE = 18;    // the gap left on either side, the same on both
+const REVEAL_EDGE = 40;    // the gap left on either side, the same on both
 const REVEAL_MIN  = 20;
-const REVEAL_MAX  = 96;
+const REVEAL_MAX  = 76;    // a short word at 96 was pressing against the square
 
 function fitWord(el, boxW, boxH){
   let lo = REVEAL_MIN, hi = REVEAL_MAX, best = REVEAL_MIN;
@@ -1861,6 +1861,25 @@ function fitWord(el, boxW, boxH){
   el.style.fontSize = best + "px";
 }
 
+/* How far the letters sit below the middle of their own line box, in pixels.
+   Above the letters is the font's full ascender; below them only the descender, which a
+   word like "domuz" never reaches. Centring the box therefore leaves more room above
+   than below. The canvas reports both the font's box and the ink's, so the difference
+   can be measured for the actual word rather than guessed at. */
+function inkNudge(el, text){
+  try {
+    const cv = inkNudge.cv || (inkNudge.cv = document.createElement("canvas"));
+    const c = cv.getContext("2d");
+    const cs = getComputedStyle(el);
+    c.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+    const m = c.measureText(text);
+    const fa = m.fontBoundingBoxAscent, fd = m.fontBoundingBoxDescent;
+    const ia = m.actualBoundingBoxAscent, id = m.actualBoundingBoxDescent;
+    if (![fa, fd, ia, id].every(function(v){ return typeof v === "number" && isFinite(v); })) return 0;
+    return ((fa - ia) - (fd - id)) / 2;
+  } catch (e) { return 0; }        // older browsers: leave it where it is
+}
+
 function revealThenDraw(i){
   revealing = true;
   const el = $("revealWord");
@@ -1870,14 +1889,14 @@ function revealThenDraw(i){
   el.style.opacity = "1";
   rv.classList.add("on");
 
-  // Over the square itself, so the word is where the drawing will be and the space on
-  // either side of it is the same.
+  /* Centred on the screen, but sized against the square: the paper is the narrower of
+     the two, and a word wider than the paper reads as spilling off it. */
   const pad = $("pad").getBoundingClientRect();
-  rv.style.left = Math.round(pad.left) + "px";
-  rv.style.top = Math.round(pad.top) + "px";
-  rv.style.width = Math.round(pad.width) + "px";
-  rv.style.height = Math.round(pad.height) + "px";
-  fitWord(el, Math.round(pad.width) - REVEAL_EDGE * 2, Math.round(pad.height) - REVEAL_EDGE * 2);
+  const boxW = Math.round(Math.min(window.innerWidth, pad.width)) - REVEAL_EDGE * 2;
+  const boxH = Math.round(Math.min(window.innerHeight, pad.height)) - REVEAL_EDGE * 2;
+  fitWord(el, boxW, boxH);
+  // Equal air above and below the letters themselves.
+  el.style.transform = "translateY(" + (-Math.round(inkNudge(el, words[i]))) + "px)";
 
   void el.offsetWidth;                     // let that state land before the fade
 
@@ -1906,6 +1925,7 @@ function clearReveal(){
   const el = $("revealWord");
   el.style.transition = "none";
   el.style.opacity = "1";
+  el.style.transform = "none";
 }
 
 function startWord(i){
