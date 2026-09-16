@@ -252,7 +252,10 @@
      leaves. The layer is laid over the square and takes the taps until the fade begins.
      REVEAL_EDGE below keeps the same gap on either side; the size is measured to fit. */
   #reveal{
-    position:fixed; inset:0; z-index:35; display:none;
+    /* Laid over the drawing square, which is where the word belongs: the square sits
+       below the header and the bar, so centring on the screen reads high on the paper.
+       The box is set in revealThenDraw, from the square's own measurements. */
+    position:fixed; z-index:35; display:none;
     align-items:center; justify-content:center;
     /* The pen is never blocked: the word is something to read, not a door to wait at. */
     pointer-events:none;
@@ -1889,12 +1892,14 @@ function revealThenDraw(i){
   el.style.opacity = "1";
   rv.classList.add("on");
 
-  /* Centred on the screen, but sized against the square: the paper is the narrower of
-     the two, and a word wider than the paper reads as spilling off it. */
+  // Over the square itself, so the word is centred on the paper it is about to be
+  // drawn on, with the same air on all four sides of it.
   const pad = $("pad").getBoundingClientRect();
-  const boxW = Math.round(Math.min(window.innerWidth, pad.width)) - REVEAL_EDGE * 2;
-  const boxH = Math.round(Math.min(window.innerHeight, pad.height)) - REVEAL_EDGE * 2;
-  fitWord(el, boxW, boxH);
+  rv.style.left = Math.round(pad.left) + "px";
+  rv.style.top = Math.round(pad.top) + "px";
+  rv.style.width = Math.round(pad.width) + "px";
+  rv.style.height = Math.round(pad.height) + "px";
+  fitWord(el, Math.round(pad.width) - REVEAL_EDGE * 2, Math.round(pad.height) - REVEAL_EDGE * 2);
   // Equal air above and below the letters themselves.
   el.style.transform = "translateY(" + (-Math.round(inkNudge(el, words[i]))) + "px)";
 
