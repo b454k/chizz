@@ -169,6 +169,10 @@
   }
   .athumb canvas{position:absolute; inset:0; width:100%; height:100%;}
   #archiveEmpty{color:var(--muted); font-size:14px; margin:0;}
+  #archiveHint{margin:8px 0 0; text-align:center;}
+  /* the same line, on the screen the day's board has to itself */
+  #scores .head p{text-align:center;}
+  #archiveScreen .scroll{padding-bottom:20px;}
   #nameNote{color:var(--ok); font-weight:600; font-size:13px; min-height:18px; margin:4px 0 0;}
   .seg{display:flex; gap:6px;}
   .seg button{
@@ -477,7 +481,7 @@
   .bhead .nm, .bhead .tm, .bhead .sc{font-weight:800; font-size:11px;}
   #boardEmpty, #scoresEmpty{color:var(--muted); font-size:14px; padding:14px;}
   .bnote{color:var(--muted); font-size:12px; margin:0; padding:10px 14px 12px;
-         border-top:1px solid var(--line);}
+         border-top:1px solid var(--line); text-align:center;}
   /* the round's own code, above its table */
   .bcode{color:var(--muted); font-size:12px; font-weight:800; letter-spacing:.14em;
          margin:18px 0 6px;}
@@ -538,9 +542,8 @@
       </div>
 
       <div class="hsec" id="archiveSec" hidden>
-        <h2 class="hsectitle" data-t="archive"></h2>
-        <p id="archiveEmpty" hidden data-t="archiveEmpty"></p>
-        <div id="archive"></div>
+        <button class="ghost" id="archiveOpen" data-t="archive"></button>
+        <p class="shint" id="archiveHint" data-t="archiveHint"></p>
       </div>
 
       <!-- Theme belongs to the app, not to the round about to be played, so it sits at
@@ -658,6 +661,21 @@
         <p id="scoresEmpty" hidden data-t="nobodyFinished"></p>
         <div id="scoresList"></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ ARŞİV ============ -->
+  <section class="screen" id="archiveScreen">
+    <div class="head">
+      <div class="headrow">
+        <button class="back" id="archiveBack" data-tal="back">←</button>
+        <h2 data-t="archive"></h2>
+      </div>
+      <p data-t="archiveHint"></p>
+    </div>
+    <div class="scroll">
+      <p id="archiveEmpty" hidden data-t="archiveEmpty"></p>
+      <div id="archive"></div>
     </div>
   </section>
 
@@ -1087,6 +1105,7 @@ const TEXT = {
   unlimited:        "sınırsız",
   archive:          "arşiv",
   archiveEmpty:     "bitirdiğin oyunlar burada birikir.",
+  archiveHint:      "son 30 günde bitirdiğin oyunlar",
   archiveMine:      "çizdim",
   archiveTheirs:    "tahmin ettim",
   archiveDaily:     "günlük",
@@ -1372,7 +1391,7 @@ function rememberDay(day, patch){
    their board; and the day's score board, which belongs to no round. Every other
    screen is worked out from the code in the address, which is the better record
    because it survives being sent to somebody else. */
-const PLACES = { between: 1, send: 1, review: 1, scores: 1 };
+const PLACES = { between: 1, send: 1, review: 1, scores: 1, archiveScreen: 1 };
 
 /* Screens on the way to somewhere else. They must not record a place, and must not
    clear one either: fetching a round puts the loading screen up first, which was
@@ -1570,8 +1589,21 @@ function buildHome(){
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
   buildDailyRow();
-  buildArchive();
+  archiveButton();
 }
+
+/* The way in, and whether there is anything behind it. A button opening an empty page is
+   worse than no button, so it waits until this device has finished something. */
+function archiveButton(){
+  const store = loadStore();
+  const any = Object.keys(store.rounds || {}).some(function(c){
+    return store.rounds[c] && store.rounds[c].done;
+  });
+  $("archiveSec").hidden = !any;
+}
+
+$("archiveOpen").onclick = function(){ buildArchive(); show("archiveScreen"); };
+$("archiveBack").onclick = function(){ goBack("home"); };
 
 /* ------------------------------------------------------------- arşiv --- */
 
@@ -1625,7 +1657,6 @@ function buildArchive(){
     .filter(function(c){ return store.rounds[c] && store.rounds[c].done; })
     .sort(function(a, b){ return (store.rounds[b].at || 0) - (store.rounds[a].at || 0); });
 
-  $("archiveSec").hidden = false;
   $("archiveEmpty").hidden = codes.length > 0;
   if (archiveIO) archiveIO.disconnect();
   if (archiveRO) archiveRO.disconnect();
@@ -3523,6 +3554,11 @@ buildHome();
   }
   if (place.screen === "scores" && place.day && place.day === dailyDayNumber()){
     openDailyBoard();
+    return;
+  }
+  if (place.screen === "archiveScreen"){
+    buildArchive();
+    show("archiveScreen");
   }
 })();
 })();
