@@ -19,17 +19,33 @@ of doing something that already had one.
 
 ### Playing
 
-- **The word arrives before every drawing**, in every mode: large in the middle of the
-  page, then flying up into the header to become the word you draw under. Around 0.85 s,
-  over a transparent layer so the paper stays visible behind it. The word used to appear
-  over an already-blank page with the clock running, and on a phone a thumb is often
-  already on the paper; the pen stays dead until the word lands, so a stray first stroke
-  cannot go down before the word has been read. Its own time starts there, so nothing is
-  taken from the drawing. A plain full-screen card was tried first and read as a loading
-  screen.
+- **The word arrives before every drawing**, in every mode: black and large in the
+  middle of the page for two seconds, then flying up into the header to become the word
+  you draw under. The layer is transparent, so the paper stays visible behind it. It is
+  drawn at the size it is read at and scaled down onto the header, rather than a small
+  rendering blown up, which looked soft. The pen wakes as the word starts moving, and
+  the word's own time starts there, so the flight is drawing time rather than a pause.
+  Until then the layer takes the taps: a thumb resting on the paper used to put a stroke
+  down before the word had been read. A plain full-screen card was tried first and read
+  as a loading screen.
 - **The daily is now kelimeler gizli**: the words are not shown, they are typed, with
   the same one-typo forgiveness as the unlimited game. Everyone plays the same twenty
   words, so the harder reading of them is the one worth ranking.
+
+### Words
+
+- **At most two birds in a day.** Seventeen of the thirty-one winged words are birds, so
+  ten drawn at random came out half birds and the day read as a round about birds rather
+  than about a shape. Over three years of days the cap holds: never more than two, and
+  94% of days have none, against days of five, seven and nine before.
+- A family is now eligible only if it can field a legal ten — eight free non-birds under
+  the cap — so a day can never be asked for words it cannot supply. For every family but
+  the winged one this is the same test as before, and the seeded shuffle is untouched, so
+  no other family's days change.
+- The cost is that `winged` appears **every 16.8 days instead of every 6.2**: a capped
+  round eats eight of its fourteen non-birds, and the fourteen-day rule then locks them.
+  Adding non-bird winged words is what buys the rhythm back — five would bring it to 8.8
+  days, ten to 6.4 — and that is waiting on words the owner approves.
 
 ### Sharing and scores
 

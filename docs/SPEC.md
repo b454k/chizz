@@ -151,12 +151,16 @@ on read — `easy`→pool/4s, `medium`→pool/2.5s, `hard`→typed/2.5s,
 ## 6. Drawing phase
 
 - Each word opens by **arriving large in the middle of the page and flying up into the
-  header**, about 0.85 s in all: 0.32 s being read, 0.52 s on the way. The layer is
+  header**: two seconds to read it, then half a second on the way. The layer is
   transparent, so the paper stays visible behind it, and the flight ends exactly on the
   header word it becomes — one thing moving, rather than a title card and then a page.
-  The pen does not answer until it lands, and the word's own time starts there, so
-  nothing is taken from the drawing. On a phone the thumb is usually already resting on
-  the paper, and a stroke meant for nothing used to land before the word had been read.
+- The held word is **black, at the size it is read at**, and is scaled *down* onto the
+  header. Blowing a 34px rendering up to a hundred left the letters soft, because by
+  then they are a picture being stretched.
+- **The pen wakes as the word starts moving**, and the word's own time starts with it,
+  so the flight is drawing time rather than a pause to sit through. Until then the layer
+  takes the taps: on a phone the thumb is usually already resting on the paper, and a
+  stroke meant for nothing used to land before the word had been read.
 - The word is large at the top, a draining progress bar beneath it, `7 / 20` at the right.
 - The canvas is square and sized to the largest square fitting the available area.
 - One pen. No undo, no eraser, no colours.

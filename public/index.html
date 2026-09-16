@@ -254,6 +254,8 @@
     position:fixed; inset:0; z-index:35; display:none;
   }
   #reveal.on{display:block;}
+  /* Once the word is on its way the pen is live, so the layer must stop taking taps. */
+  #reveal.through{pointer-events:none;}
   #revealWord{
     position:absolute; white-space:nowrap; font-weight:800; letter-spacing:-.02em;
     transform-origin:left center; will-change:transform;
@@ -845,6 +847,16 @@ const DAILY_POOL = {
 const DAILY_FAMILIES = Object.keys(DAILY_POOL).sort();
 const DAILY_WINDOW = 14;   // a word may return on the 14th day, not before
 const DAILY_PER_FAMILY = 10;
+
+/* Seventeen of the thirty-one winged words are birds, so ten drawn at random came out
+   half birds and the day read as a round about birds rather than a round about a shape.
+   Two at most. Birds live only in that family, so this costs the others nothing. */
+const DAILY_BIRDS = ["baykuş","civciv","devekuşu","flamingo","güvercin","horoz","kartal",
+                     "kaz","kuğu","kuş","leylek","martı","penguen","serçe","tavuk",
+                     "tavus kuşu","ördek"];
+const DAILY_BIRD_MAX = 2;
+
+function isBird(w){ return DAILY_BIRDS.indexOf(w) >= 0; }
 // Midnight in Turkey on 8 Sep 2026, written in UTC. Turkey has no daylight saving.
 const DAILY_EPOCH = Date.UTC(2026, 8, 7, 21, 0, 0);
 const DAY_MS = 86400000;
@@ -887,6 +899,25 @@ function dailyTake(list, n, rnd){
   return a.slice(0, n);
 }
 
+/* Ten words from one family, never more than two of them birds. The same shuffle as
+   everywhere else -- so the day stays the same on every device, and a family with no
+   birds in it draws exactly what it drew before -- with birds simply passed over once
+   two are in hand. */
+function dailyPick(list, rnd){
+  const shuffled = dailyTake(list, list.length, rnd);
+  const out = [];
+  let birds = 0;
+  for (let i = 0; i < shuffled.length && out.length < DAILY_PER_FAMILY; i++){
+    const w = shuffled[i];
+    if (isBird(w)){
+      if (birds >= DAILY_BIRD_MAX) continue;
+      birds++;
+    }
+    out.push(w);
+  }
+  return out;
+}
+
 /* Which words are free today depends on what the days before used, so the whole
    schedule is replayed from day one. A few hundred cheap iterations, years in.
 
@@ -907,11 +938,15 @@ function dailyWords(day){
       });
     };
     const ready = DAILY_FAMILIES.filter(function(f){
-      return freeIn(f).length >= DAILY_PER_FAMILY;
+      const free = freeIn(f);
+      // Ten words of which at most two may be birds, so eight non-birds have to be
+      // free. For every family but the winged one this is the same test as before.
+      return free.length >= DAILY_PER_FAMILY &&
+             free.filter(function(w){ return !isBird(w); }).length >= DAILY_PER_FAMILY - DAILY_BIRD_MAX;
     });
     out = [];
     dailyTake(ready, 2, rnd).forEach(function(f){
-      dailyTake(freeIn(f), DAILY_PER_FAMILY, rnd).forEach(function(w){
+      dailyPick(freeIn(f), rnd).forEach(function(w){
         lastUsed[w] = d; out.push(w);
       });
     });
@@ -1777,7 +1812,7 @@ function startDrawPhase(){
    the middle of the page, big, and flies up into the header -- ending exactly where and
    how the word will sit while you draw, so the two read as one thing rather than a
    title card followed by a page. The pen is dead until it lands. */
-const REVEAL_HOLD = 320;    // big in the middle, being read
+const REVEAL_HOLD = 2000;   // big in the middle, being read
 const REVEAL_FLY  = 520;    // and on its way up
 let revealing = false;
 let revealPending = false;
@@ -1787,49 +1822,63 @@ function revealThenDraw(i){
   revealing = true;
   const el = $("revealWord");
   const host = $("word");
+  const rv = $("reveal");
   el.textContent = words[i];
   host.style.visibility = "hidden";        // its double is in flight; keep the layout
-  $("reveal").classList.add("on");
+  rv.classList.remove("through");          // no drawing while the word is being read
+  rv.classList.add("on");
 
-  // Lay the flying word exactly over the header word, then push it out to the middle
-  // of the page and scale it up. Coming back to no transform at all is what makes it
-  // land on its place rather than near it.
+  // Sit the word exactly over the header word, and give it the header's own size for
+  // long enough to measure how wide the word actually is.
   const to = host.getBoundingClientRect();
+  const hostPx = parseFloat(getComputedStyle(host).fontSize) || 34;
   el.style.transition = "none";
   el.style.transform = "none";
   el.style.left = to.left + "px";
   el.style.top = to.top + "px";
   el.style.height = to.height + "px";
   el.style.lineHeight = to.height + "px";
-  el.style.fontSize = getComputedStyle(host).fontSize;
+  el.style.fontSize = hostPx + "px";
 
-  // The word's own width, not the header slot it sits in: measured after the styles
-  // above have landed, or a short word would be sized as though it were a long one.
-  const w = Math.round(el.getBoundingClientRect().width) || to.width || 1;
   // Big, but never wider than the page: a long word simply gets a shorter flight.
-  const grow = Math.max(1.15, Math.min((window.innerWidth - 36) / w, 3.2));
-  const dx = window.innerWidth / 2 - to.left - (w * grow) / 2;
-  const dy = window.innerHeight / 2 - to.top - to.height / 2;
-  // The flight crosses the paper, where the header colour is near-white on off-white.
-  // It travels in the accent colour and lands back on the header colour exactly.
-  el.style.color = "var(--accent)";
+  const small = Math.round(el.getBoundingClientRect().width) || to.width || 1;
+  const grow = Math.max(1.15, Math.min((window.innerWidth - 36) / small, 3.2));
+
+  /* Drawn at the size it is read at, then scaled DOWN onto the header. Blowing a
+     34px rendering up to a hundred is what made it look soft: the letters are a
+     picture by then, and the picture gets stretched. */
+  const bigPx = Math.round(hostPx * grow);
+  el.style.fontSize = bigPx + "px";
+  const bigW = Math.round(el.getBoundingClientRect().width) || small * grow;
+  const land = (hostPx / bigPx).toFixed(4);      // back to the header's exact size
+  const dx = Math.round(window.innerWidth / 2 - to.left - bigW / 2);
+  const dy = Math.round(window.innerHeight / 2 - to.top - to.height / 2);
+
+  // Black, like the pen: it is read over the paper, where the header's near-white
+  // would disappear. It eases to the header colour on the way up.
+  el.style.color = "var(--pen)";
   el.style.opacity = "0";
-  el.style.transform = "translate(" + Math.round(dx) + "px," + Math.round(dy) + "px) scale(" + grow.toFixed(3) + ")";
+  el.style.transform = "translate(" + dx + "px," + dy + "px)";
   void el.offsetWidth;                     // let that starting state take effect first
   el.style.transition = "opacity 130ms linear";
   el.style.opacity = "1";
 
   clearTimeout(revealTimer);
   revealTimer = setTimeout(function(){
+    /* The pen wakes as the word starts moving, and the word's own time starts with it:
+       the flight is drawing time rather than a pause to sit through. */
+    revealing = false;
+    rv.classList.add("through");
+    wordStart = performance.now();
+    raf = requestAnimationFrame(tick);
+
     el.style.transition = "transform " + REVEAL_FLY + "ms cubic-bezier(.22,.75,.25,1), color " + REVEAL_FLY + "ms linear";
-    el.style.transform = "none";
+    el.style.transform = "scale(" + land + ")";
     el.style.color = "";
     revealTimer = setTimeout(function(){
-      $("reveal").classList.remove("on");
-      host.style.visibility = "";
-      revealing = false;
-      wordStart = performance.now();       // the word's own time starts here, not before
-      raf = requestAnimationFrame(tick);
+      rv.classList.remove("on");
+      rv.classList.remove("through");
+      host.style.visibility = "";          // the real word takes over, crisp again
     }, REVEAL_FLY);
   }, REVEAL_HOLD);
 }
@@ -1839,11 +1888,13 @@ function clearReveal(){
   revealing = false;
   revealPending = false;
   $("reveal").classList.remove("on");
+  $("reveal").classList.remove("through");
   $("word").style.visibility = "";
   const el = $("revealWord");
   el.style.transition = "none";
   el.style.transform = "none";
   el.style.color = "";
+  el.style.fontSize = "";
 }
 
 function startWord(i){
