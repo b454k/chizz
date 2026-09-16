@@ -19,15 +19,14 @@ of doing something that already had one.
 
 ### Playing
 
-- **The word arrives before every drawing**, in every mode: black and large in the
-  middle of the page for two seconds, then flying up into the header to become the word
-  you draw under. The layer is transparent, so the paper stays visible behind it. It is
-  drawn at the size it is read at and scaled down onto the header, rather than a small
-  rendering blown up, which looked soft. The pen wakes as the word starts moving, and
-  the word's own time starts there, so the flight is drawing time rather than a pause.
-  Until then the layer takes the taps: a thumb resting on the paper used to put a stroke
-  down before the word had been read. A plain full-screen card was tried first and read
-  as a loading screen.
+- **The word is shown on the paper before every drawing**, in every mode: black, centred
+  on the square with the same gap either side, 0.7 s to read and 0.3 s to fade. The size
+  is measured rather than fixed, so `ev` fills the square and `çamaşır makinesi` shrinks
+  to fit, breaking between words and never inside one. The word in the header stays put
+  throughout, and **the pen is never blocked** — you can draw the moment it appears. The
+  word's own time starts as the fade begins, so reading costs nothing. Two earlier tries
+  were worse: a full-screen card read as a loading screen, and flying the word up into
+  the header made a ceremony of it.
 - **The daily is now kelimeler gizli**: the words are not shown, they are typed, with
   the same one-typo forgiveness as the unlimited game. Everyone plays the same twenty
   words, so the harder reading of them is the one worth ranking.

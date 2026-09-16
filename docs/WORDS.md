@@ -45,8 +45,22 @@ tidying at some point.)
 | `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 24 |
 | `oval` | small and egg-shaped: seeds, nuts, pebbles | 22 |
 
-**449 words.** Checked: no word is in two families, none of the 39 removed words is
-back, and every word the free game uses is in here.
+**455 words.** Checked: no word is in two families, no rejected word is back, and every
+word the free game uses is in here. `tools/check-words.js` checks all of it, including
+that the copy of the pool inside `public/index.html` matches this record exactly.
+
+The `winged` family was rebuilt after a complaint that a round came out mostly birds.
+Seventeen of its thirty-one words were birds, so ten drawn at random were half birds.
+Two things changed: **at most two birds a day**, and ten words that are not birds —
+`pantolon`, `şort`, `kulaklık`, `salıncak`, `şezlong`, `gemi`, `balık`, `karides`,
+`sosisli`, `salatalık` — four of them moved out of `domed`, `stick` and `horizontal`.
+The cap alone would have starved the family: a capped round eats eight of its non-birds
+and the fourteen-day rule then locks them, so it fell from appearing every 6.2 days to
+every 16.8. At forty-one words it is back to 6.4, and the families that gave words up
+barely moved — `domed` 8.8 to 9.3 days, `stick` 6.2 to 6.3, `horizontal` unchanged.
+
+The family is no longer only birds and insects: it is anything whose drawing throws two
+halves wide, which is what the shape was always about.
 
 Ten were added to give `domed` and `ring` room to breathe — `bere`, `midye`,
 `deniz kabuğu`, `mağara`, `semer`, `beşik` and `kapak` to `domed`; `çelenk`, `kement`,

@@ -69,8 +69,8 @@ guessing, and `#timeAsk` before the first unlimited round of the day.
    unlimited round of the day answers the question "her kelime için 3 saniyen olacak"
    before the countdown, with başla and değiştir
 2. `countdown` — 3, 2, 1
-3. `draw` — 20 words, one at a time, auto-advancing, each opening with the word
-   flying into its place
+3. `draw` — 20 words, one at a time, auto-advancing, each opening with the word shown
+   on the paper for a second
 4. `between` — choose to guess yourself or send to a friend
 5. `recall` — assign a word to each drawing
 6. `result` — score, per-cell correction, share text
@@ -150,17 +150,15 @@ on read — `easy`→pool/4s, `medium`→pool/2.5s, `hard`→typed/2.5s,
 
 ## 6. Drawing phase
 
-- Each word opens by **arriving large in the middle of the page and flying up into the
-  header**: two seconds to read it, then half a second on the way. The layer is
-  transparent, so the paper stays visible behind it, and the flight ends exactly on the
-  header word it becomes — one thing moving, rather than a title card and then a page.
-- The held word is **black, at the size it is read at**, and is scaled *down* onto the
-  header. Blowing a 34px rendering up to a hundred left the letters soft, because by
-  then they are a picture being stretched.
-- **The pen wakes as the word starts moving**, and the word's own time starts with it,
-  so the flight is drawing time rather than a pause to sit through. Until then the layer
-  takes the taps: on a phone the thumb is usually already resting on the paper, and a
-  stroke meant for nothing used to land before the word had been read.
+- Each word opens with the word itself **on the paper, in black**: 0.7 s to read, then a
+  0.3 s fade. It is centred on the square, with the same gap either side, and the word in
+  the header is there the whole time — the big one is a second look, not a title card.
+- **The size is measured, not fixed.** One number cannot suit both `ev` and
+  `çamaşır makinesi`, so the largest size that fits the square by width and height is
+  found by halving. Words break between words only, never inside one.
+- **The pen is never blocked**: you can start drawing the moment the word appears, and
+  the layer takes no taps. The word's own time starts as the fade begins, so the second
+  spent reading is not taken out of the drawing.
 - The word is large at the top, a draining progress bar beneath it, `7 / 20` at the right.
 - The canvas is square and sized to the largest square fitting the available area.
 - One pen. No undo, no eraser, no colours.

@@ -32,6 +32,18 @@ peygamber devesi, mayıs böceği, savaş uçağı, model uçak
 `planör` is on both lists: it was rejected in September and proposed again here, which
 is what this file is for.
 
+## Never in the same round
+
+Some words are fine on their own but not together: they draw as the same shape, so a
+grid holding both asks the player to tell apart two drawings that never differed.
+
+- `kanepe` and `koltuk`
+
+The generator enforces this (`DAILY_NEVER_TOGETHER` in `public/index.html`), and it is
+recorded in `docs/words.json` under `rules.neverTogether`. A day is twenty words, so if
+honouring a pair would leave the day short — which needs the family to be nearly
+exhausted — the twenty wins and the pair gives way.
+
 ## Renamed, not banned
 
 These were kept under a clearer name, so the old spelling should not come back either:
