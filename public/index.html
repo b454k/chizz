@@ -145,6 +145,29 @@
   }
   .shint{color:var(--muted); font-size:12px; margin:2px 0 0;}
   .nlabel{color:var(--muted); font-size:13px; font-weight:600; margin:0 0 6px;}
+
+  /* arşiv: what this device has finished, with the drawings from each round */
+  #archive .arow{
+    border:2px solid var(--line); border-radius:14px; padding:12px 13px; margin:0 0 10px;
+    background:var(--panel); width:100%; text-align:left; display:block;
+  }
+  #archive .arow:active{background:var(--panel2);}
+  .ahead{display:flex; align-items:baseline; gap:8px; margin:0 0 9px;}
+  .ahead .awhen{color:var(--muted); font-size:13px; font-weight:600;}
+  .ahead .awho{color:var(--muted); font-size:13px; font-weight:600; flex:1; min-width:0;
+               overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .ahead .ascore{font-weight:800; font-size:15px; font-variant-numeric:tabular-nums;}
+  .acode{
+    font-size:12px; font-weight:800; letter-spacing:.14em; color:var(--muted);
+  }
+  /* the twenty drawings, in the same four across the round itself uses */
+  .astrip{display:grid; grid-template-columns:repeat(10,1fr); gap:3px;}
+  .athumb{
+    position:relative; width:100%; aspect-ratio:1/1; border-radius:4px;
+    overflow:hidden; background:var(--paper);
+  }
+  .athumb canvas{position:absolute; inset:0; width:100%; height:100%;}
+  #archiveEmpty{color:var(--muted); font-size:14px; margin:0;}
   #nameNote{color:var(--ok); font-weight:600; font-size:13px; min-height:18px; margin:4px 0 0;}
   .seg{display:flex; gap:6px;}
   .seg button{
@@ -489,6 +512,12 @@
           <button id="joinGo" data-t="join"></button>
         </div>
         <p class="err" id="joinErr"></p>
+      </div>
+
+      <div class="hsec" id="archiveSec" hidden>
+        <h2 class="hsectitle" data-t="archive"></h2>
+        <p id="archiveEmpty" hidden data-t="archiveEmpty"></p>
+        <div id="archive"></div>
       </div>
     </div>
   </section>
@@ -1009,6 +1038,11 @@ const TEXT = {
   themeLight:       "açık",
   tagline:          "ne chizzmiştin?",
   unlimited:        "sınırsız",
+  archive:          "arşiv",
+  archiveEmpty:     "bitirdiğin oyunlar burada birikir.",
+  archiveMine:      "çizdim",
+  archiveTheirs:    "tahmin ettim",
+  archiveDaily:     "günlük",
   change:           "değiştir",
   timeNotice:       "her kelime için {n} saniyen olacak",
 
@@ -1076,9 +1110,9 @@ const TEXT = {
   scores:           "skorlar",
   scoresSuffix:     " · skorlar",
   scoresNoteLive:   "skora göre sıralı; eşitlikte hızlı olan önde. arkadaşların bitirdikçe kendiliğinden güncellenir.",
-  scoresNoteResult: "skora göre sıralı; eşitlikte hızlı olan önde. arkadaşların bitirdikçe burada beliriyor.",
+  scoresNoteResult: "arkadaşların bitirdikçe burada beliriyor.",
   nobodyFinished:   "henüz kimse bitirmedi.",
-  firstToPlay:      "bu çizimleri ilk oynayan sensin.",
+  firstToPlay:      "henüz kimse tahmin etmedi.",
 
 
   share:            "paylaş",
@@ -1466,6 +1500,149 @@ function buildHome(){
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
   buildDailyRow();
+  buildArchive();
+}
+
+/* ------------------------------------------------------------- arşiv --- */
+
+/* What this device has finished, newest first. The store already keeps thirty days of
+   rounds and no more -- the same clock the server expires them on -- so "the last thirty
+   days" is simply everything in it that has been played to the end.
+
+   Only the bookkeeping is on the device; the drawings live on the server. Fetching forty
+   rounds the moment the start screen opens would be rude, so a row asks for its own
+   drawings when it comes into view, and what arrives is kept for the rest of the visit. */
+const archiveSeen = {};        // code -> the round as the server has it
+
+let archiveIO = null;
+
+/* Twenty small canvases can be handed their drawings before the layout has given them a
+   width, and a canvas painted at zero width stays empty for good. The round grid keeps a
+   ResizeObserver for the same reason; this is the archive's. */
+const archiveRO = typeof ResizeObserver !== "undefined"
+  ? new ResizeObserver(function(entries){
+      for (let i = 0; i < entries.length; i++) paintThumb(entries[i].target);
+    })
+  : null;
+
+/* One drawing, small. The strokes are on the canvas itself, so a repaint needs nothing
+   looked up: whatever the row fetched is still here when the width arrives. */
+function paintThumb(cv){
+  const strokes = cv.__strokes;
+  if (!strokes) return;
+  const size = cv.clientWidth;
+  if (!size) return;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(size * dpr);
+  cv.height = Math.round(size * dpr);
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, size, size);
+  paintStrokes(ctx, strokes, size, Math.max(1, size * 0.05));
+}
+
+function archiveWhen(at){
+  const d = new Date(at || Date.now());
+  const p = function(n){ return n < 10 ? "0" + n : String(n); };
+  return p(d.getDate()) + "/" + p(d.getMonth() + 1);
+}
+
+function buildArchive(){
+  const box = $("archive");
+  if (!box) return;
+  const store = loadStore();
+  const codes = Object.keys(store.rounds || {})
+    .filter(function(c){ return store.rounds[c] && store.rounds[c].done; })
+    .sort(function(a, b){ return (store.rounds[b].at || 0) - (store.rounds[a].at || 0); });
+
+  $("archiveSec").hidden = false;
+  $("archiveEmpty").hidden = codes.length > 0;
+  if (archiveIO) archiveIO.disconnect();
+  if (archiveRO) archiveRO.disconnect();
+  archiveIO = typeof IntersectionObserver !== "undefined"
+    ? new IntersectionObserver(function(rows){
+        rows.forEach(function(r){
+          if (!r.isIntersecting) return;
+          archiveIO.unobserve(r.target);
+          fillArchiveRow(r.target);
+        });
+      }, { rootMargin: "200px" })
+    : null;
+
+  box.innerHTML = "";
+  codes.forEach(function(code){
+    const rec = store.rounds[code];
+    const row = document.createElement("button");
+    row.className = "arow";
+    row.dataset.code = code;
+
+    const head = document.createElement("div");
+    head.className = "ahead";
+    const when = document.createElement("span");
+    when.className = "awhen";
+    when.textContent = archiveWhen(rec.at);
+    const who = document.createElement("span");
+    who.className = "awho";
+    who.textContent = rec.mine ? TEXT.archiveMine : TEXT.archiveTheirs;
+    const score = document.createElement("span");
+    score.className = "ascore";
+    score.textContent = (rec.score || 0) + "/" + N;
+    head.appendChild(when); head.appendChild(who); head.appendChild(score);
+
+    const strip = document.createElement("div");
+    strip.className = "astrip";
+    for (let i = 0; i < N; i++){
+      const t = document.createElement("div");
+      t.className = "athumb";
+      t.appendChild(document.createElement("canvas"));
+      strip.appendChild(t);
+    }
+
+    const code2 = document.createElement("div");
+    code2.className = "acode";
+    code2.textContent = code + (rec.ms ? " \u00b7 " + timeLabel(rec.ms) : "");
+
+    row.appendChild(head);
+    row.appendChild(strip);
+    row.appendChild(code2);
+    row.onclick = function(){ loadGame(code); };
+    box.appendChild(row);
+
+    if (archiveIO) archiveIO.observe(row); else fillArchiveRow(row);
+  });
+}
+
+/* One row's drawings. A round that has expired on the server simply keeps its empty
+   squares: the score beside them is this device's own record and still true. */
+function fillArchiveRow(row){
+  const code = row.dataset.code;
+  if (!code) return;
+  if (archiveSeen[code]){ paintArchiveRow(row, archiveSeen[code]); return; }
+  api("/api/game/" + encodeURIComponent(code)).then(function(r){
+    if (!r.ok || !r.data) return;
+    const round = {
+      drawings: decodeDrawings(r.data.drawings),
+      day: Number(r.data.day) > 0 ? Number(r.data.day) : 0,
+      name: typeof r.data.name === "string" ? r.data.name : ""
+    };
+    archiveSeen[code] = round;
+    paintArchiveRow(row, round);
+  }).catch(function(){ /* offline: the row keeps its score and its empty squares */ });
+}
+
+function paintArchiveRow(row, round){
+  // Whether it was a daily round is something only the server knows, so it is said here,
+  // where the answer arrives.
+  if (round.day){
+    const who = row.querySelector(".awho");
+    if (who) who.textContent = TEXT.archiveDaily;
+  }
+  const cvs = row.querySelectorAll(".athumb canvas");
+  for (let i = 0; i < cvs.length; i++){
+    cvs[i].__strokes = round.drawings[i] || [];
+    paintThumb(cvs[i]);                     // now, if it already has a width
+    if (archiveRO) archiveRO.observe(cvs[i]);   // and again when it gets one
+  }
 }
 
 $("secs").addEventListener("input", function(){
