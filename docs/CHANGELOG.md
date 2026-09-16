@@ -19,11 +19,14 @@ of doing something that already had one.
 
 ### Playing
 
-- **Half a second with the word alone, full screen, before every drawing**, in every
-  mode. The word used to appear over an already-blank page with the clock running, and
-  on a phone a thumb is often already on the paper. The pen is dead until the word
-  lifts, so a stray first stroke cannot land on the next word. The word's own time
-  starts after it, so nothing is taken from the drawing.
+- **The word arrives before every drawing**, in every mode: large in the middle of the
+  page, then flying up into the header to become the word you draw under. Around 0.85 s,
+  over a transparent layer so the paper stays visible behind it. The word used to appear
+  over an already-blank page with the clock running, and on a phone a thumb is often
+  already on the paper; the pen stays dead until the word lands, so a stray first stroke
+  cannot go down before the word has been read. Its own time starts there, so nothing is
+  taken from the drawing. A plain full-screen card was tried first and read as a loading
+  screen.
 - **The daily is now kelimeler gizli**: the words are not shown, they are typed, with
   the same one-typo forgiveness as the unlimited game. Everyone plays the same twenty
   words, so the harder reading of them is the one worth ranking.

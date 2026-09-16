@@ -247,15 +247,16 @@
   #stage{flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding-bottom:14px;}
   #pad{background:var(--paper); border:2px solid var(--line); border-radius:16px; touch-action:none; display:block;}
 
-  /* the word alone, before the pen goes live */
+  /* The word arrives over the page, large, and flies up into its place in the header.
+     Transparent: the paper you are about to draw on stays visible behind it. The layer
+     still takes the taps, so the pen cannot start until the word has landed. */
   #reveal{
-    position:fixed; inset:0; z-index:35; background:var(--bg);
-    display:none; align-items:center; justify-content:center; padding:24px;
+    position:fixed; inset:0; z-index:35; display:none;
   }
-  #reveal.on{display:flex;}
+  #reveal.on{display:block;}
   #revealWord{
-    font-size:46px; font-weight:800; letter-spacing:-.03em; line-height:1.1;
-    text-align:center; word-break:break-word;
+    position:absolute; white-space:nowrap; font-weight:800; letter-spacing:-.02em;
+    transform-origin:left center; will-change:transform;
   }
 
   /* ara ekranlar */
@@ -1771,25 +1772,66 @@ function startDrawPhase(){
   startWord(0);
 }
 
-/* The word used to appear at the top of a blank page with the clock already
-   running, which on a phone is easy to start drawing over before reading it. It
-   now gets half a second on its own, and the pen is dead until that is over. */
-const REVEAL_MS = 500;
+/* The word used to appear at the top of a blank page with the clock already running,
+   which on a phone is easy to start drawing over before reading it. It now arrives in
+   the middle of the page, big, and flies up into the header -- ending exactly where and
+   how the word will sit while you draw, so the two read as one thing rather than a
+   title card followed by a page. The pen is dead until it lands. */
+const REVEAL_HOLD = 320;    // big in the middle, being read
+const REVEAL_FLY  = 520;    // and on its way up
 let revealing = false;
 let revealPending = false;
 let revealTimer = 0;
 
 function revealThenDraw(i){
   revealing = true;
-  $("revealWord").textContent = words[i];
+  const el = $("revealWord");
+  const host = $("word");
+  el.textContent = words[i];
+  host.style.visibility = "hidden";        // its double is in flight; keep the layout
   $("reveal").classList.add("on");
+
+  // Lay the flying word exactly over the header word, then push it out to the middle
+  // of the page and scale it up. Coming back to no transform at all is what makes it
+  // land on its place rather than near it.
+  const to = host.getBoundingClientRect();
+  el.style.transition = "none";
+  el.style.transform = "none";
+  el.style.left = to.left + "px";
+  el.style.top = to.top + "px";
+  el.style.height = to.height + "px";
+  el.style.lineHeight = to.height + "px";
+  el.style.fontSize = getComputedStyle(host).fontSize;
+
+  // The word's own width, not the header slot it sits in: measured after the styles
+  // above have landed, or a short word would be sized as though it were a long one.
+  const w = Math.round(el.getBoundingClientRect().width) || to.width || 1;
+  // Big, but never wider than the page: a long word simply gets a shorter flight.
+  const grow = Math.max(1.15, Math.min((window.innerWidth - 36) / w, 3.2));
+  const dx = window.innerWidth / 2 - to.left - (w * grow) / 2;
+  const dy = window.innerHeight / 2 - to.top - to.height / 2;
+  // The flight crosses the paper, where the header colour is near-white on off-white.
+  // It travels in the accent colour and lands back on the header colour exactly.
+  el.style.color = "var(--accent)";
+  el.style.opacity = "0";
+  el.style.transform = "translate(" + Math.round(dx) + "px," + Math.round(dy) + "px) scale(" + grow.toFixed(3) + ")";
+  void el.offsetWidth;                     // let that starting state take effect first
+  el.style.transition = "opacity 130ms linear";
+  el.style.opacity = "1";
+
   clearTimeout(revealTimer);
   revealTimer = setTimeout(function(){
-    $("reveal").classList.remove("on");
-    revealing = false;
-    wordStart = performance.now();     // the word's own time starts here, not before
-    raf = requestAnimationFrame(tick);
-  }, REVEAL_MS);
+    el.style.transition = "transform " + REVEAL_FLY + "ms cubic-bezier(.22,.75,.25,1), color " + REVEAL_FLY + "ms linear";
+    el.style.transform = "none";
+    el.style.color = "";
+    revealTimer = setTimeout(function(){
+      $("reveal").classList.remove("on");
+      host.style.visibility = "";
+      revealing = false;
+      wordStart = performance.now();       // the word's own time starts here, not before
+      raf = requestAnimationFrame(tick);
+    }, REVEAL_FLY);
+  }, REVEAL_HOLD);
 }
 
 function clearReveal(){
@@ -1797,6 +1839,11 @@ function clearReveal(){
   revealing = false;
   revealPending = false;
   $("reveal").classList.remove("on");
+  $("word").style.visibility = "";
+  const el = $("revealWord");
+  el.style.transition = "none";
+  el.style.transform = "none";
+  el.style.color = "";
 }
 
 function startWord(i){

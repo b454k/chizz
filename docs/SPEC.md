@@ -69,8 +69,8 @@ guessing, and `#timeAsk` before the first unlimited round of the day.
    unlimited round of the day answers the question "her kelime için 3 saniyen olacak"
    before the countdown, with başla and değiştir
 2. `countdown` — 3, 2, 1
-3. `draw` — 20 words, one at a time, auto-advancing, each opening with half a second
-   of the word alone
+3. `draw` — 20 words, one at a time, auto-advancing, each opening with the word
+   flying into its place
 4. `between` — choose to guess yourself or send to a friend
 5. `recall` — assign a word to each drawing
 6. `result` — score, per-cell correction, share text
@@ -150,10 +150,13 @@ on read — `easy`→pool/4s, `medium`→pool/2.5s, `hard`→typed/2.5s,
 
 ## 6. Drawing phase
 
-- Each word opens with **half a second of the word alone, full screen**. The pen does
-  not answer until it lifts, and the word's own time starts after it, so nothing is
-  taken from the drawing. On a phone the thumb is usually already resting on the paper,
-  and a stroke meant for nothing used to land before the word had been read.
+- Each word opens by **arriving large in the middle of the page and flying up into the
+  header**, about 0.85 s in all: 0.32 s being read, 0.52 s on the way. The layer is
+  transparent, so the paper stays visible behind it, and the flight ends exactly on the
+  header word it becomes — one thing moving, rather than a title card and then a page.
+  The pen does not answer until it lands, and the word's own time starts there, so
+  nothing is taken from the drawing. On a phone the thumb is usually already resting on
+  the paper, and a stroke meant for nothing used to land before the word had been read.
 - The word is large at the top, a draining progress bar beneath it, `7 / 20` at the right.
 - The canvas is square and sized to the largest square fitting the available area.
 - One pen. No undo, no eraser, no colours.
