@@ -1116,13 +1116,15 @@ function dailyDays(from, to){
    than no game at all. The two families are the ones that need the fewest such repeats,
    at random among equals.
 
-   On a device that has played the daily game in the last fourteen days, the daily
-   game's words for today and the next thirteen are held back, and dealt only when
-   nothing else is left. The day is the same for everyone and cannot steer around this
+   On a device that has played the daily game on at least two different days in the
+   last fourteen, the daily game's words for today and the next thirteen are held back,
+   and dealt only when nothing else is left. The day is the same for everyone and cannot steer around this
    device, so a word dealt here would otherwise turn up again in the daily game inside
    the fourteen days: simulated, that was 13 of the day's 20 words for a player of the
    daily game and one sınırsız round a day. A device that never plays the day has no
-   such repeats to avoid, and keeps those 280 words. */
+   such repeats to avoid, and keeps those 280 words. One day is not enough to count:
+   a single try of the daily game held back 280 words for fourteen days, and a player
+   of sınırsız alone went from no repeats to six or seven a round. */
 const SEEN_SPREAD = 7;
 
 function freshWords(){
@@ -1134,11 +1136,7 @@ function freshWords(){
     const d = seen[w];
     return typeof d === "number" && today - d < DAILY_WINDOW ? d : 0;
   };
-  // days[N] covers rounds drawn before dailyAt was recorded; it only keeps two days.
-  const playsDaily = (typeof store.dailyAt === "number" && today - store.dailyAt < DAILY_WINDOW) ||
-    Object.keys(store.days || {}).some(function(n){
-      return store.days[n] && store.days[n].drawn && today - Number(n) < DAILY_WINDOW;
-    });
+  const playsDaily = dailyDaysPlayed(store, today).length >= 2;
   const held = {};
   if (playsDaily){
     dailyDays(today, today + DAILY_WINDOW - 1).forEach(function(list){
@@ -1167,14 +1165,34 @@ function freshWords(){
   return out;
 }
 
+/* The different days, within the last fourteen, on which this device played the daily
+   game. days[N] and the single dailyAt an earlier version kept are read too, so a device
+   that played before this list existed is not forgotten. */
+function dailyDaysPlayed(store, today){
+  const found = {};
+  const note = function(n){
+    n = Number(n);
+    if (n > 0 && today - n >= 0 && today - n < DAILY_WINDOW) found[n] = true;
+  };
+  (Array.isArray(store.dailyPlayed) ? store.dailyPlayed : []).forEach(note);
+  if (typeof store.dailyAt === "number") note(store.dailyAt);
+  Object.keys(store.days || {}).forEach(function(n){ if (store.days[n] && store.days[n].drawn) note(n); });
+  return Object.keys(found).map(Number);
+}
+
 /* The words a round put in front of this device, on today's date. A daily round also
-   marks the device as one that plays the day (see freshWords). */
+   records the day it was played (see freshWords). */
 function rememberSeen(list, daily){
   const store = loadStore();
   if (!store.seen || typeof store.seen !== "object") store.seen = {};
   const today = dailyDayNumber();
   list.forEach(function(w){ store.seen[w] = today; });
-  if (daily) store.dailyAt = today;
+  if (daily){
+    const played = dailyDaysPlayed(store, today);
+    if (played.indexOf(today) < 0) played.push(today);
+    store.dailyPlayed = played;
+    delete store.dailyAt;
+  }
   saveStore(store);
 }
 

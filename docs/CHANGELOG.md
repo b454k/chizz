@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-17 — one daily game does not make a daily player
+
+sınırsız held back the coming daily words for 14 days after any daily game. A player of
+sınırsız alone who tried the daily game once went from 0 repeated words a round to about
+6.6 for the next two weeks, for a game they might never play again. A device now counts as
+a player of the day only after playing it on 2 different days within 14.
+
 ## 2026-09-17 — geri bildirim
 
 - A `geri bildirim` button at the top right of the start screen, and a `bir sorun mu var?

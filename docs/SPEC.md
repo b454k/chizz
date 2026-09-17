@@ -216,11 +216,14 @@ was put in front of it, in the daily game or here (`seen` in section 14), for 14
   at random across a week around the day they were seen -- by exact day, the ten words
   dealt together on one day came back together.
 - The two families are the ones needing the fewest such repeats, at random among equals.
-- **On a device that has played the daily game in the last 14 days** (`dailyAt`), the
-  daily game's words for today and the next 13 days are held back and dealt only when
-  nothing else is left. The day is the same for everyone and cannot avoid this device's
-  words, so without this a word dealt in sınırsız came round again in the daily game
-  within the 14 days. A device that does not play the day keeps those 280 words.
+- **On a device that has played the daily game on at least 2 different days in the last
+  14** (`dailyPlayed`), the daily game's words for today and the next 13 days are held
+  back and dealt only when nothing else is left. The day is the same for everyone and
+  cannot avoid this device's words, so without this a word dealt in sınırsız came round
+  again in the daily game within the 14 days. A device that does not play the day keeps
+  those 280 words. One day does not count: a single try held the words back for 14 days
+  and took a sınırsız-only player (1 a day) from 0 repeated words a round to about 6.6.
+  The price is that the second daily game, like the first, can repeat words sınırsız dealt.
 
 Measured by simulation over 90 days with 461 words, repeated words out of 20 (seen by the
 device in the previous 14 days):
@@ -426,7 +429,7 @@ holds:
 | `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |
 | `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |
 | `seen` | Word → the day it was last dealt to this device, in either game, kept for 14 days. What sınırsız deals from (section 7) |
-| `dailyAt` | The last day this device started the daily game. Within 14 days of it, sınırsız holds back the upcoming daily words (section 7) |
+| `dailyPlayed` | The different days in the last 14 on which this device started the daily game. With 2 or more, sınırsız holds back the upcoming daily words (section 7). Replaces `dailyAt`, which is still read |
 | `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. Entries older than the
