@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-17 — sorun bildir
+
+The feedback button and dialog title read `sorun bildir` instead of `geri bildirim`, and
+the note under the text box reads `ekran ve cihaz bilgileri otomatik olarak eklenir`.
+
 ## 2026-09-17 — one daily game does not make a daily player
 
 sınırsız held back the coming daily words for 14 days after any daily game. A player of

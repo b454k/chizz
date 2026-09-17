@@ -606,13 +606,13 @@ the player touching it.
 
 ## 19b. Feedback
 
-A `geri bildirim` button sits at the top right of the start screen, above the title, so
+A `sorun bildir` button sits at the top right of the start screen, above the title, so
 every visit sees it without scrolling. `bir sorun mu var? bildir` appears under a result
 and on a failed round load, where problems are found; from there `hata bildir` is
 already chosen.
 
 The dialog asks for the kind (`hata bildir` / `öneri`) and up to 500 characters, with a
-live count and at least 10 characters. It says `ekran ve cihaz bilgisi de eklenir`, and
+live count and at least 10 characters. It says `ekran ve cihaz bilgileri otomatik olarak eklenir`, and
 attaches: the screen it was opened from, the address, the round code, the day, whether it
 is a daily round, role, mode, seconds, theme, browser, language, viewport and pixel
 ratio, whether the device is online, and the last five script errors (message and
