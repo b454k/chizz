@@ -20,6 +20,20 @@ words.
   device, and friends on their own phones are dealt independently. Growing the pool is
   what raises it.
 
+### The daily game no longer repeats what sınırsız dealt
+Simulating the above showed a worse problem: for someone playing the daily game and one
+sınırsız round a day, 13 of each day's 20 daily words had already been dealt to them in
+sınırsız within 14 days. The day is the same for everyone and cannot avoid one device's
+words.
+
+- On a device that has played the daily game in the last 14 days, sınırsız holds back
+  the daily words for today and the next 13 days, and deals them only when nothing else
+  is left. Daily repeats go to 0; the repeats move into sınırsız, mostly as words seen
+  10–13 days earlier, because the daily game takes up about 540 of the 461 words for
+  such a device.
+- Devices that never play the day are not affected and keep those 280 words.
+- With about 630 more words, daily + 2 sınırsız a day repeats nothing.
+
 ### arşiv keeps every unsaved drawing
 Starting a new round deleted the unsaved one before it, so only the last drawn round
 ever showed as "henüz kaydedilmedi". Now each drawn round with at least one line moves to

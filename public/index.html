@@ -1015,9 +1015,15 @@ function dealFrom(ordered, taken){
    end up appearing every nine days or so and large ones every six, which is exactly
    right -- a small family needs longer to refresh. */
 function dailyWords(day){
+  return dailyDays(day, day)[0] || [];
+}
+
+/* The days from..to, each as its twenty words, out of a single replay of the schedule. */
+function dailyDays(from, to){
   const lastUsed = {};
+  const days = [];
   let out = [];
-  for (let d = 1; d <= day; d++){
+  for (let d = 1; d <= to; d++){
     const rnd = dailyRandom(d);
     const freeIn = function(f){
       return DAILY_POOL[f].filter(function(w){
@@ -1037,36 +1043,59 @@ function dailyWords(day){
         lastUsed[w] = d; out.push(w);
       });
     });
+    if (d >= from) days.push(out);
   }
-  return out;
+  return days;
 }
 
 /* sınırsız: two families and ten words from each, dealt the way the day is, but for
    this device. Words it has not been shown for fourteen days -- here or in the daily
    game -- come first, in random order. When a family runs short of those, the words it
-   saw longest ago fill the ten, a day at a time and at random within a day, so a player
-   who plays a lot sees old words again rather than no game at all. The two families are
-   the ones that need the fewest such repeats, at random among equals. */
+   saw longest ago fill the ten, so a player who plays a lot sees old words again rather
+   than no game at all. The two families are the ones that need the fewest such repeats,
+   at random among equals.
+
+   On a device that has played the daily game in the last fourteen days, the daily
+   game's words for today and the next thirteen are held back, and dealt only when
+   nothing else is left. The day is the same for everyone and cannot steer around this
+   device, so a word dealt here would otherwise turn up again in the daily game inside
+   the fourteen days: simulated, that was 13 of the day's 20 words for a player of the
+   daily game and one sınırsız round a day. A device that never plays the day has no
+   such repeats to avoid, and keeps those 280 words. */
 const SEEN_SPREAD = 7;
 
 function freshWords(){
-  const seen = loadStore().seen || {};
+  const store = loadStore();
+  const seen = store.seen || {};
   const today = dailyDayNumber();
   // 0 for a word free to deal, otherwise the day it was last shown.
   const since = function(w){
     const d = seen[w];
     return typeof d === "number" && today - d < DAILY_WINDOW ? d : 0;
   };
+  // days[N] covers rounds drawn before dailyAt was recorded; it only keeps two days.
+  const playsDaily = (typeof store.dailyAt === "number" && today - store.dailyAt < DAILY_WINDOW) ||
+    Object.keys(store.days || {}).some(function(n){
+      return store.days[n] && store.days[n].drawn && today - Number(n) < DAILY_WINDOW;
+    });
+  const held = {};
+  if (playsDaily){
+    dailyDays(today, today + DAILY_WINDOW - 1).forEach(function(list){
+      list.forEach(function(w){ held[w] = true; });
+    });
+  }
+  // A held word ranks after a word seen today, whatever the spread below does to that.
+  const level = function(w){ return held[w] ? today + SEEN_SPREAD + 1 : since(w); };
   // Free words sort below every seen one (keys under 0, at random). Seen words are spread
   // across a week around the day they were shown: strictly by day, the ten dealt together
   // on one day came back together too.
   const order = function(x){ return x.d ? x.d + x.r * SEEN_SPREAD : x.r - 1; };
   const families = DAILY_FAMILIES.map(function(f){
     const line = DAILY_POOL[f]
-      .map(function(w){ return { w: w, d: since(w), r: Math.random() }; })
+      .map(function(w){ return { w: w, d: level(w), r: Math.random() }; })
       .sort(function(a, b){ return order(a) - order(b); })
       .map(function(x){ return x.w; });
-    const newest = Math.max.apply(null, dealFrom(line, []).map(since));
+    const newest = Math.max.apply(null, dealFrom(line, []).map(level));
     return { line: line, newest: newest, r: Math.random() };
   }).sort(function(a, b){ return a.newest - b.newest || a.r - b.r; });
 
@@ -1077,12 +1106,14 @@ function freshWords(){
   return out;
 }
 
-/* The words a round put in front of this device, on today's date. */
-function rememberSeen(list){
+/* The words a round put in front of this device, on today's date. A daily round also
+   marks the device as one that plays the day (see freshWords). */
+function rememberSeen(list, daily){
   const store = loadStore();
   if (!store.seen || typeof store.seen !== "object") store.seen = {};
   const today = dailyDayNumber();
   list.forEach(function(w){ store.seen[w] = today; });
+  if (daily) store.dailyAt = today;
   saveStore(store);
 }
 
@@ -2138,7 +2169,7 @@ function startDaily(){
   scores  = [];
   scoreSent = false;
   words    = dailyWords(dailyDay);
-  rememberSeen(words);
+  rememberSeen(words, true);
   drawings = words.map(function(){ return []; });
   order    = shuffle(words.map(function(_, i){ return i; }));
   picks    = new Array(N).fill(null);

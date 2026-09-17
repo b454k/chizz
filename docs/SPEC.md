@@ -215,11 +215,27 @@ was put in front of it, in the daily game or here (`seen` in section 14), for 14
   at random across a week around the day they were seen -- by exact day, the ten words
   dealt together on one day came back together.
 - The two families are the ones needing the fewest such repeats, at random among equals.
+- **On a device that has played the daily game in the last 14 days** (`dailyAt`), the
+  daily game's words for today and the next 13 days are held back and dealt only when
+  nothing else is left. The day is the same for everyone and cannot avoid this device's
+  words, so without this a word dealt in sınırsız came round again in the daily game
+  within the 14 days. A device that does not play the day keeps those 280 words.
 
-Measured by simulation: one sınırsız round a day never repeats a word within 14 days;
-the daily game plus one sınırsız round a day first repeats at about the 14th round; any
-number of rounds back to back first repeats at about the 20th, which is what 461 words
-allow. Over many rounds a word's most frequent partner comes along about 56% of the time,
+Measured by simulation over 90 days with 461 words, repeated words out of 20 (seen by the
+device in the previous 14 days):
+
+| Play | in the daily game | per sınırsız round | first repeat |
+|---|---|---|---|
+| daily only | 0 | — | never |
+| sınırsız only, 1 a day | — | 0 | never |
+| sınırsız only, 2 a day | — | 14.8 | day 11 |
+| daily + 1 sınırsız a day | 0 (13.5 before the hold-back) | 17.7 | day 4 |
+| daily + 2 sınırsız a day | 0 | 18.7 | day 3 |
+
+The daily game takes up about 540 words at a time for a device that plays it (the last 14
+days and the next 14), more than the pool holds, so its repeats land in sınırsız, mostly
+as words seen 10–13 days earlier. With 811 words daily + 1 sınırsız a day has no repeats;
+with 1,091, daily + 2 a day has none. Over many rounds a word's most frequent partner comes along about 56% of the time,
 the same as pure random dealing; with the 30 fixed sets this replaced it was 98%.
 
 The rounds used to come from 30 fixed sets of 20, so the same words always arrived
@@ -402,6 +418,7 @@ holds:
 | `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |
 | `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |
 | `seen` | Word → the day it was last dealt to this device, in either game, kept for 14 days. What sınırsız deals from (section 7) |
+| `dailyAt` | The last day this device started the daily game. Within 14 days of it, sınırsız holds back the upcoming daily words (section 7) |
 | `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. Entries older than the
