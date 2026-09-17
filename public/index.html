@@ -861,99 +861,6 @@
 
 /* ---------------------------------------------------------------- data --- */
 
-const SETS = [
-  { id:"set-01",   // round / boxy
-    familyA:["top","elma","güneş","saat","tekerlek","balon","portakal","tabak","ay","yüzük"],
-    familyB:["kutu","ev","televizyon","kitap","pencere","buzdolabı","valiz","telefon","kapı","çanta"] },
-  { id:"set-02",   // horizontal / vertical
-    familyA:["fil","kanepe","inek","masa","otobüs","tren","timsah","köprü","araba","ayı"],
-    familyB:["ağaç","insan","lamba","şişe","kule","şemsiye","mum","zürafa","kaktüs","süpürge"] },
-  { id:"set-03",   // peaked / stick
-    familyA:["dağ","çadır","çam","pizza","dondurma","şapka","roket","yelkenli","çatı","huni"],
-    familyB:["kalem","kaşık","anahtar","çekiç","diş fırçası","balık","kılıç","tarak","cetvel","sosis"] },
-  { id:"set-04",   // curved / striped
-    familyA:["bulut","kalp","yılan","ahtapot","çiçek","el","damla","dalga","kedi","kurdele"],
-    familyB:["merdiven","çit","bayrak","tuğla","tabela","raf","çerçeve","klavye","ütü","gözlük"] },
-  { id:"set-05",   // winged / handled
-    familyA:["kuş","uçak","kelebek","arı","uçurtma","yarasa","helikopter","sinek","kuğu","tavuk"],
-    familyB:["fincan","kova","tencere","sepet","çaydanlık","tava","kupa","sürahi","cezve","kilit"] },
-  { id:"set-06",   // round / horizontal
-    familyA:["karpuz","düğme","para","simit","göz","kavun","zil","nar","top","saat"],
-    familyB:["at","koyun","kaplumbağa","bank","kamyon","domuz","köpek","yatak","piyano","sehpa"] },
-  { id:"set-07",   // vertical / boxy
-    familyA:["direk","fener","baca","minare","sütun","vazo","termos","ağaç","lamba","şişe"],
-    familyB:["tuğla","çerçeve","sandık","zarf","dolap","tablet","klavye","çamaşır makinesi","kitap","kapı"] },
-  { id:"set-08",   // stick / radial
-    familyA:["çatal","bıçak","tornavida","fırça","muz","havuç","kürek","flüt","kalem","kaşık"],
-    familyB:["yıldız","kar tanesi","çark","pusula","örümcek","denizyıldızı","ateş","patlama","palmiye","çiçek"] },
-  { id:"set-09",   // curved / striped
-    familyA:["tırtıl","salyangoz","ayak","duman","ip","sarmaşık","yılan","bulut","el","kedi"],
-    familyB:["demiryolu","kafes","ızgara","fermuar","merdiven","çit","bayrak","raf","ütü","gözlük"] },
-  { id:"set-10",   // peaked / winged
-    familyA:["piramit","elmas","ok","uçurtma","dağ","çadır","çam","şapka","roket","huni"],
-    familyB:["kuş","uçak","kelebek","arı","yarasa","helikopter","sinek","kuğu","tavuk","melek"] },
-  { id:"set-11",   // round / boxy
-    familyA:["kiraz","üzüm","limon","mandalina","çilek","misket","madalya","soğan","domates","şeftali"],
-    familyB:["cüzdan","radyo","fırın","defter","kumbara","bilgisayar","ekran","hoparlör","klima","kasa"] },
-  { id:"set-12",   // vertical / horizontal
-    familyA:["gökdelen","bambu","mısır","selvi","baston","ampul","abajur","musluk","çeşme","heykel"],
-    familyB:["gemi","tekne","denizaltı","balina","hipopotam","gergedan","deve","eşek","tilki","kurt"] },
-  { id:"set-13",   // peaked / stick
-    familyA:["külah","yelken","sandviç","volkan","tepe","kravat","buzdağı","taç","fes","abajur"],
-    familyB:["pipet","kürdan","tebeşir","sopa","sihirli değnek","olta","cetvel","çatal","maşa","spatula"] },
-  { id:"set-14",   // curved / striped
-    familyA:["kuyruk","solucan","dudak","kulak","burun","kaş","bıyık","saç","yaprak","gül"],
-    familyB:["barkod","takvim","satranç tahtası","çikolata","perde","gofret","yapboz","ağ","file","örgü"] },
-  { id:"set-15",   // winged / handled
-    familyA:["güvercin","civciv","kartal","baykuş","penguen","leylek","martı","ördek","kaz","horoz"],
-    familyB:["bardak","kavanoz","süzgeç","matara","demlik","vazo","termos","kapı kolu","balta","kazma"] },
-  { id:"set-16",   // radial / oval
-    familyA:["ayçiçeği","pervane","vantilatör","direksiyon","hedef tahtası","papatya","kirpi","havai fişek","yelpaze","örümcek ağı"],
-    familyB:["yumurta","patates","zeytin","badem","avokado","fıstık","fasulye","hindistan cevizi","limon","kapsül"] },
-  { id:"set-17",   // domed / ring
-    familyA:["gökkuşağı","tünel","iglo","mantar","kubbe","paraşüt","kask","kaplumbağa","kase","köprü"],
-    familyB:["halka","donut","can simidi","bilezik","kelepçe","zincir","lastik","anahtarlık","hula hoop","kolye"] },
-  { id:"set-18",   // round / stick
-    familyA:["kiraz","kayısı","ceviz","fındık","şeftali","balkabağı","davul","tef","küre","dünya"],
-    familyB:["cımbız","çivi","vida","iğne","kibrit","salatalık","havuç","baget","matkap","testere"] },
-  { id:"set-19",   // boxy / curved
-    familyA:["yastık","havlu","battaniye","halı","tablo","gazete","harita","mendil","mektup","asansör"],
-    familyB:["lale","papatya","fiyonk","düğüm","kanca","soru işareti","şimşek","nehir","tüy","yumak"] },
-  { id:"set-20",   // vertical / round
-    familyA:["termometre","saksı","şelale","deniz feneri","elektrik direği","trafik lambası","vinç","anten","duş","kolon"],
-    familyB:["üzüm","bezelye","misket","kurabiye","elma","güneş","tekerlek","balon","portakal","tabak"] },
-  { id:"set-21",   // horizontal / peaked
-    familyA:["aslan","kaplan","zebra","minibüs","traktör","vagon","karavan","sedye","kamyon","kertenkele"],
-    familyB:["peynir","pasta","börek","kravat","diş","alev","pizza","dondurma","yelkenli","çatı"] },
-  { id:"set-22",   // handled / striped
-    familyA:["tırmık","çapa","el arabası","sırt çantası","kepçe","rende","tirbuşon","kürek","raket","lolipop"],
-    familyB:["nota","piyano","çamaşır ipi","parmaklık","kalorifer","yaya geçidi","file","ray","korkuluk","tabela"] },
-  { id:"set-23",   // oval / boxy
-    familyA:["hap","tohum","çekirdek","kozalak","gözyaşı","çakıl","patlıcan","armut","kabak","sabun"],
-    familyB:["çekmece","hediye","bavul","pil","peçete","dosya","kutu","ev","televizyon","pencere"] },
-  { id:"set-24",   // ring / vertical
-    familyA:["tasma","kolye","küpe","deniz simidi","kulp","halat","daire","paket lastiği","kemer","bileklik"],
-    familyB:["asa","insan","kule","şemsiye","mum","zürafa","kaktüs","süpürge","direk","fener"] },
-  { id:"set-25",   // winged / horizontal
-    familyA:["yusufçuk","uğur böceği","çekirge","ateş böceği","peri","sivrisinek","devekuşu","güve","flamingo","tavus kuşu"],
-    familyB:["fok","koltuk","kayık","timsah","gemi","fil","kanepe","inek","masa","otobüs"] },
-  { id:"set-26",   // radial / stick
-    familyA:["rüzgar gülü","deniz kestanesi","dişli","kestane","yıldız","kar tanesi","çark","pusula","örümcek","denizyıldızı"],
-    familyB:["makas","pense","sigara","biber","anahtar","çekiç","diş fırçası","balık","kılıç","tarak"] },
-  { id:"set-27",   // domed / curved
-    familyA:["hilal","denizanası","at nalı","mıknatıs","hamak","salıncak","yay","çan","tas","gökkuşağı"],
-    familyB:["hortum","beyin","çengel","virgül","kalp","ahtapot","damla","dalga","kurdele","tırtıl"] },
-  { id:"set-28",   // oval / striped
-    familyA:["mercimek","tespih","yumurta","patates","zeytin","badem","avokado","fıstık","fasulye","hindistan cevizi"],
-    familyB:["demiryolu","kafes","ızgara","fermuar","barkod","takvim","satranç tahtası","çikolata","perde","gofret"] },
-  { id:"set-29",   // round / peaked
-    familyA:["ay","yüzük","karpuz","düğme","para","simit","göz","kavun","zil","nar"],
-    familyB:["piramit","elmas","ok","külah","yelken","sandviç","volkan","tepe","tost","buzdağı"] },
-  { id:"set-30",   // handled / winged
-    familyA:["mikrofon","ayna","fincan","kova","tencere","sepet","çaydanlık","tava","kupa","sürahi"],
-    familyB:["serçe","flamingo","melek","güvercin","civciv","kartal","baykuş","penguen","leylek","martı"] }
-];
-
 /* Two ways to answer, and the clock set separately in settings. The four fixed
    difficulties conflated the two, so "medium" and "hard" differed only in how you
    answered while sharing a timing nobody could change. */
@@ -976,8 +883,8 @@ const LEGACY_DIFFS = {
 
 /* ========================================================= daily puzzle ===
    The same twenty words for everyone, every day, chosen from the pool in
-   docs/words.json rather than from the hand-made sets above -- free play keeps
-   those. Families are what make it a game: ten words of one silhouette and ten
+   docs/words.json. sınırsız deals from the same pool, per device (see
+   freshWords). Families are what make it a game: ten words of one silhouette and ten
    of another, so half the grid is ruled out at a glance and the work happens
    inside a family where the shapes collide.
 
@@ -1075,12 +982,16 @@ function dailyTake(list, n, rnd){
    birds in it draws exactly what it drew before -- with birds simply passed over once
    two are in hand. */
 function dailyPick(list, rnd, taken){
-  const shuffled = dailyTake(list, list.length, rnd);
+  return dealFrom(dailyTake(list, list.length, rnd), taken);
+}
+
+/* Ten words taken in the order given, with the bird cap and the pairs kept apart. */
+function dealFrom(ordered, taken){
   const out = [];
   const skipped = [];
   let birds = 0;
-  for (let i = 0; i < shuffled.length && out.length < DAILY_PER_FAMILY; i++){
-    const w = shuffled[i];
+  for (let i = 0; i < ordered.length && out.length < DAILY_PER_FAMILY; i++){
+    const w = ordered[i];
     if (isBird(w)){
       if (birds >= DAILY_BIRD_MAX) continue;
       birds++;
@@ -1128,6 +1039,51 @@ function dailyWords(day){
     });
   }
   return out;
+}
+
+/* sınırsız: two families and ten words from each, dealt the way the day is, but for
+   this device. Words it has not been shown for fourteen days -- here or in the daily
+   game -- come first, in random order. When a family runs short of those, the words it
+   saw longest ago fill the ten, a day at a time and at random within a day, so a player
+   who plays a lot sees old words again rather than no game at all. The two families are
+   the ones that need the fewest such repeats, at random among equals. */
+const SEEN_SPREAD = 7;
+
+function freshWords(){
+  const seen = loadStore().seen || {};
+  const today = dailyDayNumber();
+  // 0 for a word free to deal, otherwise the day it was last shown.
+  const since = function(w){
+    const d = seen[w];
+    return typeof d === "number" && today - d < DAILY_WINDOW ? d : 0;
+  };
+  // Free words sort below every seen one (keys under 0, at random). Seen words are spread
+  // across a week around the day they were shown: strictly by day, the ten dealt together
+  // on one day came back together too.
+  const order = function(x){ return x.d ? x.d + x.r * SEEN_SPREAD : x.r - 1; };
+  const families = DAILY_FAMILIES.map(function(f){
+    const line = DAILY_POOL[f]
+      .map(function(w){ return { w: w, d: since(w), r: Math.random() }; })
+      .sort(function(a, b){ return order(a) - order(b); })
+      .map(function(x){ return x.w; });
+    const newest = Math.max.apply(null, dealFrom(line, []).map(since));
+    return { line: line, newest: newest, r: Math.random() };
+  }).sort(function(a, b){ return a.newest - b.newest || a.r - b.r; });
+
+  const out = [];
+  families.slice(0, 2).forEach(function(fam){
+    dealFrom(fam.line, out).forEach(function(w){ out.push(w); });
+  });
+  return out;
+}
+
+/* The words a round put in front of this device, on today's date. */
+function rememberSeen(list){
+  const store = loadStore();
+  if (!store.seen || typeof store.seen !== "object") store.seen = {};
+  const today = dailyDayNumber();
+  list.forEach(function(w){ store.seen[w] = today; });
+  saveStore(store);
 }
 
 /* =========================================================================
@@ -1327,8 +1283,7 @@ const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 let modeId   = "pool";
 let secs     = SECS_DEFAULT;     // seconds per word, 1-10
 let theme    = "dark";
-let setId    = null;      // chosen at random when a round starts
-let lastSetId = null;     // never draw the same set twice in a row
+let setId    = null;      // "mix" for sınırsız, null for the day; kept only because saves carry it
 
 let words    = [];        // the shuffled 20 words; index = drawing index
 let drawings = [];        // drawings[i] = [[{x,y},...], ...]  0-1 normalize
@@ -1366,7 +1321,6 @@ function secsText(v){ return String(v).replace(".", ",") + " sn"; }
 function applyTheme(){
   document.documentElement.dataset.theme = theme;
 }
-const setOf  = function(){ return SETS.find(function(s){ return s.id === setId; }); };
 
 /* --------------------------------------------------------------- storage --- */
 /* The v1 brief banned localStorage, back when a round was one throwaway sitting.
@@ -1400,6 +1354,20 @@ function saveStore(store){
     .slice(0, KEEP_ROUNDS)
     .forEach(function(c){ kept[c] = store.rounds[c]; });
   store.rounds = kept;
+  // Words stop mattering once fourteen days have passed; unsaved drawings keep to the
+  // same limits as rounds.
+  if (store.seen && typeof store.seen === "object"){
+    const today = dailyDayNumber();
+    Object.keys(store.seen).forEach(function(w){
+      if (!(today - store.seen[w] < DAILY_WINDOW)) delete store.seen[w];
+    });
+  }
+  if (Array.isArray(store.drafts)){
+    store.drafts = store.drafts
+      .filter(function(d){ return d && now - (d.at || 0) < ROUND_TTL; })
+      .sort(function(a, b){ return (b.at || 0) - (a.at || 0); })
+      .slice(0, KEEP_ROUNDS);
+  }
   try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){}
 }
 
@@ -1561,9 +1529,43 @@ function clearPending(){
   saveStore(store);
 }
 
+/* The round on the between screen is store.pending; a new round used to delete it, so
+   only the last unsaved drawing ever survived. Now it moves to store.drafts instead, if
+   anything was drawn in it -- a round with no line anywhere is not worth keeping. */
+function hasLines(p){
+  return !!(p && Array.isArray(p.words) && p.words.length === N &&
+            Array.isArray(p.drawings) && p.drawings.some(function(d){ return d && d.length; }));
+}
+
+function shelve(store){
+  const p = store.pending;
+  delete store.pending;
+  if (!hasLines(p)) return;
+  store.drafts = (store.drafts || []).filter(function(d){ return d.at !== p.at; });
+  store.drafts.push(p);
+}
+
+function shelvePending(){
+  const store = loadStore();
+  if (!store.pending) return;
+  shelve(store);
+  saveStore(store);
+}
+
+/* Back to an older unsaved drawing from arşiv: it becomes the round on the between
+   screen, and whatever was there goes to the drafts. */
+function reopenDraft(p){
+  const store = loadStore();
+  if (store.pending && store.pending.at !== p.at) shelve(store);
+  store.drafts = (store.drafts || []).filter(function(d){ return d.at !== p.at; });
+  store.pending = p;
+  saveStore(store);
+  resumePending(p);
+}
+
 function resumePending(rec){
   isDaily = false; dailyDay = 0; afterDraw = "";
-  setId = SETS.some(function(s){ return s.id === rec.setId; }) ? rec.setId : SETS[0].id;
+  setId = typeof rec.setId === "string" ? rec.setId : "mix";
   modeId = MODES.some(function(m){ return m.id === rec.modeId; }) ? rec.modeId : modeId;
   secs = clampSecs(rec.secs);
   role = "solo"; drawerName = ""; lastCode = "";
@@ -1806,8 +1808,9 @@ function archiveItems(){
   const items = Object.keys(store.rounds || {})
     .filter(function(c){ const r = store.rounds[c]; return r && (r.done || r.mine); })
     .map(function(c){ return { code: c, at: store.rounds[c].at || 0 }; });
-  const p = store.pending;
-  if (p && Array.isArray(p.words) && p.words.length === N) items.push({ pending: p, at: p.at || 0 });
+  (store.drafts || []).concat(store.pending ? [store.pending] : []).forEach(function(p){
+    if (hasLines(p)) items.push({ pending: p, at: p.at || 0 });
+  });
   return items.sort(function(a, b){ return b.at - a.at; });
 }
 
@@ -1877,7 +1880,7 @@ function buildArchive(boxId, limit){
     if (item.pending){
       // Drawn here and never saved: the drawings are on the device, and with no code there
       // is no board, so it opens where a just-drawn round opens.
-      row.onclick = function(){ resumePending(item.pending); };
+      row.onclick = function(){ reopenDraft(item.pending); };
       paintArchiveRow(row, { drawings: decodeDrawings(item.pending.drawings || []), day: 0 });
       return;
     }
@@ -2093,16 +2096,9 @@ chips2().forEach(function(el){
 
 let cdTimer = null;
 
-function randomSet(){
-  const havuz = SETS.filter(function(s){ return s.id !== lastSetId; });
-  return havuz[Math.floor(Math.random() * havuz.length)];
-}
-
 function startGame(){
-  clearPending();
-  const s = randomSet();
-  setId = s.id;
-  lastSetId = s.id;
+  shelvePending();
+  setId = "mix";
   isDaily = false; dailyDay = 0; afterDraw = "";
 
   role      = "solo";
@@ -2112,7 +2108,8 @@ function startGame(){
   recallMs  = 0;
   scores  = [];
   scoreSent = false;
-  words    = shuffle(s.familyA.concat(s.familyB));
+  words    = shuffle(freshWords());
+  rememberSeen(words);
   drawings = words.map(function(){ return []; });
   order    = shuffle(words.map(function(_, i){ return i; }));
   picks    = new Array(N).fill(null);
@@ -2126,7 +2123,7 @@ function startGame(){
    a score posted to the day board means the same thing for everybody. The settings
    panel is deliberately ignored here. */
 function startDaily(){
-  clearPending();
+  shelvePending();
   dailyDay = dailyDayNumber();
   isDaily  = true;
   modeId   = "typed";
@@ -2141,6 +2138,7 @@ function startDaily(){
   scores  = [];
   scoreSent = false;
   words    = dailyWords(dailyDay);
+  rememberSeen(words);
   drawings = words.map(function(){ return []; });
   order    = shuffle(words.map(function(_, i){ return i; }));
   picks    = new Array(N).fill(null);
@@ -2476,7 +2474,7 @@ function confirmExit(){
   pausedAt = 0;
   live.clear();
   closeSheet(); closeModal(); closeZoom();
-  clearPending();
+  shelvePending();
   // The round's own entry goes with it: back from wherever this lands must not lead into
   // a round that no longer exists.
   if (history.state && history.state.screen === "draw" && history.state.depth > 0){
@@ -3555,7 +3553,7 @@ function loadGame(code, want, who){
     const loadedWords = v.words, loadedDrawings = decodeDrawings(v.drawings);
     if (!Array.isArray(loadedWords) || loadedWords.length !== N || loadedDrawings.length !== N) throw new Error("malformed");
 
-    setId    = v.setId && SETS.some(function(s){ return s.id === v.setId; }) ? v.setId : SETS[0].id;
+    setId    = typeof v.setId === "string" ? v.setId : "mix";
     // Accept both shapes: rounds shared before modes existed only have a difficulty.
     const legacy = LEGACY_DIFFS[v.difficulty];
     modeId = MODES.some(function(m){ return m.id === v.mode; }) ? v.mode

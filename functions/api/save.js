@@ -65,10 +65,11 @@ export async function onRequestPost({ request, env }) {
   try { d = JSON.parse(body); } catch (e) { return error("invalid JSON", 400); }
   if (!d || typeof d !== "object") return error("invalid body", 400);
 
-  // A daily round comes from the generated pool rather than a hand-made set, so it
-  // carries a day number instead of a set id.
+  // A daily round carries a day number instead of a set id. A sınırsız round is dealt
+  // from the pool and says "mix"; set-01 to set-30 are the fixed sets it used to come
+  // from, still sent by a page loaded before they went.
   const day = Number.isInteger(d.day) && d.day > 0 && d.day <= today() + 1 ? d.day : 0;
-  if (!day && (typeof d.setId !== "string" || !/^set-(0[1-9]|[12][0-9]|30)$/.test(d.setId))) {
+  if (!day && (typeof d.setId !== "string" || !/^(mix|set-(0[1-9]|[12][0-9]|30))$/.test(d.setId))) {
     return error("invalid setId", 400);
   }
   const legacy = LEGACY_DIFFS[d.difficulty];

@@ -1,8 +1,7 @@
 # Banned words
 
 Words the owner has rejected. **They never go back into the game** — not into
-`docs/words.json`, not into the hand-made sets in `public/index.html`, and not into a
-proposal. Read this file before suggesting any new word.
+`docs/words.json`, not into the pool in `public/index.html`, and not into a proposal. Read this file before suggesting any new word.
 
 `tools/check-words.js` enforces it. Run it after touching either word list:
 
@@ -10,7 +9,7 @@ proposal. Read this file before suggesting any new word.
 node tools/check-words.js
 ```
 
-It fails if a banned word is anywhere in the pool or the sets, and it fails if a word
+It fails if a banned word is anywhere in the pool, and it fails if a word
 appears in two families. Being mechanical is the point: this list exists because
 `planör` was removed in September and proposed again a few days later, from memory.
 

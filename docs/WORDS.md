@@ -1,8 +1,8 @@
 # Word pool
 
 Every word the game knows, tagged by the silhouette it draws as. This is the source
-the **daily puzzle** generates its sets from. It is not the hand-made sets in
-`public/index.html` — free play keeps using those.
+the **daily puzzle** and **sınırsız** both deal from. The thirty hand-made sets it was
+read out of are gone; sınırsız stopped using them on 2026-09-17.
 
 The data is in [`words.json`](words.json). The generator that turns a date into twenty
 words lives in `public/index.html`, next to the pool it reads.

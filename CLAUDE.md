@@ -6,7 +6,7 @@ drawings back to the words. One HTML file plus Cloudflare Pages Functions.
 ## Before proposing or adding any word
 
 Read **`docs/BANNED-WORDS.md`** first. Those words have been rejected by the owner and
-never go back — not into the daily pool, not into the hand-made sets, not into a
+never go back — not into the word pool, not into a
 proposal. Then run:
 
 ```bash

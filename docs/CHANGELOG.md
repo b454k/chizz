@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-17 — sınırsız stops repeating itself
+
+Playing sınırsız round after round showed the same words back to back. It was not
+dealing words: it picked one of 30 fixed lists of 20, avoiding only the list just
+played, so the same twenty always came together and two lists could share half their
+words.
+
+- sınırsız now deals from the daily game's pool the way the day does -- two silhouette
+  families, ten words each, birds capped, kanepe and koltuk kept apart -- favouring words
+  this device has not been shown for 14 days, in either game. When those run out, the
+  words it saw longest ago come back, spread over a week so a group does not return
+  whole. The 30 fixed sets are gone.
+- Simulated: one round a day never repeats within 14 days; the daily plus one round a day
+  first repeats around the 14th round; back-to-back play around the 20th. A word's most
+  frequent partner now comes along about 56% of the time over many rounds, against 98%
+  with the fixed sets. The daily game's words are unchanged, checked for 500 days.
+- The limit is the pool: 461 words is about 20 rounds before anything repeats, per
+  device, and friends on their own phones are dealt independently. Growing the pool is
+  what raises it.
+
+### arşiv keeps every unsaved drawing
+Starting a new round deleted the unsaved one before it, so only the last drawn round
+ever showed as "henüz kaydedilmedi". Now each drawn round with at least one line moves to
+arşiv instead, until it is sent, guessed, or ages out after 30 days. Blank rounds are not
+kept.
+
 ## 2026-09-16 — back, reload, arşiv, and friends' answers
 
 A friend drew a round, landed on the start screen by mistake, and had no way back to

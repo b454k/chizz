@@ -195,29 +195,36 @@ as images, so they rescale cleanly into the small grid cells.
 If the page is hidden mid-round, the elapsed time is credited back on return rather
 than burning the current word.
 
-## 7. Word sets
+## 7. Words
 
-30 sets, ids `set-01` … `set-30`. Each set holds exactly 20 words as two families of
-10. Families are grouped by **silhouette**, not by category — an elephant and a sofa
-share a shape, which is the joke. Family labels exist only as source comments and are
-never shown.
+Both games deal from one pool: 461 words in 14 **silhouette** families (`docs/words.json`,
+copied into `public/index.html` as `DAILY_POOL`). Families are grouped by shape, not by
+category — an elephant and a sofa share a shape, which is the joke. A round is two
+families and ten words from each, never more than two birds, never `kanepe` with
+`koltuk`. Family names are never shown. See `docs/WORDS.md`.
 
-Verified against the current data:
+**The day** is the same for everyone and follows its own schedule: no word returns
+within 14 days.
 
-| Property | Value |
-|---|---|
-| Sets | 30 |
-| Words per set | 20 (10 + 10) |
-| Total slots | 600 |
-| Unique words | 459 |
-| Words used twice | 141 |
-| Words used once | 318 |
-| Words used more than twice | none |
-| Repeats within a single set | none |
+**sınırsız** is dealt per device (`freshWords`). The device remembers the day each word
+was put in front of it, in the daily game or here (`seen` in section 14), for 14 days.
 
-At the start of a round a set is chosen **at random** and the 20 words are shuffled
-together. The set is never named anywhere in the interface, and the same set is never
-drawn twice in a row (`lastSetId`).
+- Words not seen for 14 days are dealt first, at random, so which words meet varies
+  from round to round.
+- When a family has fewer than ten of those, the words seen longest ago fill it, spread
+  at random across a week around the day they were seen -- by exact day, the ten words
+  dealt together on one day came back together.
+- The two families are the ones needing the fewest such repeats, at random among equals.
+
+Measured by simulation: one sınırsız round a day never repeats a word within 14 days;
+the daily game plus one sınırsız round a day first repeats at about the 14th round; any
+number of rounds back to back first repeats at about the 20th, which is what 461 words
+allow. Over many rounds a word's most frequent partner comes along about 56% of the time,
+the same as pure random dealing; with the 30 fixed sets this replaced it was 98%.
+
+The rounds used to come from 30 fixed sets of 20, so the same words always arrived
+together and two sets could share half their words. A save from a page loaded before
+the change still sends `set-01` … `set-30`, and is accepted; a dealt round sends `mix`.
 
 ## 8. Recall phase
 
@@ -329,7 +336,7 @@ trip. A typical 20-drawing round is 30–40 KB against a 200 KB limit.
 ### Endpoints
 
 `POST /api/save` — body `{setId, mode, seconds, name, words, drawings}`, returns
-`{code}`. Validates set id, mode, seconds in 1–10, exactly 20 words, exactly 20
+`{code}`. Validates the set id (`mix`, or a legacy `set-01` … `set-30`; a daily round sends a day instead), mode, seconds in 1–10, exactly 20 words, exactly 20
 drawings and every coordinate as an integer in range; rejects bodies over 200 KB with
 `413`. A legacy `difficulty` is accepted in place of `mode`/`seconds`. Non-`POST`
 methods return `405` — without an explicit handler Pages would fall through and serve
@@ -392,7 +399,9 @@ holds:
 | `mode`, `secs`, `theme` | The settings chosen on the home screen |
 | `hintDay` | The day the time-per-word reminder was last shown, so it is shown once a day |
 | `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, the mode chosen for guessing a friend's round, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
-| `pending` | A drawn round not saved anywhere yet, with when it was drawn: it is what a reload on the between screen returns to, and it is listed in arşiv |
+| `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |
+| `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |
+| `seen` | Word → the day it was last dealt to this device, in either game, kept for 14 days. What sınırsız deals from (section 7) |
 | `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. Entries older than the
@@ -408,8 +417,8 @@ What this buys:
 - **The drawer comes back to their share screen** with the same code and link; a reload
   used to lose the link entirely. See *Back and reload* in section 4.
 - **arşiv lists every round drawn here**, not only finished ones: a finished round opens
-  its result, a round nobody has guessed opens its drawings with the board, and a drawing
-  never saved opens the between screen. A round drawn and then left on the start screen
+  its result, a round nobody has guessed opens its drawings with the board, and every drawing
+  never saved (with at least one line in it) opens the between screen. A round drawn and then left on the start screen
   by mistake is one tap away.
 - **A daily duel survives a reload at every step.** Whose round you are dueling is read
   from `days[N]`, never from memory, and switching between your round and theirs always

@@ -67,19 +67,7 @@ for (const family of pool.families) {
   }
 }
 
-// 2. the hand-made sets, read from the file the game runs
-const setWords = new Set();
-const setsBlock = page.slice(page.indexOf("const SETS"), page.indexOf("const TEXT"));
-for (const m of setsBlock.matchAll(/"([^"\\]{2,40})"/g)) {
-  const word = m[1];
-  if (/^set-\d\d$/.test(word) || /^[a-z]+[A-Z]/.test(word)) continue;   // ids and keys
-  setWords.add(word);
-}
-for (const word of setWords) {
-  if (banned.has(word)) fail("rejected word in the hand-made sets — " + word);
-}
-
-// 3. the record and the running copy must agree, word for word
+// 2. the record and the running copy must agree, word for word
 const pagePool = readPagePool();
 const pageFamilies = Object.keys(pagePool).sort();
 const recordFamilies = pool.families.map(f => f.id).sort();
@@ -96,7 +84,7 @@ if (pageFamilies.join(",") !== recordFamilies.join(",")) {
   }
 }
 
-// 4. so must the bird list and the pairs that may not meet
+// 3. so must the bird list and the pairs that may not meet
 const pageBirds = readPageList("DAILY_BIRDS") || [];
 const recordBirds = (pool.rules && pool.rules.birds) || [];
 if (pageBirds.slice().sort().join("|") !== recordBirds.slice().sort().join("|")) {
@@ -118,7 +106,6 @@ for (const w of pagePairs) {
 
 console.log("rejected words on record:  " + banned.size);
 console.log("daily pool:                " + seen.size + " words in " + pool.families.length + " families");
-console.log("hand-made sets:            " + setWords.size + " distinct words");
 console.log("birds:                     " + pageBirds.length + ", capped at " +
             ((pool.rules && pool.rules.birdsPerSet) || "?") + " a day");
 console.log("never together:            " + (pagePairs.length ? pagePairs.join(" + ") : "none"));
