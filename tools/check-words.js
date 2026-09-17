@@ -1,8 +1,8 @@
 // node tools/check-words.js
 //
 // Words the owner has rejected must never come back, a word must never sit in two
-// silhouette families, and the three things that exist twice -- the pool, the bird list
-// and the pairs that must not meet -- must say the same in both places.
+// silhouette families, and the two things that exist twice -- the pool and the bird
+// list -- must say the same in both places.
 //
 // All of it was being kept in my head, which is how a word removed in September was
 // proposed again days later, and how a half-applied edit once left docs/words.json and
@@ -84,7 +84,7 @@ if (pageFamilies.join(",") !== recordFamilies.join(",")) {
   }
 }
 
-// 3. so must the bird list and the pairs that may not meet
+// 3. so must the bird list
 const pageBirds = readPageList("DAILY_BIRDS") || [];
 const recordBirds = (pool.rules && pool.rules.birds) || [];
 if (pageBirds.slice().sort().join("|") !== recordBirds.slice().sort().join("|")) {
@@ -94,21 +94,11 @@ for (const b of pageBirds) {
   if (!seen.has(b)) fail("a bird that is in no family — " + b);
 }
 
-const pagePairs = readPageList("DAILY_NEVER_TOGETHER") || [];
-const recordPairs = [].concat(...((pool.rules && pool.rules.neverTogether) || []));
-if (pagePairs.slice().sort().join("|") !== recordPairs.slice().sort().join("|")) {
-  fail("the never-together pairs differ: page " + JSON.stringify(pagePairs) +
-       ", record " + JSON.stringify(recordPairs));
-}
-for (const w of pagePairs) {
-  if (!seen.has(w)) fail("a never-together word that is in no family — " + w);
-}
 
 console.log("rejected words on record:  " + banned.size);
 console.log("daily pool:                " + seen.size + " words in " + pool.families.length + " families");
 console.log("birds:                     " + pageBirds.length + ", capped at " +
             ((pool.rules && pool.rules.birdsPerSet) || "?") + " a day");
-console.log("never together:            " + (pagePairs.length ? pagePairs.join(" + ") : "none"));
 
 if (bad) {
   console.error("");

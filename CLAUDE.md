@@ -15,6 +15,10 @@ node tools/check-words.js
 
 It fails if a banned word is in play or a word sits in two silhouette families.
 
+**Changing the pool reshuffles the daily game**, today included, because every day is
+replayed from day 1. First add every day through today to `DAILY_PLAYED` in
+`public/index.html`, taken from the schedule as it stands, then change the words.
+
 ## Before deploying
 
 ```bash

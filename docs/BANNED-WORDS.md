@@ -31,17 +31,21 @@ peygamber devesi, mayıs böceği, savaş uçağı, model uçak
 `planör` is on both lists: it was rejected in September and proposed again here, which
 is what this file is for.
 
-## Never in the same round
+## Rejected 2026-09-17 — replaced
 
-Some words are fine on their own but not together: they draw as the same shape, so a
-grid holding both asks the player to tell apart two drawings that never differed.
+semer, kement, selvi
 
-- `kanepe` and `koltuk`
+Replaced in the same family: `semer` → `askılık`, `kement` → `balon balığı`,
+`selvi` → `pırasa`.
 
-The generator enforces this (`DAILY_NEVER_TOGETHER` in `public/index.html`), and it is
-recorded in `docs/words.json` under `rules.neverTogether`. A day is twenty words, so if
-honouring a pair would leave the day short — which needs the family to be nearly
-exhausted — the twenty wins and the pair gives way.
+## Rejected 2026-09-17 — the same thing as a word that stays
+
+kanepe, demiryolu
+
+`kanepe` draws and means the same as `koltuk`, and `demiryolu` the same as `ray`.
+Only one of each is kept.
+`kanepe` and `koltuk` used to be kept out of the same round by the generator.
+That rule went with `kanepe`.
 
 ## Renamed, not banned
 

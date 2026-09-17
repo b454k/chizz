@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "purpose": "Word pool for generating daily sets. Not the hand-made sets in index.html, which the free-play game keeps using.",
+  "purpose": "Word pool for the daily game and sınırsız. public/index.html carries a copy as DAILY_POOL.",
   "rules": {
     "wordsPerSet": 20,
     "familiesPerSet": 2,
@@ -27,12 +27,6 @@
       "tavuk",
       "tavus kuşu",
       "ördek"
-    ],
-    "neverTogether": [
-      [
-        "kanepe",
-        "koltuk"
-      ]
     ]
   },
   "totalWords": 461,
@@ -134,6 +128,7 @@
       "id": "domed",
       "shape": "an arc over a base: rainbows, tunnels, shells, bowls",
       "words": [
+        "askılık",
         "at nalı",
         "bere",
         "beşik",
@@ -155,7 +150,6 @@
         "mıknatıs",
         "midye",
         "paraşüt",
-        "semer",
         "tas",
         "tümsek",
         "tünel",
@@ -220,7 +214,6 @@
         "hipopotam",
         "inek",
         "kamyon",
-        "kanepe",
         "kaplan",
         "karavan",
         "kayık",
@@ -346,6 +339,7 @@
       "shape": "a closed loop with a hole: bracelets, tyres, chains",
       "words": [
         "anahtarlık",
+        "balon balığı",
         "bant",
         "bileklik",
         "bilezik",
@@ -359,7 +353,6 @@
         "halka",
         "hula hoop",
         "kelepçe",
-        "kement",
         "kemer",
         "kolye",
         "kulp",
@@ -468,7 +461,6 @@
         "çamaşır ipi",
         "çikolata",
         "çit",
-        "demiryolu",
         "fermuar",
         "file",
         "gofret",
@@ -522,8 +514,8 @@
         "minare",
         "mum",
         "musluk",
+        "pırasa",
         "saksı",
-        "selvi",
         "süpürge",
         "sütun",
         "şelale",

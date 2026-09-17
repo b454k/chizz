@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-17 — five words out, three in
+
+- In the same family: `semer` → `askılık` (domed), `kement` → `balon balığı` (ring),
+  `selvi` → `pırasa` (vertical).
+- Removed as duplicates of a word that stays: `kanepe` (keeps `koltuk`) and `demiryolu`
+  (keeps `ray`). With `kanepe` gone, the rule keeping it apart from `koltuk` went too.
+- All five are recorded in `docs/BANNED-WORDS.md`. The pool is 459 words.
+
+### The days already played stay as they were
+Every day is replayed from day 1 against the pool, so any change to the words reshuffles
+the whole schedule — today included, which would have given anyone who had not played yet
+different words from friends who had, on the same board. Days 1 to 10 are now kept as they
+were dealt (`DAILY_PLAYED`), and the new pool starts with day 11. Checked over 1,100 days:
+days 1–10 unchanged, no word back within 14 days (across the switch too), never more than
+two birds, no removed word dealt after day 10. `CLAUDE.md` now says to extend the list
+through today before any pool change.
+
 ## 2026-09-17 — sınırsız stops repeating itself
 
 Playing sınırsız round after round showed the same words back to back. It was not

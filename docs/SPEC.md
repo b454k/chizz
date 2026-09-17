@@ -197,14 +197,15 @@ than burning the current word.
 
 ## 7. Words
 
-Both games deal from one pool: 461 words in 14 **silhouette** families (`docs/words.json`,
+Both games deal from one pool: 459 words in 14 **silhouette** families (`docs/words.json`,
 copied into `public/index.html` as `DAILY_POOL`). Families are grouped by shape, not by
 category — an elephant and a sofa share a shape, which is the joke. A round is two
-families and ten words from each, never more than two birds, never `kanepe` with
-`koltuk`. Family names are never shown. See `docs/WORDS.md`.
+families and ten words from each, never more than two birds. Family names are never shown. See `docs/WORDS.md`.
 
 **The day** is the same for everyone and follows its own schedule: no word returns
-within 14 days.
+within 14 days. The schedule is replayed from day 1 against the pool, so the days already
+played are kept as they were dealt (`DAILY_PLAYED`) and a change to the pool only
+reaches days nobody has seen. Extend it through today before any pool change.
 
 **sınırsız** is dealt per device (`freshWords`). The device remembers the day each word
 was put in front of it, in the daily game or here (`seen` in section 14), for 14 days.

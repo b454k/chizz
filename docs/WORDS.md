@@ -18,7 +18,7 @@ word sits in tells you its shape. The tags were read back out of the sets.
 That matters, because the silhouette principle **is** the difficulty design. Two
 families that are easy to tell apart, so the player feels they have ruled out half the
 grid immediately; then the real work happens inside a family, where a `fil` and a
-`kanepe` are the same rough shape and the drawings collide. A generator that ignored
+`koltuk` are the same rough shape and the drawings collide. A generator that ignored
 families would produce twenty unrelated words and a much easier, much duller game.
 
 Family names are English because they never reach a player — they are a design tool,
@@ -31,7 +31,7 @@ tidying at some point.)
 | family | the shape | words |
 |---|---|---:|
 | `boxy` | a rectangle with corners: boxes, screens, books, bags | 43 |
-| `horizontal` | long and low, wider than tall: vehicles, big animals, furniture | 41 |
+| `horizontal` | long and low, wider than tall: vehicles, big animals, furniture | 40 |
 | `winged` | wings out to the sides: birds, insects, and anything that throws two halves wide | 41 |
 | `curved` | a flowing curve with no corners: clouds, hearts, snakes, body parts | 38 |
 | `stick` | a long thin rod: pens, tools, cutlery, fish | 38 |
@@ -39,13 +39,13 @@ tidying at some point.)
 | `vertical` | tall and narrow, standing up: poles, bottles, trees, towers | 35 |
 | `handled` | a body with a stalk or handle: cups, jugs, tools you hold | 32 |
 | `peaked` | a triangle or cone, pointed at the top: hats, mountains, sails | 30 |
-| `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 30 |
+| `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 29 |
 | `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 26 |
 | `ring` | a closed loop with a hole: bracelets, tyres, chains | 26 |
 | `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 24 |
 | `oval` | small and egg-shaped: seeds, nuts, pebbles | 22 |
 
-**461 words.** Checked: no word is in two families, no rejected word is back, and every
+**459 words.** Checked: no word is in two families, no rejected word is back, and every
 word the free game uses is in here. `tools/check-words.js` checks all of it, including
 that the copy of the pool inside `public/index.html` matches this record exactly.
 
