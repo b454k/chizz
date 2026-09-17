@@ -266,20 +266,36 @@
   .chip2 .cl{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
 
   /* leave-game confirmation */
-  #confirm, #finishAsk, #timeAsk, #nameAsk{
+  #confirm, #finishAsk, #timeAsk, #nameAsk, #fbAsk{
     position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
     display:none; align-items:center; justify-content:center; padding:16px;
   }
-  #confirm.on, #finishAsk.on, #timeAsk.on, #nameAsk.on{display:flex;}
-  #confirmCard, #finishAskCard, #timeAskCard, #nameAskCard{
+  #confirm.on, #finishAsk.on, #timeAsk.on, #nameAsk.on, #fbAsk.on{display:flex;}
+  #confirmCard, #finishAskCard, #timeAskCard, #nameAskCard, #fbAskCard{
     box-sizing:border-box;   /* the padding has to fit inside 100%, or the card runs off a narrow phone */
     background:var(--panel); border-radius:18px; padding:20px; width:100%; max-width:360px;
     box-shadow:0 20px 60px rgba(0,0,0,.28); text-align:center;
   }
-  #confirmCard b, #finishAskCard b, #timeAskCard b, #nameAskCard b{display:block; font-size:19px; margin-bottom:6px;}
+  #confirmCard b, #finishAskCard b, #timeAskCard b, #nameAskCard b, #fbAskCard b{display:block; font-size:19px; margin-bottom:6px;}
   #confirmCard p, #finishAskCard p, #timeAskCard p, #nameAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
   #nameAskCard .txt{margin:14px 0 0; text-align:center;}
-  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary, #nameAskCard .primary{margin:14px 0 8px;}
+  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary, #nameAskCard .primary, #fbAskCard .primary{margin:14px 0 8px;}
+  /* geri bildirim */
+  #fbAskCard .seg{justify-content:center; margin:12px 0 0;}
+  #fbText{display:block; box-sizing:border-box; margin:12px 0 0; min-height:118px; resize:none;
+          font-family:inherit; font-size:16px; line-height:1.4; text-align:left;}
+  .fbmeta{display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted);
+          margin:6px 2px 0; text-align:left;}
+  #fbCount{font-variant-numeric:tabular-nums; flex:none;}
+  #fbMsg{min-height:18px; font-size:13px; font-weight:600; margin:8px 0 0;}
+  #fbMsg.ok{color:var(--ok);}
+  #fbMsg.bad{color:var(--no);}
+  #fbWebsite{position:absolute; left:-9999px; width:1px; height:1px; opacity:0;}
+  .htop{display:flex; justify-content:flex-end; margin:0 0 6px;}
+  #fbOpen{border:2px solid var(--line); border-radius:999px; padding:6px 13px;
+          font-size:13px; font-weight:700; background:var(--panel);}
+  .linkish{display:block; margin:0 auto 14px; font-size:13px; font-weight:600; color:var(--muted);
+           text-decoration:underline; text-underline-offset:3px;}
   #word{font-size:34px; font-weight:800; letter-spacing:-.02em; flex:1; min-width:0;
         overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   #counter{font-variant-numeric:tabular-nums; color:var(--muted); font-weight:700; font-size:15px;}
@@ -522,6 +538,9 @@
   <!-- ============ ANA EKRAN ============ -->
   <section class="screen on" id="home">
     <div class="hwrap">
+      <!-- At the top, where every visit sees it without scrolling; small, so it does not
+           compete with the day's game. -->
+      <div class="htop"><button id="fbOpen" data-t="fbOpen"></button></div>
       <h1>chizz</h1>
       <p class="tagline" data-t="tagline"></p>
 
@@ -680,7 +699,10 @@
   <section class="screen mid" id="loading">
     <h2 id="loadTitle"></h2>
     <p id="loadMsg"></p>
-    <div class="stack"><button class="ghost" id="loadHome" hidden data-t="backHome"></button></div>
+    <div class="stack">
+      <button class="ghost" id="loadHome" hidden data-t="backHome"></button>
+      <button class="linkish" id="loadReport" hidden style="margin-top:14px" data-t="reportProblem"></button>
+    </div>
   </section>
 
   <!-- ============ SCORE WATCH (for the drawer) ============ -->
@@ -781,6 +803,7 @@
         <button class="ghost" id="again" data-t="playAgain"></button>
         <button class="ghost" id="home2" data-t="home"></button>
       </div>
+      <button class="linkish" id="resultReport" data-t="reportProblem"></button>
     </div>
   </section>
 
@@ -812,6 +835,24 @@
     <input class="txt" id="nameAskField" maxlength="10" data-tph="namePlaceholder"
            autocorrect="off" spellcheck="false" enterkeyhint="done">
     <button class="primary off" id="nameAskGo" data-t="saveName"></button>
+  </div>
+</div>
+
+<!-- A bug report or a suggestion. What the page knows about where it was sent from goes
+     with it, which is what a screenshot would mostly have been for. -->
+<div id="fbAsk">
+  <div id="fbAskCard">
+    <b data-t="fbTitle"></b>
+    <div class="seg" id="fbKinds">
+      <button data-kind="hata" data-t="fbBug"></button>
+      <button data-kind="oneri" data-t="fbIdea"></button>
+    </div>
+    <textarea class="txt" id="fbText" maxlength="500" rows="5" data-tph="fbHint"></textarea>
+    <input id="fbWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="fbmeta"><span data-t="fbDevice"></span><span id="fbCount">0/500</span></div>
+    <p id="fbMsg"></p>
+    <button class="primary off" id="fbSend" data-t="fbSend"></button>
+    <button class="ghost" id="fbCancel" data-t="cancel"></button>
   </div>
 </div>
 
@@ -858,6 +899,20 @@
 <script>
 (function(){
 "use strict";
+
+// The last few script errors, sent along with a bug report. Kept from the start so an
+// error on the way to the problem is not missed.
+const recentErrors = [];
+function noteError(message, where){
+  recentErrors.push({ message: String(message || "").slice(0, 200), where: String(where || "").slice(0, 120), at: Date.now() });
+  if (recentErrors.length > 5) recentErrors.shift();
+}
+window.addEventListener("error", function(e){
+  noteError(e && e.message, e && e.filename ? e.filename.split("/").pop() + ":" + e.lineno + ":" + e.colno : "");
+});
+window.addEventListener("unhandledrejection", function(e){
+  noteError(e && e.reason && (e.reason.message || e.reason), "promise");
+});
 
 /* ---------------------------------------------------------------- data --- */
 
@@ -1144,6 +1199,19 @@ const TEXT = {
   perWord:          "kelime başına süre",
   theme:            "tema",
   yourName:         "adın",
+  fbOpen:           "geri bildirim",
+  fbTitle:          "geri bildirim",
+  fbBug:            "hata bildir",
+  fbIdea:           "öneri",
+  fbHint:           "ne oldu, ya da ne olsun istersin?",
+  fbDevice:         "ekran ve cihaz bilgisi de eklenir",
+  fbSend:           "gönder",
+  fbNeedKind:       "önce hata mı öneri mi, seç.",
+  fbTooShort:       "biraz daha yaz, en az 10 karakter.",
+  fbThanks:         "teşekkürler, mesajın ulaştı.",
+  fbFailed:         "gönderilemedi. bağlantını kontrol edip tekrar dene.",
+  fbWait:           "az önce gönderdin, bir dakika sonra tekrar dene.",
+  reportProblem:    "bir sorun mu var? bildir",
   chooseTitle:      "nasıl tahmin etmek istersin?",
   tapForAnswers:    "üzerine tıklayarak arkadaşlarının cevaplarını görebilirsin",
   answersOf:        "{whose} cevapları",
@@ -1502,6 +1570,7 @@ function goBack(fallback){
 function restoreEntry(st){
   $("finishAsk").classList.remove("on");
   $("timeAsk").classList.remove("on");
+  $("fbAsk").classList.remove("on");
   historyQuiet = true;
   const s = st && st.screen;
   if (s === "scores"){ openDailyBoard(); return; }
@@ -3252,6 +3321,112 @@ function sendScore(){
   }).catch(function(){ /* already shown locally, fail quietly */ });
 }
 
+/* ------------------------------------------------------- geri bildirim --- */
+
+const FB_MIN = 10, FB_MAX = 500;
+const FB_COOLDOWN = 60 * 1000;      // one report a minute from a device
+let fbKind = "";
+let fbFrom = "";
+let fbSending = false;
+
+function screenNow(){
+  const st = history.state;
+  const on = document.querySelector(".screen.on");
+  return (st && st.screen) || (on ? on.id : "");
+}
+
+// Everything a report needs that a person would not think to type.
+function feedbackContext(){
+  return {
+    from: fbFrom,
+    screen: screenNow(),
+    address: location.pathname + location.search,
+    code: lastCode || "",
+    day: dailyDayNumber(),
+    daily: !!isDaily,
+    role: role,
+    mode: modeId,
+    secs: secs,
+    theme: theme,
+    device: navigator.userAgent,
+    language: navigator.language || "",
+    viewport: window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
+    online: navigator.onLine,
+    errors: recentErrors.slice()
+  };
+}
+
+function fbSay(text, tone){
+  $("fbMsg").textContent = text || "";
+  $("fbMsg").className = tone || "";
+}
+
+function refreshFeedback(){
+  const n = Array.from($("fbText").value).length;
+  $("fbCount").textContent = n + "/" + FB_MAX;
+  Array.prototype.forEach.call($("fbKinds").children, function(b){
+    b.classList.toggle("sel", b.dataset.kind === fbKind);
+  });
+  $("fbSend").classList.toggle("off", fbSending || !fbKind || Array.from($("fbText").value.trim()).length < FB_MIN);
+}
+
+/* From the start screen nothing is assumed; from a failed load or a result it is most
+   likely a bug, so that is chosen already. */
+function openFeedback(kind){
+  fbKind = kind || "";
+  fbFrom = screenNow();
+  $("fbText").value = "";
+  $("fbWebsite").value = "";
+  fbSay("");
+  refreshFeedback();
+  $("fbAsk").classList.add("on");
+}
+
+function closeFeedback(){ $("fbAsk").classList.remove("on"); }
+
+$("fbOpen").onclick = function(){ openFeedback(""); };
+$("loadReport").onclick = function(){ openFeedback("hata"); };
+$("resultReport").onclick = function(){ openFeedback("hata"); };
+$("fbCancel").onclick = closeFeedback;
+Array.prototype.forEach.call($("fbKinds").children, function(b){
+  b.onclick = function(){ fbKind = b.dataset.kind; fbSay(""); refreshFeedback(); };
+});
+$("fbText").addEventListener("input", function(){ fbSay(""); refreshFeedback(); });
+
+$("fbSend").onclick = function(){
+  if (fbSending) return;
+  const text = $("fbText").value.trim();
+  if (!fbKind){ fbSay(TEXT.fbNeedKind, "bad"); return; }
+  if (Array.from(text).length < FB_MIN){ fbSay(TEXT.fbTooShort, "bad"); return; }
+  const store = loadStore();
+  if (store.fbAt && Date.now() - store.fbAt < FB_COOLDOWN){ fbSay(TEXT.fbWait, "bad"); return; }
+
+  fbSending = true;
+  refreshFeedback();
+  api("/api/feedback", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      kind: fbKind, text: text, name: myName || "",
+      website: $("fbWebsite").value, context: feedbackContext()
+    })
+  }).then(function(r){
+    if (!r.ok) throw new Error("feedback " + r.status);
+    const s = loadStore();
+    s.fbAt = Date.now();
+    saveStore(s);
+    fbSending = false;
+    fbSay(TEXT.fbThanks, "ok");
+    $("fbText").value = "";
+    refreshFeedback();
+    setTimeout(closeFeedback, 1600);
+  }).catch(function(){
+    fbSending = false;
+    fbSay(TEXT.fbFailed, "bad");
+    refreshFeedback();
+  });
+};
+
 /* ---------------------------------------------------------- name sorma --- */
 
 // Nothing is asked before a round any more: you press start and draw. A name is
@@ -3582,6 +3757,7 @@ function loadGame(code, want, who){
   $("loadTitle").textContent = TEXT.loadingDrawings;
   $("loadMsg").textContent = "";
   $("loadHome").hidden = true;
+  $("loadReport").hidden = true;
 
   api("/api/game/" + encodeURIComponent(code)).then(function(r){
     if (r.status === 404) throw new Error("notfound");
@@ -3673,6 +3849,7 @@ function loadGame(code, want, who){
       : TEXT.fetchFailed;
     $("loadMsg").textContent = e && e.message === "notfound" ? "" : TEXT.checkConnection;
     $("loadHome").hidden = false;
+    $("loadReport").hidden = false;
   });
 }
 

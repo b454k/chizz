@@ -361,6 +361,13 @@ the whole HTML page in reply to an API call.
 
 `GET /api/game/:code` — returns the stored round, `404` for an unknown or expired code.
 
+`POST /api/feedback` — body `{kind, text, name, context}`, returns `{ok: true}`. `kind` is
+`hata` or `oneri`; `text` is 10–500 characters; `context` is dropped if over 4,000
+characters of JSON. Each report is one KV entry keyed
+`feedback:<ISO time>:<kind>:<4 random characters>`, kept 180 days. Nothing reads them
+through the API. A hidden `website` field that a person cannot fill makes the request
+succeed without saving. Non-`POST` returns `405`.
+
 `GET/POST /api/scores/:code` — body `{name, score, ms, answers}`. **The board is ranked best
 score first, ties broken by the faster time**, then by who finished first; rows
 written before times were recorded have no `ms` and fall in behind timed ones on a
@@ -593,6 +600,27 @@ Separately, Safari zooms into any focused field whose text is under 16px, which 
 other half of the same trap. Inputs inherit the 16px body font; the share fallback
 textarea did not, and it is focused and selected programmatically, so it zoomed without
 the player touching it.
+
+## 19b. Feedback
+
+A `geri bildirim` button sits at the top right of the start screen, above the title, so
+every visit sees it without scrolling. `bir sorun mu var? bildir` appears under a result
+and on a failed round load, where problems are found; from there `hata bildir` is
+already chosen.
+
+The dialog asks for the kind (`hata bildir` / `öneri`) and up to 500 characters, with a
+live count and at least 10 characters. It says `ekran ve cihaz bilgisi de eklenir`, and
+attaches: the screen it was opened from, the address, the round code, the day, whether it
+is a daily round, role, mode, seconds, theme, browser, language, viewport and pixel
+ratio, whether the device is online, and the last five script errors (message and
+position only). The name on the device goes too. No screenshot: few people attach one
+from a phone, it can hold personal things, and it would need file storage.
+
+One report a minute per device (`fbAt` in storage). No IP address is stored.
+
+**Reading them:** Cloudflare dashboard → Storage & Databases → KV → the `GAMES`
+namespace, keys starting with `feedback:`, or
+`npx wrangler kv key list --prefix feedback: --namespace-id <id> --remote`.
 
 ## 20. Hosting
 

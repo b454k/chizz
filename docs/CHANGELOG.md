@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-17 — geri bildirim
+
+- A `geri bildirim` button at the top right of the start screen, and a `bir sorun mu var?
+  bildir` link under a result and on a failed round load.
+- One dialog behind all three: hata bildir or öneri, 10–500 characters with a live count.
+  The page attaches what it knows -- screen, round code, day, mode, device, viewport and
+  the last five script errors -- in place of a screenshot, and says so.
+- `POST /api/feedback` writes each report as its own KV entry,
+  `feedback:<time>:<kind>:<random>`, kept 180 days, readable in the Cloudflare dashboard.
+  One report a minute per device, a hidden field to catch form bots, no IP stored.
+
 ## 2026-09-17 — five words out, three in
 
 - In the same family: `semer` → `askılık` (domed), `kement` → `balon balığı` (ring),
