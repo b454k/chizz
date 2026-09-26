@@ -136,6 +136,10 @@
     border:2px solid var(--line); border-radius:14px; padding:12px 13px; text-align:left;
     background:var(--panel);
   }
+  .diff .mtag{
+    display:block; font-size:11px; font-weight:800; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:3px;
+  }
   .diff .mname{display:block; text-transform:lowercase; font-size:16px;}
   .diff .mdesc{
     display:block; margin-top:4px; color:var(--muted);
@@ -558,7 +562,6 @@
 
       <div class="hsec">
         <h2 class="hsectitle" data-t="unlimited"></h2>
-        <div class="diffs" id="modes"></div>
 
         <div class="settings">
           <div class="srow">
@@ -922,8 +925,8 @@ window.addEventListener("unhandledrejection", function(e){
 // The ids stay pool/typed: they are written into every saved round, so renaming
 // them would break links already shared. Only the labels changed.
 const MODES = [
-  { id:"pool",  key:"modeOpen",   desc:"modeOpenDesc"   },
-  { id:"typed", key:"modeHidden", desc:"modeHiddenDesc" }
+  { id:"pool",  key:"modeOpen",   desc:"modeOpenDesc",   tag:"modeEasy" },
+  { id:"typed", key:"modeHidden", desc:"modeHiddenDesc", tag:"modeHard" }
 ];
 const SECS_MIN = 1, SECS_MAX = 10, SECS_DEFAULT = 3;   // the recommended speed
 
@@ -1256,9 +1259,11 @@ const TEXT = {
   timeNotice:       "her kelime için {n} saniyen olacak",
 
   modeOpen:         "kelimeler açık",
-  modeOpenDesc:     "kelime listesi önünde durur, her çizim için doğru olanı seçersin.",
+  modeOpenDesc:     "kelimelerle çizimleri eşleştir",
+  modeEasy:         "kolay",
   modeHidden:       "kelimeler gizli",
-  modeHiddenDesc:   "liste yok. her çizimin kelimesini kendin hatırlayıp yazarsın.",
+  modeHiddenDesc:   "çizimlerin ne olduğunu kendin yaz",
+  modeHard:         "zor",
   recommended:      "önerilen: 3 sn",
   totalTime:        "toplam",
   enterCode:        "4 haneli kodu gir.",
@@ -1498,7 +1503,6 @@ function savedName(){ return loadStore().name; }
 
 function rememberSettings(){
   const store = loadStore();
-  store.mode  = modeId;
   store.secs  = secs;
   store.theme = theme;
   saveStore(store);
@@ -1506,7 +1510,6 @@ function rememberSettings(){
 
 function loadSettings(){
   const store = loadStore();
-  if (MODES.some(function(m){ return m.id === store.mode; })) modeId = store.mode;
   if (store.secs !== undefined) secs = clampSecs(store.secs);
   if (store.theme === "light" || store.theme === "dark") theme = store.theme;
 }
@@ -1593,12 +1596,15 @@ function restoreEntry(st){
   const s = st && st.screen;
   if (s === "scores"){ openDailyBoard(); return; }
   if (s === "archiveScreen"){ buildArchive("archiveFull", 0); show("archiveScreen"); return; }
-  // The link form before the round is saved has no code yet: its drawings are the unsaved ones.
-  if (s === "between" || (s === "send" && !st.code)){
+  // The link form and the kolay/zor question, before the round is saved, have no code
+  // yet: their drawings are the unsaved ones.
+  if (s === "between" || ((s === "send" || s === "choose") && !st.code)){
     const p = loadStore().pending;
     if (p && Array.isArray(p.words) && p.words.length === N){
       resumePending(p);
-      if (s === "send"){ historyQuiet = true; openShareScreen("between"); }
+      historyQuiet = true;
+      if (s === "send") openShareScreen("between");
+      else if (s === "choose") showChoose();
       return;
     }
   }
@@ -1809,9 +1815,13 @@ function isCorrect(cevap, kelime){
 function modeCard(m){
   const b = document.createElement("button");
   b.className = "diff";
+  const tag = document.createElement("span");
+  tag.className = "mtag";
+  tag.textContent = TEXT[m.tag];
   const name = document.createElement("b");
   name.className = "mname";
   name.textContent = TEXT[m.key];
+  b.appendChild(tag);
   const desc = document.createElement("span");
   desc.className = "mdesc";
   desc.textContent = TEXT[m.desc];
@@ -1819,11 +1829,16 @@ function modeCard(m){
   return b;
 }
 
-/* A friend's round, before its guessing starts: kelimeler açık or gizli. The choice is
-   kept with the round, so a guess left half done comes back the way it was begun. */
+/* Before any guessing starts, on your own round or a friend's: kolay or zor. It is a
+   question about guessing, so it is asked on the way in rather than before the drawing,
+   and the choice is kept with the round, so a guess left half done comes back the way it
+   was begun. The day is not asked: it is the same game for everybody. */
 function showChoose(){
-  $("chooseTitle").textContent = drawerName ? TEXT.whatDidDraw.replace("{name}", drawerName) : TEXT.whatWasDrawn;
-  $("chooseBody").textContent = TEXT.chooseTitle;
+  const theirs = role === "guesser";
+  $("chooseTitle").textContent = theirs
+    ? (drawerName ? TEXT.whatDidDraw.replace("{name}", drawerName) : TEXT.whatWasDrawn)
+    : TEXT.chooseTitle;
+  $("chooseBody").textContent = theirs ? TEXT.chooseTitle : "";
   const box = $("chooseModes");
   box.innerHTML = "";
   MODES.forEach(function(m){
@@ -1841,15 +1856,6 @@ function showChoose(){
 $("chooseHome").onclick = function(){ show("home"); };
 
 function buildHome(){
-  const box = $("modes");
-  box.innerHTML = "";
-  MODES.forEach(function(m){
-    const b = modeCard(m);
-    if (m.id === modeId) b.classList.add("sel");
-    b.onclick = function(){ modeId = m.id; rememberSettings(); buildHome(); };
-    box.appendChild(b);
-  });
-
   const seg = $("themes");
   seg.innerHTML = "";
   [["dark", "themeDark"], ["light", "themeLight"]].forEach(function(pair){
@@ -2509,7 +2515,9 @@ function startWord(i){
   strokes = [];
   live.clear();
   paintPad();
-  $("drawLevel").textContent = roundLabel();
+  // Nothing about guessing has been chosen yet at this point, so the header carries the
+  // one setting the drawing does have.
+  $("drawLevel").textContent = secsText(secs);
   $("word").textContent = words[i];
   $("counter").textContent = (i + 1) + " / " + N;
   $("bar").style.transform = "scaleX(1)";
@@ -3959,7 +3967,8 @@ $("timeStart").onclick = function(){ closeTimeAsk(); rememberHint(); startGame()
 // Changing the time is an answer to the question, so it is not asked again either.
 $("timeChange").onclick = function(){ closeTimeAsk(); rememberHint(); $("secs").focus(); };
 $("timeAsk").onclick = function(e){ if (e.target === $("timeAsk")) closeTimeAsk(); };
-$("toRecall").onclick = buildRecall;
+// The day has one set of rules for everyone, so only a free round asks.
+$("toRecall").onclick = function(){ if (isDaily) buildRecall(); else showChoose(); };
 // A stray tap on Bitir used to end the round on the spot, which for the daily means
 // the day is gone. Ask first.
 $("finish").onclick   = function(){ $("finishAsk").classList.add("on"); };

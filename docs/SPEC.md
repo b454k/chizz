@@ -46,7 +46,7 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 
 | id | Purpose |
 |---|---|
-| `home` | Title, then two sections with a heading each: the day's puzzle with a way into its board, and `sınırsız` -- two mode buttons side by side, a settings panel, a start button, and a 4-character code field with a join button |
+| `home` | Title, then two sections with a heading each: the day's puzzle with a way into its board, and `sınırsız` -- a settings panel, a start button, and a 4-character code field with a join button. A `sorun bildir` button sits above the title |
 | `countdown` | Full-screen 3 → 2 → 1, one second each |
 | `draw` | The drawing phase |
 | `between` | After 20 drawings: send to a friend, or guess them yourself |
@@ -55,7 +55,7 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 | `scores` | The day's global board, the only score table with a screen of its own |
 | `recall` | The shuffled grid of 20 drawings, where answers are given |
 | `result` | Score, correct/incorrect grid, score board, share button. Also used unmarked -- the drawings with the board under them -- for a round that has been sent but not yet guessed |
-| `choose` | A friend's round, opened: kelimeler açık or kelimeler gizli, asked every time before its guessing starts |
+| `choose` | kolay (kelimeler açık) or zor (kelimeler gizli), asked every time before guessing starts -- on your own round and on a friend's |
 | `answers` | One player's answers on a round's board, marked against the words, reached by tapping their name |
 
 Overlays sit outside the screen system: `#sheet` (the word pool), `#modal` (the
@@ -68,14 +68,15 @@ name after the first round drawn on a device.
 
 ### Solo
 
-1. `home` — pick a mode, adjust the settings if you want, press start. The first
-   unlimited round of the day answers the question "her kelime için 3 saniyen olacak"
-   before the countdown, with başla and değiştir
+1. `home` — adjust the settings if you want, press start. The first unlimited round of
+   the day answers the question "her kelime için 3 saniyen olacak" before the countdown,
+   with başla and değiştir
 2. `countdown` — 3, 2, 1
 3. `draw` — 20 words, one at a time, auto-advancing, each opening with the word shown
    on the paper for a second
 4. `between` — choose to guess yourself or send to a friend
-5. `recall` — assign a word to each drawing
+5. `choose` — kolay or zor, on the way into guessing (not for the day)
+6. `recall` — assign a word to each drawing
 6. `result` — score, per-cell correction, share text
 
 Nothing is asked before the round starts. A device with no name yet is asked for one
@@ -130,20 +131,27 @@ round, and back from there leaves the site.
 
 Two variables, set independently rather than bundled into fixed levels.
 
-**Mode** — how an answer is given:
+**Mode** — how an answer is given. It is **asked at the end of a round**, on the way into
+guessing, not before the drawing: it says nothing about how to draw, and a round sent to a
+friend never needed it. The same question greets a friend opening a round. The cards carry
+the difficulty, because that is what the choice really is:
 
-| id | Label | Answer method |
+| id | Card | Answer method |
 |---|---|---|
-| `pool` | Kelimeler açık | Choose from the remaining words, which stay on screen |
-| `typed` | Kelimeler gizli | No list; recall and type the word |
+| `pool` | kolay · kelimeler açık · "kelimelerle çizimleri eşleştir" | Choose from the remaining words, which stay on screen |
+| `typed` | zor · kelimeler gizli · "çizimlerin ne olduğunu kendin yaz" | No list; recall and type the word |
+
+It is asked every time and not remembered as a setting. A round already begun keeps the
+mode it was begun with (`rounds[CODE].modeId`). A round saved without being guessed
+carries `pool`, which binds nobody: whoever opens it is asked.
 
 **Seconds per word** — a slider from **1 to 10 seconds in half-second steps**,
 defaulting to 3, which is also the recommended speed named under the slider.
 
-The daily ignores both settings: it is always `typed` at 3 seconds. Everyone plays the
-same twenty words, and a shared board only means something if the terms are the same
-for everybody on it. That is why the mode buttons and the slider sit inside the
-`sınırsız` section rather than above both games.
+The daily ignores both: it is always `typed` at 3 seconds, and it is the one round that
+is never asked, since everyone plays the same twenty words and a shared board only means
+something if the terms are the same for everybody on it. That is why the slider sits
+inside the `sınırsız` section rather than above both games.
 
 Because the setting outlives the visit, the first unlimited round of each day says what
 it is — `her kelime için 3 saniyen olacak` — offering başla and değiştir. The device
@@ -156,9 +164,9 @@ and it contradicted the recommended speed by calling it the hardest.
 **Theme** — dark (default) or light. Applied as `data-theme` on the root element;
 the dark palette is the base and the light one restates only the colours that differ.
 
-Mode, seconds and theme are all kept on the device. The mode and duration are shown
-together on the drawing, recall and result screens, and in the share text
-(`Kelimeler açık · 3 sn`).
+Seconds and theme are kept on the device; the mode is not, being asked every round. The
+drawing screen shows the duration alone, since nothing about guessing has been chosen
+yet; the recall and result screens and the share text show both (`kelimeler açık · 3 sn`).
 
 This replaced four fixed difficulties (`easy`, `medium`, `hard`, `impossible`), which
 conflated the two variables: `medium` and `hard` differed only in answer method while
@@ -423,7 +431,7 @@ holds:
 | Field | Purpose |
 |---|---|
 | `name` | The name typed on this device. Editable on the result screen at any time; changing it renames the rounds this device saved |
-| `mode`, `secs`, `theme` | The settings chosen on the home screen |
+| `secs`, `theme` | The settings chosen on the home screen. The mode is not kept: it is asked on the way into every round |
 | `hintDay` | The day the time-per-word reminder was last shown, so it is shown once a day |
 | `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, the mode chosen for guessing a friend's round, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
 | `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |

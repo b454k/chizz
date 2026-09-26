@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-26 — kolay or zor, asked after the drawing
+
+The two modes sat on the start screen, above a game they say nothing about: they decide
+how the round is **guessed**, and a round sent to a friend never used the choice at all,
+since whoever opens it is asked anyway.
+
+- The cards are gone from the start screen, which now holds the day, the time slider,
+  başla and a code to join.
+- The same question appears on the way into guessing -- after drawing your own round, and
+  when opening a friend's -- and is asked every time rather than remembered.
+- The cards are labelled for what the choice is: **kolay** (kelimeler açık, "kelimelerle
+  çizimleri eşleştir") and **zor** (kelimeler gizli, "çizimlerin ne olduğunu kendin yaz").
+- The day is not asked: it is `typed` for everybody, or its board would compare
+  different games.
+- The drawing screen's header shows the seconds alone, the mode not being chosen yet.
+
 ## 2026-09-17 — sorun bildir
 
 The feedback button and dialog title read `sorun bildir` instead of `geri bildirim`, and
