@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-27 — 168 words, and a family for people
+
+An 800-word English list from the owner, translated, checked against the pool and the
+banned list, and sorted by silhouette. The pool goes from 459 to **627 words**.
+
+- **306** were already in, under their Turkish names.
+- **154** were another name for a word already in (`palto` for `ceket`, `metro` for
+  `tren`, `kutup ayısı` for `ayı`).
+- **67** were verbs, which this game cannot deal: a round is twenty nouns to draw.
+- **93** are hard to draw in seconds or impossible to tell from a word that stays, and
+  **5** have no short natural Turkish name. Both lists are in the reply, not in the pool.
+- **7** are on the banned list: papağan, pelikan, karga, erik, kereviz, sal, and
+  clipboard, whose Turkish name carries the banned `pano`.
+- **168** were added.
+
+### A fifteenth family: figure
+A standing human outline -- astronot, korsan, kral, palyaço, gelin, iskelet, robot,
+kardan adam, oyuncak ayı -- where one person is told from another by what they hold or
+wear. `insan` and `heykel` moved in from `vertical`, where they read as poles.
+
+Days 1 to 20 were frozen before the pool changed, so nobody`s finished day moved.
+Checked over 1,100 days: those days unchanged, no word back within 14 days, never more
+than two birds, every word dealt at least once, families coming up every 6 to 11 days.
+Repeats for a player of sınırsız alone at 2 rounds a day: 14.8 words a round before,
+0.1 now.
+
 ## 2026-09-26 — the day's two boards, and a sınırsız score that reached them
 
 Two sınırsız players turned up on günün skorları while the owner's parents were testing.

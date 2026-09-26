@@ -207,7 +207,7 @@ than burning the current word.
 
 ## 7. Words
 
-Both games deal from one pool: 459 words in 14 **silhouette** families (`docs/words.json`,
+Both games deal from one pool: 627 words in 15 **silhouette** families (`docs/words.json`,
 copied into `public/index.html` as `DAILY_POOL`). Families are grouped by shape, not by
 category — an elephant and a sofa share a shape, which is the joke. A round is two
 families and ten words from each, never more than two birds. Family names are never shown. See `docs/WORDS.md`.
@@ -235,21 +235,22 @@ was put in front of it, in the daily game or here (`seen` in section 14), for 14
   and took a sınırsız-only player (1 a day) from 0 repeated words a round to about 6.6.
   The price is that the second daily game, like the first, can repeat words sınırsız dealt.
 
-Measured by simulation over 90 days with 461 words, repeated words out of 20 (seen by the
-device in the previous 14 days):
+Measured by simulation over 90 days with 627 words, repeated words out of 20 (seen by
+the device in the previous 14 days):
 
 | Play | in the daily game | per sınırsız round | first repeat |
 |---|---|---|---|
 | daily only | 0 | — | never |
 | sınırsız only, 1 a day | — | 0 | never |
-| sınırsız only, 2 a day | — | 14.8 | day 11 |
-| daily + 1 sınırsız a day | 0 (13.5 before the hold-back) | 17.7 | day 4 |
-| daily + 2 sınırsız a day | 0 | 18.7 | day 3 |
+| sınırsız only, 2 a day | — | 0.1 | day 19 |
+| sınırsız only, 3 a day | — | 16.2 | day 10 |
+| daily + 1 sınırsız a day | 0.1 | 14.3 | day 6 |
+| daily + 2 sınırsız a day | 0.2 | 18.0 | day 3 |
 
 The daily game takes up about 540 words at a time for a device that plays it (the last 14
-days and the next 14), more than the pool holds, so its repeats land in sınırsız, mostly
-as words seen 10–13 days earlier. With 811 words daily + 1 sınırsız a day has no repeats;
-with 1,091, daily + 2 a day has none. Over many rounds a word's most frequent partner comes along about 56% of the time,
+days and the next 14), so for someone who plays both, the repeats land in sınırsız, mostly
+as words seen 10–13 days earlier. About 810 words would clear daily + 1 sınırsız a day,
+and about 1,090 daily + 2 a day. Over many rounds a word's most frequent partner comes along about 56% of the time,
 the same as pure random dealing; with the 30 fixed sets this replaced it was 98%.
 
 The rounds used to come from 30 fixed sets of 20, so the same words always arrived

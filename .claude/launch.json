@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "reel-workbench",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:/Users/HP/AppData/Local/Temp/claude/C--Users-HP-Desktop-apps-chizz/a173aa88-7c55-4527-95fe-87daab6f463e/scratchpad/reel/serve.mjs"],
+      "port": 8765
+    }
+  ]
+}
