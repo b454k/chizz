@@ -30,23 +30,23 @@ tidying at some point.)
 
 | family | the shape | words |
 |---|---|---:|
+| `boxy` | a rectangle with corners: boxes, screens, books, bags | 76 |
 | `horizontal` | long and low, wider than tall: vehicles, big animals, furniture | 69 |
-| `boxy` | a rectangle with corners: boxes, screens, books, bags | 67 |
-| `curved` | a flowing curve with no corners: clouds, hearts, snakes, body parts | 54 |
-| `winged` | wings out to the sides: birds, insects, and anything that throws two halves wide | 48 |
-| `stick` | a long thin rod: pens, tools, cutlery, fish | 45 |
-| `peaked` | a triangle or cone, pointed at the top: hats, mountains, sails | 42 |
-| `round` | a closed circle: balls, fruit, faces, clock faces | 40 |
-| `vertical` | tall and narrow, standing up: poles, bottles, trees, towers | 40 |
-| `handled` | a body with a stalk or handle: cups, jugs, tools you hold | 37 |
-| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 36 |
-| `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 35 |
-| `oval` | small and egg-shaped: seeds, nuts, pebbles | 31 |
-| `ring` | a closed loop with a hole: bracelets, tyres, chains | 31 |
-| `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 30 |
-| `figure` | a standing human outline: people, a doll, a snowman, a skeleton | 22 |
+| `curved` | a flowing curve with no corners: clouds, hearts, snakes, body parts | 56 |
+| `winged` | wings out to the sides: birds, insects, and anything that throws two halves wide | 49 |
+| `stick` | a long thin rod: pens, tools, cutlery, fish | 47 |
+| `peaked` | a triangle or cone, pointed at the top: hats, mountains, sails | 44 |
+| `vertical` | tall and narrow, standing up: poles, bottles, trees, towers | 43 |
+| `round` | a closed circle: balls, fruit, faces, clock faces | 42 |
+| `handled` | a body with a stalk or handle: cups, jugs, tools you hold | 41 |
+| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 39 |
+| `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 37 |
+| `oval` | small and egg-shaped: seeds, nuts, pebbles | 36 |
+| `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 36 |
+| `ring` | a closed loop with a hole: bracelets, tyres, chains | 32 |
+| `figure` | a standing human outline: people, a doll, a snowman, a skeleton | 28 |
 
-**627 words.** Checked: no word is in two families, no rejected word is back, and every
+**675 words.** Checked: no word is in two families, no rejected word is back, and every
 word the free game uses is in here. `tools/check-words.js` checks all of it, including
 that the copy of the pool inside `public/index.html` matches this record exactly.
 

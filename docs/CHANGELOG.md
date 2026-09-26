@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-27 — 48 more words, from the second 300
+
+The second batch of the owner`s list, words 801 to 1100, run through the same pass. The
+pool goes 627 -> **675 words**, still 15 families.
+
+- **41** were already in, **96** were another name for a word already in (vapur for gemi,
+  ekskavatör for buldozer, çakal for kurt), **28** were verbs.
+- **67** are hard to draw in seconds or impossible to tell apart, **7** have no short
+  Turkish name.
+- **13** are on the banned list, two of them by carrying a banned word inside a longer
+  name: çanak anten (çanak) and dama (dama tahtası).
+- **48** were added, among them a first set of make-believe figures — deniz kızı, cadı,
+  uzaylı, balerin, mağara adamı, kurabiye adam — and kanarya, the 21st bird.
+
+Days 1 to 20 were frozen again before the change. Checked over 1,100 days: unchanged
+days, no repeat inside 14 days, at most two birds, every word dealt. A player of sınırsız
+alone now repeats nothing at two rounds a day.
+
 ## 2026-09-27 — 168 words, and a family for people
 
 An 800-word English list from the owner, translated, checked against the pool and the
