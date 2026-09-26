@@ -1,11 +1,14 @@
 import { dayNumber as today } from "../../../lib/day.js";
 
-// GET  /api/daily/6  -> { scores: [{name, score, ms, ts}, ...] } best first
-// POST /api/daily/6  body {name, score, ms, was?, token?}
+// GET  /api/daily/6?mode=pool  -> { day, mode, scores: [{name, score, ms, ts}, ...] } best first
+// POST /api/daily/6  body {name, score, ms, mode, was?, token?}
 //
-// The daily board. Everyone plays the same twenty words on the same day at the same
-// settings, so unlike a duel board this one is global: every player who finished that
-// day, ranked together.
+// The daily board. Everyone plays the same twenty words on the same day, so unlike a duel
+// board this one is global: every player who finished that day, ranked together.
+//
+// One board per mode, since kelimeler açık and kelimeler gizli are not the same game and a
+// single table would rank them against each other. typed keeps the original keys, every
+// score written before the split having been played that way.
 //
 // Same shape as the per-round board in ../scores/[code].js, and for the same reasons:
 // each player writes their own key so two people finishing at once cannot overwrite
@@ -39,6 +42,19 @@ function nameKey(name) {
 }
 
 
+const MODES = ["pool", "typed"];
+
+function readMode(request, body) {
+  const asked = (body && typeof body.mode === "string" && body.mode) ||
+                new URL(request.url).searchParams.get("mode") || "";
+  return MODES.indexOf(asked) >= 0 ? asked : "typed";
+}
+
+// typed is where every score lived before the boards split, so it keeps the old keys.
+function base(day, mode) {
+  return mode === "typed" ? "day:" + day : "day:" + day + ":" + mode;
+}
+
 function readDay(params) {
   const raw = String(params.day || "").trim();
   if (!/^[1-9][0-9]{0,5}$/.test(raw)) return 0;
@@ -70,8 +86,8 @@ function mergeBoards(summary, scanned) {
   return rank(Array.from(known.values())).slice(0, MAX_ROWS);
 }
 
-async function scanBoard(env, day) {
-  const r = await env.GAMES.list({ prefix: "day:" + day + ":s:", limit: 1000 });
+async function scanBoard(env, day, mode) {
+  const r = await env.GAMES.list({ prefix: base(day, mode) + ":s:", limit: 1000 });
   const scores = [];
   for (const k of r.keys) {
     const m = k.metadata;
@@ -86,37 +102,38 @@ async function scanBoard(env, day) {
   return rank(scores);
 }
 
-function writeBoard(env, day, scores) {
+function writeBoard(env, day, mode, scores) {
   return env.GAMES.put(
-    "day:" + day + ":board",
+    base(day, mode) + ":board",
     JSON.stringify({ scores, scannedAt: Date.now() }),
     { expirationTtl: TTL }
   );
 }
 
-export async function onRequestGet({ params, env }) {
+export async function onRequestGet({ params, request, env }) {
   if (!env.GAMES) return json({ error: "storage not bound" }, 500);
   const day = readDay(params);
   if (!day) return json({ error: "no such day" }, 404);
+  const mode = readMode(request, null);
 
-  const summary = await env.GAMES.get("day:" + day + ":board", { type: "json", cacheTtl: BOARD_CACHE });
+  const summary = await env.GAMES.get(base(day, mode) + ":board", { type: "json", cacheTtl: BOARD_CACHE });
   const fresh = summary
     && Array.isArray(summary.scores)
     && typeof summary.scannedAt === "number"
     && Date.now() - summary.scannedAt < REPAIR_AFTER;
-  if (fresh) return json({ day, scores: rank(summary.scores) });
+  if (fresh) return json({ day, mode, scores: rank(summary.scores) });
 
   // No summary means nobody has played the day yet: every score post writes one. Listing
   // here found nothing and repeated on every poll, since an empty day never writes one.
-  if (!summary || !Array.isArray(summary.scores)) return json({ day, scores: [] });
+  if (!summary || !Array.isArray(summary.scores)) return json({ day, mode, scores: [] });
 
-  const merged = mergeBoards(summary, await scanBoard(env, day));
+  const merged = mergeBoards(summary, await scanBoard(env, day, mode));
   const had = summary && Array.isArray(summary.scores) ? summary.scores.length : 0;
   if (merged.length > 0 && merged.length >= had) {
-    await writeBoard(env, day, merged);
-    return json({ day, scores: merged });
+    await writeBoard(env, day, mode, merged);
+    return json({ day, mode, scores: merged });
   }
-  return json({ day, scores: had ? rank(summary.scores) : merged });
+  return json({ day, mode, scores: had ? rank(summary.scores) : merged });
 }
 
 export async function onRequestPost({ params, request, env }) {
@@ -134,43 +151,44 @@ export async function onRequestPost({ params, request, env }) {
   const MAX_MS = 6 * 60 * 60 * 1000;
   const ms = Number.isFinite(d.ms) && d.ms > 0 && d.ms < MAX_MS ? Math.round(d.ms) : 0;
 
+  const mode = readMode(request, d);
   const key = nameKey(name);
-  const summary = await env.GAMES.get("day:" + day + ":board", { type: "json" });
-  const merged = mergeBoards(summary, await scanBoard(env, day));
+  const summary = await env.GAMES.get(base(day, mode) + ":board", { type: "json" });
+  const merged = mergeBoards(summary, await scanBoard(env, day, mode));
   const known = new Map(merged.map(function (s) { return [nameKey(s.name), s]; }));
 
   const previous = known.get(key);
   let ts = previous && previous.ts ? previous.ts : Date.now();
   const keepMs = previous && previous.ms > 0 ? previous.ms : ms;
 
-  const existing = await env.GAMES.getWithMetadata("day:" + day + ":s:" + key);
+  const existing = await env.GAMES.getWithMetadata(base(day, mode) + ":s:" + key);
   let token = existing && existing.metadata && typeof existing.metadata.token === "string"
     ? existing.metadata.token : "";
 
   const wasKey = typeof d.was === "string" && d.was.trim() ? nameKey(d.was.trim()) : "";
   if (wasKey && wasKey !== key) {
-    const old = await env.GAMES.getWithMetadata("day:" + day + ":s:" + wasKey);
+    const old = await env.GAMES.getWithMetadata(base(day, mode) + ":s:" + wasKey);
     const om = old && old.metadata;
     const given = typeof d.token === "string" ? d.token : "";
     if (om && typeof om.token === "string" && om.token && given && om.token === given) {
       if (!token) token = om.token;
       if (om.ts) ts = om.ts;
-      await env.GAMES.delete("day:" + day + ":s:" + wasKey);
+      await env.GAMES.delete(base(day, mode) + ":s:" + wasKey);
       known.delete(wasKey);
     }
   }
   if (!token) token = crypto.randomUUID().replace(/-/g, "");
 
-  await env.GAMES.put("day:" + day + ":s:" + key, "", {
+  await env.GAMES.put(base(day, mode) + ":s:" + key, "", {
     metadata: { name, score: d.score, ms: keepMs, ts, token },
     expirationTtl: TTL
   });
 
   known.set(key, { name, score: d.score, ms: keepMs, ts });
   const scores = rank(Array.from(known.values())).slice(0, MAX_ROWS);
-  await writeBoard(env, day, scores);
+  await writeBoard(env, day, mode, scores);
 
-  return json({ day, scores, token });
+  return json({ day, mode, scores, token });
 }
 
 // Without this Pages falls through to the static asset handler and answers an API

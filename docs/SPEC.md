@@ -52,10 +52,11 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 | `between` | After 20 drawings: send to a friend, or guess them yourself |
 | `send` | Duel submission: sending / code + link / errors |
 | `loading` | Fetching a round opened from a code or link |
-| `scores` | The day's global board, the only score table with a screen of its own |
+| `dayPick` | Which of the day's two boards to read: kolay or zor |
+| `scores` | One of the day's two global boards, the only score tables with a screen of their own |
 | `recall` | The shuffled grid of 20 drawings, where answers are given |
 | `result` | Score, correct/incorrect grid, score board, share button. Also used unmarked -- the drawings with the board under them -- for a round that has been sent but not yet guessed |
-| `choose` | kolay (kelimeler açık) or zor (kelimeler gizli), asked every time before guessing starts -- on your own round and on a friend's |
+| `choose` | kolay (kelimeler açık) or zor (kelimeler gizli), asked every time before guessing starts -- on your own round, on the day's, and on a friend's |
 | `answers` | One player's answers on a round's board, marked against the words, reached by tapping their name |
 
 Overlays sit outside the screen system: `#sheet` (the word pool), `#modal` (the
@@ -148,10 +149,11 @@ carries `pool`, which binds nobody: whoever opens it is asked.
 **Seconds per word** — a slider from **1 to 10 seconds in half-second steps**,
 defaulting to 3, which is also the recommended speed named under the slider.
 
-The daily ignores both: it is always `typed` at 3 seconds, and it is the one round that
-is never asked, since everyone plays the same twenty words and a shared board only means
-something if the terms are the same for everybody on it. That is why the slider sits
-inside the `sınırsız` section rather than above both games.
+The daily ignores the slider -- always 3 seconds -- but it is asked the same kolay/zor
+question after its drawing, and the answer decides which of the day's two boards the score
+joins. Everyone on one board played it the same way, which is what makes the ranking mean
+something. That is why the slider sits inside the `sınırsız` section rather than above
+both games.
 
 Because the setting outlives the visit, the first unlimited round of each day says what
 it is — `her kelime için 3 saniyen olacak` — offering başla and değiştir. The device
@@ -395,16 +397,35 @@ is stored as the value of the player's own key -- empty before answers were kept
 board never carries it. `GET /api/scores/:code?name=<name>` returns `{answers}` for one
 player, `null` when there are none: one `get`, made only when someone taps a name.
 
+`GET/POST /api/daily/:day?mode=pool|typed` — the day's global board for one mode, same
+shape and the same two layers as a round's board. POST takes `{name, score, ms, mode,
+was?, token?}`. The mode defaults to `typed`, whose keys (`day:<n>:board`,
+`day:<n>:s:<name>`) are the ones written before the boards split; kolay lives under
+`day:<n>:pool:...`.
+
 Everything is written with a **30-day TTL** and expires by itself. Stored data is the
 set id, mode, seconds, an optional name, the 20 words and the 20 drawings. No email,
 no IP, no account.
 
 ### Score board
 
-On the result screen of a shared round, and on the drawer's `scores` screen, the board
-polls every 2 seconds while the screen is visible, pausing when the tab is hidden and
-refreshing immediately on return. Your own row is inserted locally so it appears
-before KV's listing catches up.
+On the result screen of a shared round, and on a `scores` screen, the board polls once a
+second while the screen is visible, pausing when the tab is hidden and refreshing
+immediately on return. Your own row is inserted locally so it appears before KV's listing
+catches up.
+
+**The day has two boards, one per mode** (`day:<n>` for zor, `day:<n>:pool` for kolay),
+because kelimeler açık and kelimeler gizli are not the same game and one table would rank
+them against each other. Every score written before the split was played typed, so zor
+keeps the original keys. `günün skorları` asks which table to open (`dayPick`); the mode
+travels in the history entry, so a reload comes back to the same table.
+
+**The day's board takes only the day's own round.** `onDayBoard()` requires the round in
+memory to be a daily one, not guessed for somebody else, *and* the day to be on record as
+drawn on this device. Opening the day's board used to set `isDaily`, and a step back onto
+a sınırsız result then posted that score to the day: two sınırsız players showed up on
+günün skorları. The board screen now keeps its own day, mode and rows (`dayBoard`) and
+touches nothing the game holds.
 
 On the result of a round this device has guessed, every row opens that player's answers,
 and a line under the board's title says so: "üzerine tıklayarak arkadaşlarının
@@ -438,7 +459,7 @@ holds:
 | `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |
 | `seen` | Word → the day it was last dealt to this device, in either game, kept for 14 days. What sınırsız deals from (section 7) |
 | `dailyPlayed` | The different days in the last 14 on which this device started the daily game. With 2 or more, sınırsız holds back the upcoming daily words (section 7). Replaces `dailyAt`, which is still read |
-| `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
+| `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, the mode chosen for guessing it (which board its score joins), whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. Entries older than the
 server's 30-day TTL are dropped, and only the newest 40 rounds are kept.

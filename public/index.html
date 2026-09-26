@@ -608,6 +608,17 @@
     </div>
   </section>
 
+  <!-- Which of the day's two boards to look at. kolay and zor are different games, so
+       they are different tables. -->
+  <section class="screen mid" id="dayPick">
+    <div class="stack">
+      <h2 data-t="dailyScores"></h2>
+      <p data-t="dayPickBody"></p>
+      <div class="diffs" id="dayPickModes"></div>
+      <button class="ghost" id="dayPickBack" data-t="home"></button>
+    </div>
+  </section>
+
   <!-- A friend's round, opened: how to guess it. Asked every time a round is opened
        before its guessing has started; the drawer's own choice does not bind anyone. -->
   <section class="screen mid" id="choose">
@@ -1261,6 +1272,7 @@ const TEXT = {
   modeOpen:         "kelimeler açık",
   modeOpenDesc:     "kelimelerle çizimleri eşleştir",
   modeEasy:         "kolay",
+  dayPickBody:      "hangi tabloya bakmak istersin?",
   modeHidden:       "kelimeler gizli",
   modeHiddenDesc:   "çizimlerin ne olduğunu kendin yaz",
   modeHard:         "zor",
@@ -1435,7 +1447,8 @@ let recallStart = 0;     // when the grid first went up; the board ranks ties by
 let recallMs  = 0;       // how long the round took, frozen once it is finished
 
 const $ = function(id){ return document.getElementById(id); };
-const modeOf = function(){ return MODES.find(function(m){ return m.id === modeId; }) || MODES[0]; };
+const modeOf = function(){ return modeById(modeId); };
+function modeById(id){ return MODES.find(function(m){ return m.id === id; }) || MODES[0]; }
 const roundMs = function(){ return Math.round(secs * 1000); };
 
 function clampSecs(v){
@@ -1566,6 +1579,7 @@ function recordArrival(screen){
   const here = history.state || {};
   const state = { screen: screen, code: ROUND_SCREENS[screen] ? lastCode : "", depth: here.depth || 0 };
   if (screen === "answers") state.who = answersOf;
+  if (screen === "scores") state.mode = dayBoard.mode;
   try {
     // Replace when restoring, when nothing has changed, or when a round ends: a finished
     // or abandoned round is not a step to go back into.
@@ -1594,7 +1608,8 @@ function restoreEntry(st){
   $("fbAsk").classList.remove("on");
   historyQuiet = true;
   const s = st && st.screen;
-  if (s === "scores"){ openDailyBoard(); return; }
+  if (s === "scores"){ openDayBoard(MODES.some(function(m){ return m.id === st.mode; }) ? st.mode : "typed"); return; }
+  if (s === "dayPick"){ showDayPick(); return; }
   if (s === "archiveScreen"){ buildArchive("archiveFull", 0); show("archiveScreen"); return; }
   // The link form and the kolay/zor question, before the round is saved, have no code
   // yet: their drawings are the unsaved ones.
@@ -1846,6 +1861,9 @@ function showChoose(){
     b.onclick = function(){
       modeId = m.id;
       rememberRound(lastCode, { modeId: m.id });
+      // The day keeps it too: it decides which of the day's two boards the score joins,
+      // and a day picked up again later resumes the way it was begun.
+      if (isDaily && dailyDay) rememberDay(dailyDay, { modeId: m.id });
       buildRecall();
     };
     box.appendChild(b);
@@ -2082,13 +2100,15 @@ function buildDailyRow(){
   $("dailyBoard").hidden = !!rec.done;
 }
 
-$("dailyBoard").onclick = function(){ openDailyBoard(); };
+$("dailyBoard").onclick = showDayPick;
 
 $("dailyGo").onclick = function(){
   const day = dailyDayNumber();
   const rec = savedDay(day) || {};
   wakeAudio();
-  if (rec.done){ openDailyBoard(); return; }
+  // The same question as the button above: both of the day's tables are worth reading,
+  // not only the one this device played.
+  if (rec.done){ showDayPick(); return; }
   if (rec.drawn && Array.isArray(rec.words) && rec.words.length === N){
     resumeDaily(rec);                       // drawn already, never guessed
     return;
@@ -2106,7 +2126,8 @@ function resumeDaily(rec){
              : (Array.isArray(rec.order) && rec.order.length === N ? rec : null);
   const done = !!(rec.done || round.done);
   dailyDay = dailyDayNumber();
-  isDaily = true; modeId = "typed"; secs = 3; setId = null;
+  isDaily = true; secs = 3; setId = null;
+  modeId = MODES.some(function(m){ return m.id === rec.modeId; }) ? rec.modeId : "typed";
   role = "solo"; drawerName = ""; lastCode = rec.code || "";
   scores = []; scoreSent = !!rec.sent;
   recallStart = round.startedAt || 0;
@@ -2118,7 +2139,9 @@ function resumeDaily(rec){
     ? kept.picks.slice() : new Array(N).fill(null);
   selPos = -1;
   // No code yet means guessing never started; the save on the way in sets one.
-  if (done) buildResult(); else buildRecall();
+  if (done) buildResult();
+  else if (!rec.modeId) showChoose();
+  else buildRecall();
 }
 
 
@@ -2256,7 +2279,7 @@ function startDaily(){
   shelvePending();
   dailyDay = dailyDayNumber();
   isDaily  = true;
-  modeId   = "typed";
+  modeId   = "typed";       // until the question after the drawing
   secs     = 3;
   setId    = null;
 
@@ -3196,7 +3219,7 @@ function showBoard(){
   if (myName && !scoreSent && !viewOnly){ scoreSent = true; sendScore(); }
   renderScores();
   fetchScores();
-  startBoardPoll();
+  startBoardPoll(fetchScores);
 }
 
 // Winner first: best score, and on a tie whoever got there quickest. Rows written
@@ -3210,6 +3233,25 @@ function rankScores(list){
   });
 }
 
+function fillBoard(box, list, opens){
+  box.innerHTML = "";
+  list.forEach(function(s, i){
+    const row = document.createElement("div");
+    row.className = "brow" + (myName && sameName(s.name, myName) ? " me" : "");
+    const rk = document.createElement("span"); rk.className = "rk"; rk.textContent = (i + 1) + ".";
+    const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = s.name;
+    const tm = document.createElement("span"); tm.className = "tm"; tm.textContent = s.ms > 0 ? timeLabel(s.ms) : "";
+    const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = s.score + "/" + N;
+    row.appendChild(rk); row.appendChild(nm); row.appendChild(tm); row.appendChild(sc);
+    if (opens){
+      row.classList.add("opens");
+      row.onclick = function(){ openAnswers(s.name); };
+    }
+    box.appendChild(row);
+  });
+}
+
+/* The board under a round's drawings. */
 function renderScores(){
   const liste = rankScores(scores);
   // Always show your own row: KV listing is eventually consistent, so a score
@@ -3218,44 +3260,29 @@ function renderScores(){
     liste.push({ name: myName, score: score, ms: elapsedMs() });
   }
   const sirali = rankScores(liste);
-
-  const kutular = [$("boardList"), $("scoresList")];
-  kutular.forEach(function(box){
-    if (!box) return;
-    box.innerHTML = "";
-    sirali.forEach(function(s, i){
-      const row = document.createElement("div");
-      row.className = "brow" + (myName && sameName(s.name, myName) ? " me" : "");
-      const rk = document.createElement("span"); rk.className = "rk"; rk.textContent = (i + 1) + ".";
-      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = s.name;
-      const tm = document.createElement("span"); tm.className = "tm"; tm.textContent = s.ms > 0 ? timeLabel(s.ms) : "";
-      const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = s.score + "/" + N;
-      row.appendChild(rk); row.appendChild(nm); row.appendChild(tm); row.appendChild(sc);
-      if (box === $("boardList") && boardOpens()){
-        row.classList.add("opens");
-        row.onclick = function(){ openAnswers(s.name); };
-      }
-      box.appendChild(row);
-    });
-  });
+  fillBoard($("boardList"), sirali, boardOpens());
   const bos = sirali.length === 0;
-  if ($("boardHint")) $("boardHint").hidden = bos || !boardOpens();
-  if ($("boardEmpty"))  $("boardEmpty").hidden  = !bos;
-  if ($("scoresEmpty")) $("scoresEmpty").hidden = !bos;
+  $("boardHint").hidden = bos || !boardOpens();
+  $("boardEmpty").hidden = !bos;
   // Column names over nothing at all would be a table pretending to have rows.
-  if ($("boardHead"))   $("boardHead").hidden   = bos;
-  if ($("scoresHead"))  $("scoresHead").hidden  = bos;
+  $("boardHead").hidden = bos;
 }
 
-// A round has its own board, keyed by its code; the day has one global board that
-// everyone who played that day lands on. Same shape, different address.
-/* The day board holds your score on your OWN drawings. Guessing a friend's daily
-   round is a different thing -- how well you read their scribbles depends on how they
-   draw -- so that goes to their round's own board, exactly like a free-play duel. */
-function onDayBoard(){ return isDaily && role !== "guesser"; }
+// A round has its own board, keyed by its code; the day has a global board per mode,
+// which everyone who played that day in that mode lands on.
+/* The day board holds your score on your OWN drawings, in the mode you played. Guessing a
+   friend's daily round is a different thing -- how well you read their scribbles depends
+   on how they draw -- so that goes to their round's own board, exactly like a free-play
+   duel. The day this device drew has to be on record as well: the flag alone once let a
+   sınırsız score reach the day, when opening the day's board had set it. */
+function onDayBoard(){
+  return isDaily && role !== "guesser" && !!(savedDay(dailyDay) || {}).drawn;
+}
 
 function boardUrl(){
-  return onDayBoard() ? "/api/daily/" + dailyDay : "/api/scores/" + encodeURIComponent(lastCode);
+  return onDayBoard()
+    ? "/api/daily/" + dailyDay + "?mode=" + encodeURIComponent(modeId)
+    : "/api/scores/" + encodeURIComponent(lastCode);
 }
 
 function hasBoard(){ return onDayBoard() ? !!dailyDay : !!lastCode; }
@@ -3274,45 +3301,84 @@ function fetchScores(){
 // second, so the poll interval is what the wait actually is.
 const POLL_MS = 1000;
 let boardTimer = null;
+let boardTick = null;
 
-function startBoardPoll(){
+function startBoardPoll(tick){
   stopBoardPoll();
-  if (!hasBoard()) return;
+  boardTick = tick;
   boardTimer = setInterval(function(){
     const visible = $("result").classList.contains("on") || $("scores").classList.contains("on");
     if (!visible){ stopBoardPoll(); return; }   // stop once the screen is left
     if (document.hidden) return;               // do not fetch while backgrounded
-    fetchScores();
+    boardTick();
   }, POLL_MS);
 }
 
 function stopBoardPoll(){
   if (boardTimer){ clearInterval(boardTimer); boardTimer = null; }
+  boardTick = null;
 }
 
 // Coming back from another app should refresh at once, not wait for the next tick.
 document.addEventListener("visibilitychange", function(){
-  if (!document.hidden && boardTimer) fetchScores();
+  if (!document.hidden && boardTick) boardTick();
 });
 
 // Reached from the start screen once the day is done.
 
-function openDailyBoard(){
-  const day = dailyDayNumber();
-  const rec = savedDay(day) || {};
-  // Readable before the day is played, in which case there is no row to add and
-  // nothing to post -- only everyone else's scores to look at.
-  viewOnly = !rec.done;
-  isDaily = true; dailyDay = day;
-  score = rec.score || 0;
-  recallMs = rec.ms || 0;
-  scores = [];
-  $("scoresTitle").textContent = TEXT.dailyBoardTitle.replace("{date}", dailyDateLabel(day));
-  renderScores();
-  fetchScores();
-  show("scores");
-  startBoardPoll();
+/* The day's two boards. kolay and zor are different games, so they are ranked apart and
+   the reader says which one they came for.
+
+   None of this touches what the game is holding. Setting isDaily here was enough to send
+   a sınırsız score to the day: a step back to that round's result found the flag still on
+   and posted the score where it did not belong. */
+let dayBoard = { day: 0, mode: "", scores: [] };
+
+function showDayPick(){
+  const box = $("dayPickModes");
+  box.innerHTML = "";
+  MODES.forEach(function(m){
+    const b = modeCard(m);
+    b.onclick = function(){ openDayBoard(m.id); };
+    box.appendChild(b);
+  });
+  show("dayPick");
 }
+
+function openDayBoard(mode){
+  dayBoard = { day: dailyDayNumber(), mode: mode, scores: [] };
+  $("scoresTitle").textContent = TEXT.dailyBoardTitle.replace("{date}", dailyDateLabel(dayBoard.day))
+    + " \u00b7 " + TEXT[modeById(mode).tag];
+  renderDayBoard();
+  fetchDayBoard();
+  show("scores");
+  startBoardPoll(fetchDayBoard);
+}
+
+function renderDayBoard(){
+  const rec = savedDay(dayBoard.day) || {};
+  const list = rankScores(dayBoard.scores);
+  // Your own row before the listing catches up -- on the board you actually played.
+  const mine = rec.done && (rec.modeId || "typed") === dayBoard.mode;
+  if (mine && myName && !list.some(function(s){ return sameName(s.name, myName); })){
+    list.push({ name: myName, score: rec.score || 0, ms: rec.ms || 0 });
+  }
+  const sirali = rankScores(list);
+  fillBoard($("scoresList"), sirali, false);
+  const bos = sirali.length === 0;
+  $("scoresEmpty").hidden = !bos;
+  $("scoresHead").hidden = bos;
+}
+
+function fetchDayBoard(){
+  const day = dayBoard.day, mode = dayBoard.mode;
+  api("/api/daily/" + day + "?mode=" + encodeURIComponent(mode)).then(function(r){
+    if (dayBoard.day !== day || dayBoard.mode !== mode) return;    // moved on since
+    if (r.ok && r.data && Array.isArray(r.data.scores)){ dayBoard.scores = r.data.scores; renderDayBoard(); }
+  }).catch(function(){ /* if the board fails, your own row still shows */ });
+}
+
+$("dayPickBack").onclick = function(){ show("home"); };
 
 // The only board with a screen to itself is the day's, which is global and has no
 // drawings of its own. Every other score table sits under the drawings it is about.
@@ -3967,8 +4033,7 @@ $("timeStart").onclick = function(){ closeTimeAsk(); rememberHint(); startGame()
 // Changing the time is an answer to the question, so it is not asked again either.
 $("timeChange").onclick = function(){ closeTimeAsk(); rememberHint(); $("secs").focus(); };
 $("timeAsk").onclick = function(e){ if (e.target === $("timeAsk")) closeTimeAsk(); };
-// The day has one set of rules for everyone, so only a free round asks.
-$("toRecall").onclick = function(){ if (isDaily) buildRecall(); else showChoose(); };
+$("toRecall").onclick = showChoose;
 // A stray tap on Bitir used to end the round on the spot, which for the daily means
 // the day is gone. Ask first.
 $("finish").onclick   = function(){ $("finishAsk").classList.add("on"); };

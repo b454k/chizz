@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-26 — the day's two boards, and a sınırsız score that reached them
+
+Two sınırsız players turned up on günün skorları while the owner's parents were testing.
+
+- **The leak:** opening the day's board set `isDaily`, the flag that says the round in
+  memory belongs to the day. Nothing set it back, so a step back onto a sınırsız result
+  rebuilt that result with the flag still on and posted its score to the day. Reproduced
+  against the previous build -- `[daily] 19 Baba 10` for a free round -- and not
+  reproducible against this one.
+- **The fix:** the board screen keeps its own day, mode and rows and touches nothing the
+  game holds, and a score reaches the day's board only when the day is on record as drawn
+  on this device.
+- **kolay and zor are separate boards.** They are different games, so one table ranked
+  them against each other. `günün skorları` now asks which table to open, and the daily
+  round is asked kolay or zor after its drawing like any other round. Scores written
+  before the split stay on the zor board, which keeps the original keys.
+
 ## 2026-09-26 — kolay or zor, asked after the drawing
 
 The two modes sat on the start screen, above a game they say nothing about: they decide
