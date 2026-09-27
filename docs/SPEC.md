@@ -207,7 +207,7 @@ than burning the current word.
 
 ## 7. Words
 
-Both games deal from one pool: 675 words in 15 **silhouette** families (`docs/words.json`,
+Both games deal from one pool: 749 words in 15 **silhouette** families (`docs/words.json`,
 copied into `public/index.html` as `DAILY_POOL`). Families are grouped by shape, not by
 category — an elephant and a sofa share a shape, which is the joke. A round is two
 families and ten words from each, never more than two birds. Family names are never shown. See `docs/WORDS.md`.
@@ -235,7 +235,7 @@ was put in front of it, in the daily game or here (`seen` in section 14), for 14
   and took a sınırsız-only player (1 a day) from 0 repeated words a round to about 6.6.
   The price is that the second daily game, like the first, can repeat words sınırsız dealt.
 
-Measured by simulation over 90 days with 675 words, repeated words out of 20 (seen by
+Measured by simulation over 90 days with 749 words, repeated words out of 20 (seen by
 the device in the previous 14 days):
 
 | Play | in the daily game | per sınırsız round | first repeat |
@@ -243,9 +243,9 @@ the device in the previous 14 days):
 | daily only | 0 | — | never |
 | sınırsız only, 1 a day | — | 0 | never |
 | sınırsız only, 2 a day | — | 0 | never |
-| sınırsız only, 3 a day | — | 15.0 | day 10 |
-| daily + 1 sınırsız a day | 0.1 | 11.9 | day 6 |
-| daily + 2 sınırsız a day | 0.2 | 17.5 | day 3 |
+| sınırsız only, 3 a day | — | 14.0 | day 12 |
+| daily + 1 sınırsız a day | 0.1 | 1.6 | day 7 |
+| daily + 2 sınırsız a day | 0.1 | 16.8 | day 4 |
 
 The daily game takes up about 540 words at a time for a device that plays it (the last 14
 days and the next 14), so for someone who plays both, the repeats land in sınırsız, mostly

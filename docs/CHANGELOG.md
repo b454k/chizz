@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-27 — 76 words of my own, picked over by the owner
+
+With the owner`s 1,100 English words spent, I proposed 108 of my own: 48 I was confident
+about and 60 I had doubts about, each doubt written out. The owner kept 45 of the first
+and 31 of the second. The pool is **749 words**.
+
+- Everything turned down is on the banned list -- 34 words, including three of my own
+  confident ones (faraş, çıngırak, karanfil) -- so it cannot be proposed again.
+- Two words left the pool for a clearer twin: `tartı` for `terazi`, `can simidi` for
+  `deniz simidi`. Both are on the banned list under the name that went.
+- Two came in under a shorter name: `uçan daire` as **ufo**, `tek boynuzlu at` as
+  **unicorn**.
+
+1,100 was the target and it is not reachable at this quality: after 675 words the
+everyday Turkish nouns are spent, which is why the owner`s own 1,100-word list yielded
+216. What 1,100 was meant to buy is mostly bought already -- for a player of the daily
+game plus a round of sınırsız a day, repeated words fell from 11.5 a round to 1.6.
+
+Days 1 to 20 frozen first. Checked over 1,100 days: unchanged days, no word back inside
+14 days, at most two birds, every word dealt, families every 6 to 9 days.
+
 ## 2026-09-27 — 48 more words, from the second 300
 
 The second batch of the owner`s list, words 801 to 1100, run through the same pass. The

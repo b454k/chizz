@@ -47,8 +47,28 @@ Only one of each is kept.
 `kanepe` and `koltuk` used to be kept out of the same round by the generator.
 That rule went with `kanepe`.
 
+## Rejected 2026-09-27 — offered and turned down
+
+Words proposed to fill the pool out and turned down by the owner. Some draw the same
+as a word that stays, some are too small or too faint to read in a grid of twenty,
+some are a person that draws as any other person.
+
+lokum, su terazisi, konteyner, fiş, römork, kırbaç, orak, söğüt, klarnet,
+şamdan, kavak, hidrant, poğaça, bisküvi, gong, testi, güveç, kevgir, mikser,
+maşrapa, leğen, yüksük, dümen, nilüfer, kanun, şamandıra, somun, pehlivan,
+manken, faraş, çıngırak, karanfil
+
+## Rejected 2026-09-27 — replaced
+
+tartı, can simidi
+
+`tartı` was replaced by `terazi`, and `can simidi` by `deniz simidi`: one word for one
+shape.
+
 ## Renamed, not banned
 
 These were kept under a clearer name, so the old spelling should not come back either:
 `feribot` → `gemi`, `kemer tokası` → `kemer`, `zebra geçidi` → `yaya geçidi`,
-`kek` → `pasta`, `çörek` → `donut`, `değnek` → `sihirli değnek`.
+`kek` → `pasta`, `çörek` → `donut`, `değnek` → `sihirli değnek`,
+`uçan daire` → `ufo`, `tek boynuzlu at` → `unicorn`, `tartı` → `terazi`,
+`can simidi` → `deniz simidi`.
