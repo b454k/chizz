@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-27 — nasıl oynanır on demand
+
+The loop showed itself once, to a device that had never played, and after that there
+was no way back to it. `nasıl oynanır?` now sits at the top of the start screen beside
+`sorun bildir` and opens the same dialog whenever anyone wants it.
+
+- The picture's `src` is set again on every open, so the loop always starts at its first
+  step. A gif left to itself carries on where it stopped.
+- Opening unasked is unchanged: still once, still only for a device that has never
+  played, still never over a round.
+- `docs/DEPLOY.md` now says `--branch production`. Without it, a deploy from `main`
+  succeeds as a preview at `main.chizz.pages.dev` and chizz.party does not move -- which
+  is what happened on the first deploy of this day's work.
+
 ## 2026-09-27 — the day's words are deferred, not held back
 
 sınırsız used to keep the daily game's next 280 words out of its own rounds entirely,

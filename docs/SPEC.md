@@ -27,7 +27,7 @@ score board for that round.
 
 ```
 public/index.html               the entire game: HTML + CSS + vanilla JS, no dependencies
-public/how-to-play.gif          the nasıl oynanır loop, shown once to a device that has never played
+public/how-to-play.gif          the nasıl oynanır loop: once unasked, then on demand
 functions/api/save.js           POST /api/save             save a round, return a code
 functions/api/game/[code].js    GET  /api/game/:code       fetch a saved round
 functions/api/scores/[code].js  GET+POST /api/scores/:code score board for a round
@@ -39,7 +39,7 @@ wrangler.jsonc                  Cloudflare Pages config and the KV binding
 `public/index.html` has no external scripts, stylesheets, fonts or network
 dependencies. Opened directly from disk it plays solo; the API is only needed for
 the duel and score features. The one file it fetches from beside itself is
-`how-to-play.gif`, and only on a device that has never played (section 4). It does use `localStorage` — see
+`how-to-play.gif`, and only when the nasıl oynanır dialog opens (section 4). It does use `localStorage` — see
 [Section 14](#14-what-is-kept-on-the-device).
 
 ## 3. Screens
@@ -65,8 +65,8 @@ Overlays sit outside the screen system: `#sheet` (the word pool), `#modal` (the
 typed-answer card) and `#reveal` (the word alone before each drawing), plus three
 questions -- `#confirm` before abandoning a round, `#finishAsk` before ending the
 guessing, `#timeAsk` before the first unlimited round of the day, and `#nameAsk` for a
-name after the first round drawn on a device -- and `#howAsk`, nasıl oynanır, once, on
-a device that has never played.
+name after the first round drawn on a device -- and `#howAsk`, nasıl oynanır, which opens
+by itself on a device that has never played and from `nasıl oynanır?` on the start screen.
 
 ## 4. Flow
 
@@ -98,9 +98,14 @@ closes it too. It never opens over a round, so a link lands on its round undistu
 
 "Never played" means the device keeps nothing from a round: no name, no word dealt to it,
 no day, no round drawn or guessed, no unsaved drawing. Everyone who played before this
-existed therefore never sees it. Closing it is remembered (`howSeen`, section 14); a
-reload before closing shows it again. The GIF is 600px square, shown at 300, about 430 KB,
+existed therefore never sees it unasked. Closing it is remembered (`howSeen`, section 14);
+a reload before closing shows it again. The GIF is 600px square, shown at 300, about 430 KB,
 and has no `src` until the dialog opens, so no other device downloads it.
+
+**`nasıl oynanır?`** at the top of the start screen, beside `sorun bildir`, opens the same
+dialog whenever anyone wants it, whatever the device has played. The `src` is set again on
+every open: a gif carries on where it left off otherwise, and the second viewing would
+start in the middle of the loop.
 
 ### Duel, drawer's side
 
@@ -478,7 +483,7 @@ holds:
 | `name` | The name typed on this device. Editable on the result screen at any time; changing it renames the rounds this device saved |
 | `secs`, `theme` | The settings chosen on the home screen. The mode is not kept: it is asked on the way into every round |
 | `hintDay` | The day the time-per-word reminder was last shown, so it is shown once a day |
-| `howSeen` | Set when nasıl oynanır is closed, so it is shown once (section 4) |
+| `howSeen` | Set when nasıl oynanır is closed, so it opens unasked only once (section 4) |
 | `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, the mode chosen for guessing a friend's round, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
 | `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |
 | `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |

@@ -61,8 +61,14 @@ required for the duel and the score board, because those go through the API.
 4. Deploy:
 
    ```bash
-   npx wrangler pages deploy
+   npx wrangler pages deploy --branch production
    ```
+
+   **`--branch production` is what reaches chizz.party.** Pages names a deployment after
+   the current git branch, and this project's production branch is called `production`,
+   not `main`. Deploy without it from `main` and Cloudflare reports success -- but it is a
+   preview at `main.chizz.pages.dev`, and the live site does not move. `wrangler pages
+   deployment list --project-name chizz` shows which deployments are Production.
 
 Subsequent updates are step 4 on its own.
 

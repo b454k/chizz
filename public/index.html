@@ -299,8 +299,8 @@
   #fbMsg.ok{color:var(--ok);}
   #fbMsg.bad{color:var(--no);}
   #fbWebsite{position:absolute; left:-9999px; width:1px; height:1px; opacity:0;}
-  .htop{display:flex; justify-content:flex-end; margin:0 0 6px;}
-  #fbOpen{border:2px solid var(--line); border-radius:999px; padding:6px 13px;
+  .htop{display:flex; justify-content:space-between; margin:0 0 6px;}
+  #fbOpen, #howOpen{border:2px solid var(--line); border-radius:999px; padding:6px 13px;
           font-size:13px; font-weight:700; background:var(--panel);}
   .linkish{display:block; margin:0 auto 14px; font-size:13px; font-weight:600; color:var(--muted);
            text-decoration:underline; text-underline-offset:3px;}
@@ -548,7 +548,10 @@
     <div class="hwrap">
       <!-- At the top, where every visit sees it without scrolling; small, so it does not
            compete with the day's game. -->
-      <div class="htop"><button id="fbOpen" data-t="fbOpen"></button></div>
+      <div class="htop">
+        <button id="howOpen" data-t="howOpen"></button>
+        <button id="fbOpen" data-t="fbOpen"></button>
+      </div>
       <h1>chizz</h1>
       <p class="tagline" data-t="tagline"></p>
 
@@ -891,8 +894,9 @@
   </div>
 </div>
 
-<!-- How to play, once, for a device that has never played: a nine-second loop of the
-     three steps. The picture has no src until this opens, so nobody else downloads it. -->
+<!-- How to play: a nine-second loop of the three steps. It shows itself once, to a device
+     that has never played, and after that on demand from the start screen. The picture has
+     no src until this opens, so nobody who never opens it downloads it. -->
 <div id="howAsk">
   <div id="howAskCard">
     <b data-t="howTitle"></b>
@@ -1311,6 +1315,7 @@ const TEXT = {
   archiveDaily:     "günlük",
   change:           "değiştir",
   timeNotice:       "her kelime için {n} saniyen olacak",
+  howOpen:          "nasıl oynanır?",
   howTitle:         "nasıl oynanır?",
   howGo:            "anladım",
   howAlt:           "her kelimeyi birkaç saniyede çiz. harf, rakam, kelime yazmak yok. sonra hangisi neydi, tahmin et.",
@@ -4094,12 +4099,19 @@ function hasPlayed(store){
     || (Array.isArray(store.drafts) && store.drafts.length)
     || (Array.isArray(store.dailyPlayed) && store.dailyPlayed.length));
 }
+function openHowTo(){
+  const img = $("howGif");
+  img.alt = TEXT.howAlt;
+  // Set again on every open: a gif carries on where it left off otherwise, and the
+  // second viewing would start in the middle of the loop.
+  img.removeAttribute("src");
+  img.src = "how-to-play.gif";
+  $("howAsk").classList.add("on");
+}
 function maybeHowTo(){
   const store = loadStore();
   if (store.howSeen || hasPlayed(store) || $("howAsk").classList.contains("on")) return;
-  const img = $("howGif");
-  if (!img.getAttribute("src")){ img.alt = TEXT.howAlt; img.src = "how-to-play.gif"; }
-  $("howAsk").classList.add("on");
+  openHowTo();
 }
 function closeHowTo(){
   $("howAsk").classList.remove("on");
@@ -4107,6 +4119,7 @@ function closeHowTo(){
   store.howSeen = true;
   saveStore(store);
 }
+$("howOpen").onclick = openHowTo;
 $("howGo").onclick = closeHowTo;
 $("howAsk").onclick = function(e){ if (e.target === $("howAsk")) closeHowTo(); };
 
