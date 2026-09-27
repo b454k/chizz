@@ -54,7 +54,7 @@ as a word that stays, some are too small or too faint to read in a grid of twent
 some are a person that draws as any other person.
 
 lokum, su terazisi, konteyner, fiş, römork, kırbaç, orak, söğüt, klarnet,
-şamdan, kavak, hidrant, poğaça, bisküvi, gong, testi, güveç, kevgir, mikser,
+şamdan, kavak, hidrant, poğaça, bisküvi, gong, testi, güveç, kevgir,
 maşrapa, leğen, yüksük, dümen, nilüfer, kanun, şamandıra, somun, pehlivan,
 manken, faraş, çıngırak, karanfil
 
@@ -65,10 +65,23 @@ tartı, can simidi
 `tartı` was replaced by `terazi`, and `can simidi` by `deniz simidi`: one word for one
 shape.
 
+## Rejected 2026-09-28 — taken back out of the pool
+
+Words the owner had in play and then removed, after seeing them in the list. They do
+not come back.
+
+akbaba, arp, ateş böceği, ayva, baget, beton mikseri, bileklik, buldozer,
+çan, çark, enginar, hurma, iletki, kanarya, kapak, kapsül, kokarca,
+koltuk değneği, kronometre, ksilofon, kürsü, makara, mala, matara, mercan,
+örs, rakun, rulo, semaver, sera, soyacak, sütun, tas, yelken, yumak, zambak
+
+`matara` went and `termos` stayed; `yelken` went and `yelkenli` stayed.
+
 ## Renamed, not banned
 
 These were kept under a clearer name, so the old spelling should not come back either:
 `feribot` → `gemi`, `kemer tokası` → `kemer`, `zebra geçidi` → `yaya geçidi`,
 `kek` → `pasta`, `çörek` → `donut`, `değnek` → `sihirli değnek`,
 `uçan daire` → `ufo`, `tek boynuzlu at` → `unicorn`, `tartı` → `terazi`,
-`can simidi` → `deniz simidi`.
+`can simidi` → `deniz simidi`, `oyun kağıdı` → `iskambil`,
+`pota` → `basketbol potası`, `blender` → `mikser`.

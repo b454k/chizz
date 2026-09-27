@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-27 — 36 words out, three under a new name
+
+A pass by the owner over the list as it stands. The pool is **713 words**.
+
+- Out and on the banned list: zambak, çark, mala, örs, rulo, sera, sütun, iletki, arp,
+  baget, ksilofon, yumak, bileklik, beton mikseri, buldozer, kronometre, kürsü, matara,
+  yelken, hurma, ayva, enginar, akbaba, ateş böceği, kanarya, kokarca, mercan, rakun,
+  çan, kapak, kapsül, koltuk değneği, makara, semaver, soyacak, tas.
+- `matara` went and `termos` stayed; `yelken` went and `yelkenli` stayed.
+- Kept under a clearer name: `oyun kağıdı` → **iskambil**, `pota` → **basketbol potası**,
+  `blender` → **mikser**. `mikser` had been turned down on 26 Sept for drawing like
+  `blender`; it comes off the banned list as the name that stays.
+- Two birds fewer: akbaba and kanarya. The bird list is 19, still capped at two a day.
+
+The cost: for a player of the daily game plus a sınırsız round a day, repeated words went
+from 1.6 a round at 749 words to **9.2** at 713. The pool sits just under the size that
+clears that case, so every word removed there is felt. sınırsız alone, up to two rounds a
+day, still repeats nothing.
+
+Days 1 to 20 frozen first; checked over 1,100 days.
+
 ## 2026-09-27 — the pool sorted by subject
 
 `docs/CATEGORIES.md` shows all 749 words under the owner`s twenty subject headings --
