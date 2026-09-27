@@ -4,7 +4,8 @@ Every word the game knows, tagged by the silhouette it draws as. This is the sou
 the **daily puzzle** and **sınırsız** both deal from. The thirty hand-made sets it was
 read out of are gone; sınırsız stopped using them on 2026-09-17.
 
-The data is in [`words.json`](words.json). The generator that turns a date into twenty
+The data is in [`words.json`](words.json). The same words sorted by subject rather than
+by shape are in [`CATEGORIES.md`](CATEGORIES.md). The generator that turns a date into twenty
 words lives in `public/index.html`, next to the pool it reads.
 
 ---

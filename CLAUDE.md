@@ -15,6 +15,16 @@ node tools/check-words.js
 
 It fails if a banned word is in play or a word sits in two silhouette families.
 
+**A word added to the pool belongs in a subject too.** `docs/categories.json` holds the
+same words sorted by subject, and `docs/CATEGORIES.md` is written from it:
+
+```bash
+node tools/make-categories.js && node tools/check-categories.js
+```
+
+The check fails if a pool word is in no category, in two, or in a category but not in the
+pool.
+
 **Changing the pool reshuffles the daily game**, today included, because every day is
 replayed from day 1. First add every day through today to `DAILY_PLAYED` in
 `public/index.html`, taken from the schedule as it stands, then change the words.

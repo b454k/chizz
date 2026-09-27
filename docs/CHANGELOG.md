@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-27 — the pool sorted by subject
+
+`docs/CATEGORIES.md` shows all 749 words under the owner`s twenty subject headings --
+household, animals, food, sports, vehicles, places, clothing, weather, people, hobby,
+body, holidays, myth, school, buildings, tools, plants, toys, shapes -- with the Turkish
+name of each heading beside it, for the day a player picks a subject to draw from.
+
+- The data is `docs/categories.json`; the readable file is written by
+  `tools/make-categories.js`.
+- `tools/check-categories.js` fails if a pool word is in no category, is in two, or is in
+  a category but not in the pool -- the same mechanical guard the banned list has.
+- **Common Actions & Verbs is empty and stays empty.** A round is twenty things to draw
+  and match back, and every action drew as the same stick figure.
+- Largest: ev eşyaları (153), hayvanlar (108), yiyecek ve içecek (83). Smallest:
+  kutlamalar (8).
+
 ## 2026-09-27 — 76 words of my own, picked over by the owner
 
 With the owner`s 1,100 English words spent, I proposed 108 of my own: 48 I was confident
