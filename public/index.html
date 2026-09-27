@@ -1155,15 +1155,17 @@ function dailyDays(from, to){
    than no game at all. The two families are the ones that need the fewest such repeats,
    at random among equals.
 
-   On a device that has played the daily game on at least two different days in the
-   last fourteen, the daily game's words for today and the next thirteen are held back,
-   and dealt only when nothing else is left. The day is the same for everyone and cannot steer around this
-   device, so a word dealt here would otherwise turn up again in the daily game inside
-   the fourteen days: simulated, that was 13 of the day's 20 words for a player of the
-   daily game and one sınırsız round a day. A device that never plays the day has no
-   such repeats to avoid, and keeps those 280 words. One day is not enough to count:
-   a single try of the daily game held back 280 words for fourteen days, and a player
-   of sınırsız alone went from no repeats to six or seven a round. */
+   The daily game's words are not kept out of sınırsız, only deferred: the twenty for
+   today and for each of the next thirteen days are dealt last among the words this
+   device has not seen, and still ahead of any word it has. So a round takes them only
+   when a family is short of anything fresher, and no family is ever starved. Held back
+   outright, as they were, those 280 words were 8.2 repeats a sınırsız round for someone
+   who plays the day and one round a day; deferred, that is 0, at the price of 2.6 of the
+   day's own twenty -- the day is the same for everyone and cannot steer around this
+   device. Dropped altogether the price would be 8.6 of the day's twenty, which is the
+   round people share, so deferring beats both.
+
+   The day's twenty and a sınırsız twenty are never the same round either way. */
 const SEEN_SPREAD = 7;
 
 function freshWords(){
@@ -1175,19 +1177,21 @@ function freshWords(){
     const d = seen[w];
     return typeof d === "number" && today - d < DAILY_WINDOW ? d : 0;
   };
-  const playsDaily = dailyDaysPlayed(store, today).length >= 2;
-  const held = {};
-  if (playsDaily){
-    dailyDays(today, today + DAILY_WINDOW - 1).forEach(function(list){
-      list.forEach(function(w){ held[w] = true; });
-    });
-  }
-  // A held word ranks after a word seen today, whatever the spread below does to that.
-  const level = function(w){ return held[w] ? today + SEEN_SPREAD + 1 : since(w); };
-  // Free words sort below every seen one (keys under 0, at random). Seen words are spread
-  // across a week around the day they were shown: strictly by day, the ten dealt together
-  // on one day came back together too.
-  const order = function(x){ return x.d ? x.d + x.r * SEEN_SPREAD : x.r - 1; };
+  // The daily days this round has to stay clear of: the last fourteen and the next
+  // fourteen, today counted once.
+  const from = Math.max(1, today - DAILY_WINDOW + 1);
+  const near = dailyDays(from, today + DAILY_WINDOW - 1);
+  const soon = {};
+  near.slice(today - from).forEach(function(list){
+    list.forEach(function(w){ soon[w] = true; });
+  });
+  // Three tiers: -2 a word free to deal, -1 a free word the day is about to use, and the
+  // day it was shown for a word seen inside the window, which is 1 or more.
+  const level = function(w){ return since(w) || (soon[w] ? -1 : -2); };
+  // Within a tier the order is random; seen words are spread across a week around the day
+  // they were shown, so strictly by day, the ten dealt together on one day came back
+  // together too.
+  const order = function(x){ return x.d >= 1 ? x.d + x.r * SEEN_SPREAD : x.d + x.r; };
   const families = DAILY_FAMILIES.map(function(f){
     const line = DAILY_POOL[f]
       .map(function(w){ return { w: w, d: level(w), r: Math.random() }; })
@@ -1197,10 +1201,24 @@ function freshWords(){
     return { line: line, newest: newest, r: Math.random() };
   }).sort(function(a, b){ return a.newest - b.newest || a.r - b.r; });
 
+  const two = families.slice(0, 2);
   const out = [];
-  families.slice(0, 2).forEach(function(fam){
+  two.forEach(function(fam){
     dealFrom(fam.line).forEach(function(w){ out.push(w); });
   });
+  // A family down to exactly ten words it can deal has no choice about which ten, so the
+  // same twenty as a daily day can come up -- about once in a thousand rounds. When it
+  // does, the last word gives way to the next one along. The stand-ins are never birds,
+  // so the two-bird cap cannot be broken by the swap.
+  const sameAsADay = function(){
+    return near.some(function(day){
+      return day.every(function(w){ return out.indexOf(w) >= 0; });
+    });
+  };
+  const spare = two[1].line.filter(function(w){
+    return !isBird(w) && out.indexOf(w) < 0;
+  });
+  for (let i = 0; i < spare.length && sameAsADay(); i++) out[out.length - 1] = spare[i];
   return out;
 }
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-09-27 — the day's words are deferred, not held back
+
+sınırsız used to keep the daily game's next 280 words out of its own rounds entirely,
+for any device that had played the day on 2 days in 14. That kept the daily round
+pristine and made sınırsız pay for it: 8.2 of its 20 words were repeats. The rule is
+now softer and applies to everyone.
+
+- The day's 20 for today and each of the next 13 are **dealt last among the words this
+  device has not seen**, and still ahead of any word it has. A family reaches them only
+  when it has nothing fresher, so nothing is starved.
+- **A sınırsız round is never the same 20 as a daily day**, in the 14 days either side.
+  It happened about once in a thousand rounds, when a family is down to exactly ten
+  words it can deal; the last word now gives way to the next one along, never a bird.
+- The **2-days-in-14 threshold is gone**. With no starvation to avoid there is nothing
+  to gate, and a sınırsız-only player measures the same either way.
+
+For someone who plays the day and one round a day, repeated words out of 20: sınırsız
+**8.2 → 0**, the daily round 0.1 → **2.7**, so 8.3 a day becomes 2.7. The first repeat
+moves from day 6 to day 15. Dropping the rule altogether instead would have put 8.6 of
+the daily round's 20 in repeats, which is the round everyone shares, so deferring beats
+both. Heavy play is limited by the pool, not the rule: 713 words cannot feed 60 fresh
+ones a day.
+
 ## 2026-09-27 — the 48 new words come back out
 
 The owner has not ruled on them, so they are simply gone from the pool -- out of

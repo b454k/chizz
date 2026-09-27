@@ -243,14 +243,19 @@ was put in front of it, in the daily game or here (`seen` in section 14), for 14
   at random across a week around the day they were seen -- by exact day, the ten words
   dealt together on one day came back together.
 - The two families are the ones needing the fewest such repeats, at random among equals.
-- **On a device that has played the daily game on at least 2 different days in the last
-  14** (`dailyPlayed`), the daily game's words for today and the next 13 days are held
-  back and dealt only when nothing else is left. The day is the same for everyone and
-  cannot avoid this device's words, so without this a word dealt in sınırsız came round
-  again in the daily game within the 14 days. A device that does not play the day keeps
-  those 280 words. One day does not count: a single try held the words back for 14 days
-  and took a sınırsız-only player (1 a day) from 0 repeated words a round to about 6.6.
-  The price is that the second daily game, like the first, can repeat words sınırsız dealt.
+- **The daily game's coming words are deferred, not held back.** The 20 words for today
+  and for each of the next 13 days are dealt last among the words this device has not
+  seen, and still ahead of any word it has. A round reaches them only when a family has
+  nothing fresher, so no family is ever starved and sınırsız always deals a fresh 20.
+  The day is the same for everyone and cannot avoid this device's words, so the repeats
+  that are left land in the daily round: 2.7 of its 20 for someone who plays the day and
+  one round a day. Held back outright that was 0.1 in the day and 8.2 in sınırsız; with
+  no rule at all it would be 8.6 in the day and 0 in sınırsız. Deferring beats both, and
+  it applies to every device -- there is nothing to starve, so no threshold to cross.
+- **A sınırsız round is never the same 20 as a daily day**, in the 14 days either side.
+  A family down to exactly ten words it can deal has no choice about which ten, so the
+  same set does come up -- about once in a thousand rounds. The last word then gives way
+  to the next one along, never a bird, so the two-bird cap holds.
 
 Measured by simulation over 90 days with 713 words, repeated words out of 20 (seen by
 the device in the previous 14 days):
@@ -260,14 +265,15 @@ the device in the previous 14 days):
 | daily only | 0 | — | never |
 | sınırsız only, 1 a day | — | 0 | never |
 | sınırsız only, 2 a day | — | 0 | never |
-| sınırsız only, 3 a day | — | 13.9 | day 11 |
-| daily + 1 sınırsız a day | 0.1 | 8.2 | day 6 |
-| daily + 2 sınırsız a day | 0.2 | 17.2 | day 2 |
+| sınırsız only, 3 a day | — | 14.0 | day 11 |
+| daily + 1 sınırsız a day | 2.7 | 0 | day 15 |
+| daily + 2 sınırsız a day | 15.0 | 9.3 | day 9 |
 
 The daily game takes up about 540 words at a time for a device that plays it (the last 14
-days and the next 14), so for someone who plays both, the repeats land in sınırsız, mostly
-as words seen 10–13 days earlier. About 810 words would clear daily + 1 sınırsız a day,
-and about 1,090 daily + 2 a day. Over many rounds a word's most frequent partner comes along about 56% of the time,
+days and the next 14), so for someone who plays both, what is left lands in the daily
+round, mostly as words seen 10–13 days earlier. About 820 words would clear daily + 1
+sınırsız a day (2.4 at 713, 0.7 at 761, 0.1 at 821); daily + 2 a day needs well past
+1,000. Over many rounds a word's most frequent partner comes along about 56% of the time,
 the same as pure random dealing; with the 30 fixed sets this replaced it was 98%.
 
 The rounds used to come from 30 fixed sets of 20, so the same words always arrived
