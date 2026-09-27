@@ -34,20 +34,20 @@ tidying at some point.)
 | `boxy` | a rectangle with corners: boxes, screens, books, bags | 85 |
 | `horizontal` | long and low, wider than tall: vehicles, big animals, furniture | 68 |
 | `curved` | a flowing curve with no corners: clouds, hearts, snakes, body parts | 62 |
-| `handled` | a body with a stalk or handle: cups, jugs, tools you hold | 51 |
 | `winged` | wings out to the sides: birds, insects, and anything that throws two halves wide | 50 |
-| `figure` | a standing human outline: people, a doll, a snowman, a skeleton | 49 |
 | `peaked` | a triangle or cone, pointed at the top: hats, mountains, sails | 49 |
 | `vertical` | tall and narrow, standing up: poles, bottles, trees, towers | 47 |
-| `oval` | small and egg-shaped: seeds, nuts, pebbles | 45 |
-| `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 45 |
-| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 44 |
-| `ring` | a closed loop with a hole: bracelets, tyres, chains | 43 |
+| `handled` | a body with a stalk or handle: cups, jugs, tools you hold | 45 |
 | `stick` | a long thin rod: pens, tools, cutlery, fish | 43 |
-| `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 41 |
+| `domed` | an arc over a base: rainbows, tunnels, shells, bowls | 41 |
+| `figure` | a standing human outline: people, a doll, a snowman, a skeleton | 39 |
+| `radial` | spokes or rays leaving a centre: fans, flowers, fireworks, wheels | 39 |
 | `round` | a closed circle: balls, fruit, faces, clock faces | 39 |
+| `oval` | small and egg-shaped: seeds, nuts, pebbles | 37 |
+| `striped` | repeating parallel lines or a grid: fences, barcodes, nets, keyboards | 37 |
+| `ring` | a closed loop with a hole: bracelets, tyres, chains | 32 |
 
-**761 words.** Checked: no word is in two families, no rejected word is back, and every
+**713 words.** Checked: no word is in two families, no rejected word is back, and every
 word the free game uses is in here. `tools/check-words.js` checks all of it, including
 that the copy of the pool inside `public/index.html` matches this record exactly.
 

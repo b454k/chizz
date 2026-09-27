@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-27 — the 48 new words come back out
+
+The owner has not ruled on them, so they are simply gone from the pool -- out of
+`words.json`, out of `DAILY_POOL` and out of the subject categories. **Nothing went on
+the banned list**: these words are undecided, not rejected, and can come back.
+
+- The **16 family moves** from the entry below stay. They are not new words, and they
+  keep every family coming up every 6.7 to 9.5 days.
+- The pool is **713 words**, families 32 to 85.
+- What the words were buying, measured again: days on which two families can field ten
+  words unseen for 14 days 81% → **19%**, and repeated words per sınırsız round for a
+  player of the daily game plus one round a day 2.1 → **8.2**. The daily game itself is
+  unaffected (0.1), and sınırsız alone up to two rounds a day still repeats nothing.
+
 ## 2026-09-27 — feeding the small families
 
 Taking 36 words out had cost far more than its size: for a player of the daily game plus
