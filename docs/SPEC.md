@@ -27,6 +27,7 @@ score board for that round.
 
 ```
 public/index.html               the entire game: HTML + CSS + vanilla JS, no dependencies
+public/how-to-play.gif          the nasıl oynanır loop, shown once to a device that has never played
 functions/api/save.js           POST /api/save             save a round, return a code
 functions/api/game/[code].js    GET  /api/game/:code       fetch a saved round
 functions/api/scores/[code].js  GET+POST /api/scores/:code score board for a round
@@ -37,7 +38,8 @@ wrangler.jsonc                  Cloudflare Pages config and the KV binding
 
 `public/index.html` has no external scripts, stylesheets, fonts or network
 dependencies. Opened directly from disk it plays solo; the API is only needed for
-the duel and score features. It does use `localStorage` — see
+the duel and score features. The one file it fetches from beside itself is
+`how-to-play.gif`, and only on a device that has never played (section 4). It does use `localStorage` — see
 [Section 14](#14-what-is-kept-on-the-device).
 
 ## 3. Screens
@@ -63,7 +65,8 @@ Overlays sit outside the screen system: `#sheet` (the word pool), `#modal` (the
 typed-answer card) and `#reveal` (the word alone before each drawing), plus three
 questions -- `#confirm` before abandoning a round, `#finishAsk` before ending the
 guessing, `#timeAsk` before the first unlimited round of the day, and `#nameAsk` for a
-name after the first round drawn on a device.
+name after the first round drawn on a device -- and `#howAsk`, nasıl oynanır, once, on
+a device that has never played.
 
 ## 4. Flow
 
@@ -84,6 +87,20 @@ Nothing is asked before the round starts. A device with no name yet is asked for
 as soon as its first round is drawn, over the screen that follows, and cannot go on
 without giving one. After that it is never asked again, only offered for changing on
 the result screen.
+
+### A new device
+
+The first time a device that has never played reaches the start screen -- a fresh visit,
+or a friend's link followed by `ana ekran` -- `nasıl oynanır?` opens over it: a nine-second
+loop of the three steps (her kelimeyi birkaç saniyede çiz · harf, rakam, kelime yazmak yok ·
+sonra hangisi neydi, tahmin et), drawn from real drawings, and `anladım`. Tapping outside
+closes it too. It never opens over a round, so a link lands on its round undisturbed.
+
+"Never played" means the device keeps nothing from a round: no name, no word dealt to it,
+no day, no round drawn or guessed, no unsaved drawing. Everyone who played before this
+existed therefore never sees it. Closing it is remembered (`howSeen`, section 14); a
+reload before closing shows it again. The GIF is 600px square, shown at 300, about 430 KB,
+and has no `src` until the dialog opens, so no other device downloads it.
 
 ### Duel, drawer's side
 
@@ -207,7 +224,7 @@ than burning the current word.
 
 ## 7. Words
 
-Both games deal from one pool: 713 words in 15 **silhouette** families (`docs/words.json`,
+Both games deal from one pool: 761 words in 15 **silhouette** families (`docs/words.json`,
 copied into `public/index.html` as `DAILY_POOL`). Families are grouped by shape, not by
 category — an elephant and a sofa share a shape, which is the joke. A round is two
 families and ten words from each, never more than two birds. Family names are never shown. See `docs/WORDS.md`.
@@ -235,7 +252,7 @@ was put in front of it, in the daily game or here (`seen` in section 14), for 14
   and took a sınırsız-only player (1 a day) from 0 repeated words a round to about 6.6.
   The price is that the second daily game, like the first, can repeat words sınırsız dealt.
 
-Measured by simulation over 90 days with 713 words, repeated words out of 20 (seen by
+Measured by simulation over 90 days with 761 words, repeated words out of 20 (seen by
 the device in the previous 14 days):
 
 | Play | in the daily game | per sınırsız round | first repeat |
@@ -243,9 +260,9 @@ the device in the previous 14 days):
 | daily only | 0 | — | never |
 | sınırsız only, 1 a day | — | 0 | never |
 | sınırsız only, 2 a day | — | 0 | never |
-| sınırsız only, 3 a day | — | 13.7 | day 10 |
-| daily + 1 sınırsız a day | 0.1 | 9.2 | day 7 |
-| daily + 2 sınırsız a day | 0.2 | 17.0 | day 4 |
+| sınırsız only, 3 a day | — | 13.2 | day 12 |
+| daily + 1 sınırsız a day | 0.1 | 2.1 | day 10 |
+| daily + 2 sınırsız a day | 0.2 | 16.3 | day 4 |
 
 The daily game takes up about 540 words at a time for a device that plays it (the last 14
 days and the next 14), so for someone who plays both, the repeats land in sınırsız, mostly
@@ -455,6 +472,7 @@ holds:
 | `name` | The name typed on this device. Editable on the result screen at any time; changing it renames the rounds this device saved |
 | `secs`, `theme` | The settings chosen on the home screen. The mode is not kept: it is asked on the way into every round |
 | `hintDay` | The day the time-per-word reminder was last shown, so it is shown once a day |
+| `howSeen` | Set when nasıl oynanır is closed, so it is shown once (section 4) |
 | `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, the mode chosen for guessing a friend's round, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
 | `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |
 | `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |

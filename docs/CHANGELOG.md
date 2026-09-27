@@ -1,5 +1,44 @@
 # Changelog
 
+## 2026-09-27 — feeding the small families
+
+Taking 36 words out had cost far more than its size: for a player of the daily game plus
+a sınırsız round a day, repeated words went from 1.6 to 9.2. The reason is that the rule
+is per family -- a round needs two families each able to field ten words unseen for 14
+days -- and the words removed fell on the families that had the least to spare. Measured
+over 60 days of that play: days on which two families could field ten fell from 88% to
+**14%**.
+
+- **48 words added**, all aimed at ring, radial, oval, domed, handled, striped and
+  figure. Sibling words are allowed now, on the owner`s word: kral gets kraliçe, and the
+  jobs that draw as a person with a prop (hemşire, pilot, denizci, garson, hakem,
+  postacı, çiftçi, prens, prenses) come in with it.
+- **16 words moved** to a family that fits their shape as well as the old one: tekerlek,
+  plak and tef to ring; güneş, ahtapot and gül to radial; şemsiye, kar küresi and turta
+  to domed; çekiç, fırça, diş fırçası, spatula, maşa and süpürge to handled; tarak to
+  striped. Moving costs no vocabulary and buys the same thing, since the limit is per
+  family.
+- The pool is **761 words** and the families run 39 to 85, where they ran 29 to 85.
+
+Days when two families can field ten: 14% → **78%**. Repeated words for the daily game
+plus a sınırsız round a day: 9.2 → **2.1**. sınırsız alone still repeats nothing up to
+two rounds a day. Every family now comes up every 7 to 9 days, where round had drifted
+to 6.5 and ring to 10.4.
+
+## 2026-09-27 — nasıl oynanır, once, for a new player
+
+A device that has never played now sees how the game goes the first time it reaches the
+start screen: `nasıl oynanır?`, a nine-second loop, and `anladım`.
+
+- The loop is three steps of three seconds, drawn from a real round (DJTL): a word arrives
+  and is drawn against the clock; a word written instead of drawn gets a red sign, then
+  the drawing done properly; the drawings come back as a grid and a word is matched to one.
+- "Never played" is read from what the device already keeps: no name, no word dealt, no
+  day, no round drawn or guessed, no unsaved drawing. Nobody who was already playing sees it.
+- Closing it (`anladım`, or a tap outside) is stored as `howSeen`. It never opens over a
+  round, so a friend's link still lands on its round.
+- `public/how-to-play.gif` is about 430 KB and is only fetched when the dialog opens.
+
 ## 2026-09-27 — 36 words out, three under a new name
 
 A pass by the owner over the list as it stands. The pool is **713 words**.

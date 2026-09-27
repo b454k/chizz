@@ -270,20 +270,24 @@
   .chip2 .cl{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
 
   /* leave-game confirmation */
-  #confirm, #finishAsk, #timeAsk, #nameAsk, #fbAsk{
+  #confirm, #finishAsk, #timeAsk, #nameAsk, #fbAsk, #howAsk{
     position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
     display:none; align-items:center; justify-content:center; padding:16px;
   }
-  #confirm.on, #finishAsk.on, #timeAsk.on, #nameAsk.on, #fbAsk.on{display:flex;}
-  #confirmCard, #finishAskCard, #timeAskCard, #nameAskCard, #fbAskCard{
+  #confirm.on, #finishAsk.on, #timeAsk.on, #nameAsk.on, #fbAsk.on, #howAsk.on{display:flex;}
+  #confirmCard, #finishAskCard, #timeAskCard, #nameAskCard, #fbAskCard, #howAskCard{
     box-sizing:border-box;   /* the padding has to fit inside 100%, or the card runs off a narrow phone */
     background:var(--panel); border-radius:18px; padding:20px; width:100%; max-width:360px;
     box-shadow:0 20px 60px rgba(0,0,0,.28); text-align:center;
   }
-  #confirmCard b, #finishAskCard b, #timeAskCard b, #nameAskCard b, #fbAskCard b{display:block; font-size:19px; margin-bottom:6px;}
+  #confirmCard b, #finishAskCard b, #timeAskCard b, #nameAskCard b, #fbAskCard b, #howAskCard b{display:block; font-size:19px; margin-bottom:6px;}
   #confirmCard p, #finishAskCard p, #timeAskCard p, #nameAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
   #nameAskCard .txt{margin:14px 0 0; text-align:center;}
-  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary, #nameAskCard .primary, #fbAskCard .primary{margin:14px 0 8px;}
+  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary, #nameAskCard .primary, #fbAskCard .primary, #howAskCard .primary{margin:14px 0 8px;}
+  /* nasıl oynanır: the loop is drawn at 600px square and shown at half, so it stays sharp
+     on a phone. Its own dark background shows while it loads, in either theme. */
+  #howGif{display:block; width:100%; max-width:300px; height:auto; aspect-ratio:1/1;
+          margin:8px auto 0; border-radius:14px; background:#131418;}
   /* geri bildirim */
   #fbAskCard .seg{justify-content:center; margin:12px 0 0;}
   #fbText{display:block; box-sizing:border-box; margin:12px 0 0; min-height:118px; resize:none;
@@ -887,6 +891,16 @@
   </div>
 </div>
 
+<!-- How to play, once, for a device that has never played: a nine-second loop of the
+     three steps. The picture has no src until this opens, so nobody else downloads it. -->
+<div id="howAsk">
+  <div id="howAskCard">
+    <b data-t="howTitle"></b>
+    <img id="howGif" width="300" height="300" alt="">
+    <button class="primary" id="howGo" data-t="howGo"></button>
+  </div>
+</div>
+
 <div id="reveal"><span id="revealWord"></span></div>
 
 <div id="modal">
@@ -963,19 +977,19 @@ const LEGACY_DIFFS = {
    ========================================================================= */
 const DAILY_POOL = {
   boxy: ["akvaryum","arı kovanı","asansör","battaniye","bavul","bilgisayar","buzdolabı","cüzdan","çakmak","çamaşır makinesi","çanta","çekmece","çerçeve","çöp kutusu","daktilo","defter","dolap","domino","dosya","ekran","ev","fabrika","fırın","fotoğraf makinesi","gazete","halı","harita","havlu","havuz","hediye","hesap makinesi","hoparlör","iskambil","kale","kalemtıraş","kapı","kara tahta","kare","kasa","kaset","kep","kesme tahtası","kitap","klima","klozet","köpek kulübesi","kredi kartı","kumanda","kumbara","kutu","mangal","mektup","mendil","mezar taşı","mızıka","önlük","peçete","pencere","pil","posta kutusu","priz","pul","radyo","sandık","silgi","soba","sünger","şömine","tablet","tablo","tavla","teleferik","telefon","telefon kulübesi","televizyon","telsiz","tepsi","tuğla","usb bellek","valiz","yara bandı","yastık","yazıcı","zar","zarf"],
-  curved: ["ahtapot","ataş","ayak","ayak izi","ayakkabı","bacak","bağlama","beyin","bıyık","boynuz","bulut","bumerang","burun","çengel","çizme","çorap","dalga","damla","denizatı","dil","dudak","duman","düğüm","el","fiyonk","gitar","gül","hortum","ip","kablo","kalp","kanca","karınca","kaş","kedi","keman","kırkayak","kol","kruvasan","kulak","kurdele","kuyruk","lale","makarna","nehir","parmak izi","paten","pipo","saç","sakal","saksafon","salyangoz","sarmaşık","solucan","soru işareti","spiral","steteskop","şimşek","tırtıl","topuklu ayakkabı","tüy","virgül","yaprak","yılan"],
-  domed: ["askılık","at nalı","atlıkarınca","bere","beşik","boks eldiveni","cami","deniz kabuğu","denizanası","ekmek","emzik","gökkuşağı","hamak","hamburger","hilal","iglo","kalkan","kaplumbağa","kase","kask","köprü","kubbe","kurbağa","kuş yuvası","kuyu","kül tablası","küvet","lavabo","mağara","mantar","mıknatıs","midye","paraşüt","sıcak hava balonu","tümsek","tünel","ufo","yay"],
-  figure: ["asker","astronot","aşçı","balerin","bebek","cadı","cüce","çoban","dalgıç","damat","deniz kızı","dev","doktor","gelin","hayalet","heykel","insan","iskelet","itfaiyeci","kardan adam","korsan","kovboy","kral","kukla","kurabiye adam","madenci","mağara adamı","mumya","ninja","oyuncak ayı","oyuncak bebek","palyaço","polis","robot","sihirbaz","şövalye","uzaylı","vampir","zombi"],
-  handled: ["ayna","balta","bardak","bebek arabası","büyüteç","cezve","çapa","çaydanlık","demlik","el arabası","fincan","kadeh","kapı kolu","kavanoz","kazma","kepçe","kilit","kova","kupa","kürek","lolipop","market arabası","mikrofon","mikser","poşet","raket","rende","sepet","sırt çantası","su tabancası","sürahi","süzgeç","tava","tencere","termos","tırmık","tirbuşon","vazo","zımba"],
+  curved: ["ataş","ayak","ayak izi","ayakkabı","bacak","bağlama","beyin","bıyık","boynuz","bulut","bumerang","burun","çengel","çizme","çorap","dalga","damla","denizatı","dil","dudak","duman","düğüm","el","fiyonk","gitar","hortum","ip","kablo","kalp","kanca","karınca","kaş","kedi","keman","kırkayak","kol","kruvasan","kulak","kurdele","kuyruk","lale","makarna","nehir","parmak izi","paten","pipo","saç","sakal","saksafon","salyangoz","sarmaşık","solucan","soru işareti","spiral","steteskop","şimşek","tırtıl","topuklu ayakkabı","tüy","virgül","yaprak","yılan"],
+  domed: ["askılık","at nalı","atlıkarınca","bere","beşik","boks eldiveni","cami","deniz kabuğu","denizanası","ekmek","emzik","fanus","gökkuşağı","hamak","hamburger","hilal","iglo","kalkan","kaplumbağa","kar küresi","kase","kask","köprü","kubbe","kurbağa","kuş yuvası","kuyu","kül tablası","küvet","lavabo","mağara","mantar","mıknatıs","midye","paraşüt","sabunluk","sıcak hava balonu","şekerlik","şemsiye","turta","tümsek","tünel","ufo","yay"],
+  figure: ["asker","astronot","aşçı","balerin","bebek","cadı","cüce","çiftçi","çoban","dalgıç","damat","deniz kızı","denizci","dev","doktor","garson","gelin","hakem","hayalet","hemşire","heykel","insan","iskelet","itfaiyeci","kardan adam","korsan","kovboy","kral","kraliçe","kukla","kurabiye adam","madenci","mağara adamı","mumya","ninja","oyuncak ayı","oyuncak bebek","palyaço","pilot","polis","postacı","prens","prenses","robot","sihirbaz","şövalye","uzaylı","vampir","zombi"],
+  handled: ["ayna","balta","balyoz","bardak","bebek arabası","büyüteç","cezve","çapa","çaydanlık","çekiç","demlik","diş fırçası","el arabası","fırça","fincan","fön makinesi","havan","kadeh","kapı kolu","kavanoz","kazma","kepçe","keser","kilit","kova","kupa","kürek","lolipop","market arabası","maşa","mikrofon","mikser","poşet","raket","rende","sepet","sırt çantası","spatula","su tabancası","süpürge","sürahi","süzgeç","şişe açacağı","tava","tencere","termos","tırmık","tırpan","tirbuşon","vazo","zımba"],
   horizontal: ["akrep","ambulans","araba","aslan","at","ayı","balina","bank","boğa","bukalemun","denizaltı","deve","dinozor","domuz","eşek","fare","fil","fok","gergedan","geyik","goril","hamster","hipopotam","inek","itfaiye aracı","kamyon","kaplan","karavan","kayık","kaykay","keçi","kertenkele","kızak","koala","koltuk","koyun","köpek","köpekbalığı","köstebek","kunduz","kurt","kütük","lama","masa","maymun","minibüs","motosiklet","otobüs","panda","sedye","sehpa","sincap","sörf tahtası","tahterevalli","tank","tavşan","tekne","tilki","timsah","traktör","tren","unicorn","uyku tulumu","ütü masası","vagon","yatak","yunus","zebra"],
-  oval: ["ananas","armut","avokado","badem","bamya","çakıl","çekirdek","dut","düdük","fasulye","fıstık","gözyaşı","hap","hindistan cevizi","incir","kabak","kivi","kozalak","limon","mango","maske","mercimek","meşe palamudu","palet","pancar","parfüm","patates","patlıcan","pide","sabun","sarımsak","şeker","tespih","tohum","turp","yumurta","zeytin"],
+  oval: ["ananas","armut","avokado","badem","bakla","bamya","çakıl","çekirdek","draje","dut","düdük","fasulye","fıstık","francala","gözyaşı","hap","hindistan cevizi","incir","kabak","kaju","kese","kivi","kozalak","kuru üzüm","leblebi","limon","mango","maske","mercimek","meşe palamudu","palet","pancar","parfüm","patates","patlıcan","pide","sabun","sarımsak","sarma","şeker","tespih","tohum","turp","yumurta","zeytin"],
   peaked: ["abajur","ahır","alev","baklava","börek","brokoli","buzdağı","çadır","çam","çatı","dağ","diş","dondurma","elbise","elmas","etek","eyfel kulesi","fes","huni","kaydırak","kilise","kravat","kum saati","kuş evi","külah","megafon","ok","pasta","pelerin","pergel","peynir","piramit","pizza","raptiye","roket","sandviç","şapka","taç","tepe","terazi","topaç","tost","trafik konisi","trompet","uçurtma","üçgen","volkan","yelkenli","zurna"],
-  radial: ["ateş","atom","avize","ayçiçeği","buket","çiçek","deniz kestanesi","denizyıldızı","direksiyon","dişli","dönme dolap","drone","eldiven","fıskiye","havai fişek","hedef tahtası","kar tanesi","kestane","kirpi","kuyruklu yıldız","maytap","örümcek","örümcek ağı","palmiye","pamuk şeker","papatya","patlama","pervane","pusula","rüzgar gülü","vantilatör","yel değirmeni","yelpaze","yengeç","yıldız","yonca"],
-  ring: ["anahtarlık","balon balığı","bant","basketbol potası","bilezik","bisiklet","çelenk","çengelli iğne","daire","deniz simidi","donut","dürbün","halat","halka","hula hoop","kelepçe","kemer","kolye","kulp","küpe","lastik","mezura","paket lastiği","simit","tasma","tekerlekli sandalye","tuvalet kağıdı","yüzük","zincir"],
-  round: ["ay","balkabağı","balon","bezelye","ceviz","çilek","davul","domates","düğme","dünya","elma","fındık","gezegen","göz","güneş","kar küresi","karpuz","kavun","kayısı","kiraz","köfte","krep","kurabiye","küre","lahmacun","madalya","mandalina","marul","misket","nar","nazar boncuğu","para","plak","portakal","saat","soğan","şeftali","tabak","tef","tekerlek","top","turta","üzüm","yoyo","zil"],
-  stick: ["anahtar","bıçak","biber","cetvel","cımbız","çatal","çekiç","çivi","dal","dambıl","diş fırçası","diş macunu","fırça","flüt","havuç","iğne","kalem","kaşık","kayak","kemik","kılıç","kibrit","kürdan","levye","makas","mandal","maşa","matkap","muz","ney","oklava","olta","pense","pipet","ruj","sigara","sihirli değnek","sopa","sosis","spatula","şırınga","şiş kebap","tarak","tebeşir","testere","tornavida","törpü","ünlem işareti","vida"],
-  striped: ["abaküs","ağ","akordeon","atkı","barkod","bayrak","çamaşır ipi","çikolata","çim","çit","fermuar","file","gofret","gözlük","gramofon","ızgara","kafes","kalorifer","klavye","korkuluk","merdiven","nota","örgü","parmaklık","patates kızartması","perde","piyano","raf","ray","satranç tahtası","tabela","takvim","ütü","waffle","yapboz","yaya geçidi"],
-  vertical: ["ağaç","ampul","anten","asa","baca","bambu","baston","biberon","çeşme","darbuka","deney tüpü","deniz feneri","direk","döner","duş","elektrik direği","fener","gökdelen","kaktüs","kanguru","kolon","kule","lamba","mısır","mikroskop","minare","mum","musluk","nargile","pırasa","pisa kulesi","saksı","sandalye","sprey","süpürge","şelale","şemsiye","şişe","tabure","teleskop","termometre","trafik lambası","tuzluk","tüp","varil","vinç","yangın söndürücü","yapıştırıcı","zürafa"],
+  radial: ["ahtapot","ateş","atom","avize","ayçiçeği","buket","çiçek","deniz kestanesi","deniz şakayığı","denizyıldızı","direksiyon","dişli","dönme dolap","drone","eldiven","fıskiye","gül","güneş","havai fişek","hedef tahtası","kar tanesi","kestane","kirpi","konfeti","kuyruklu yıldız","maytap","molekül","nergis","örümcek","örümcek ağı","palmiye","pamuk şeker","papatya","patlama","pervane","pusula","rüzgar gülü","rüzgar türbini","vantilatör","virüs","yel değirmeni","yelpaze","yengeç","yıldız","yonca"],
+  ring: ["açma","alyans","anahtar deliği","anahtarlık","balon balığı","bant","basketbol potası","bilezik","bisiklet","cd","çelenk","çengelli iğne","daire","deniz simidi","donut","dürbün","halat","halhal","halka","hula hoop","kapı tokmağı","kasnak","kelepçe","kemer","kolye","kulp","künye","küpe","lastik","mezura","paket lastiği","pasta kalıbı","plak","simit","soğan halkası","sucuk","tasma","tef","tekerlek","tekerlekli sandalye","tuvalet kağıdı","yüzük","zincir"],
+  round: ["ay","balkabağı","balon","bezelye","ceviz","çilek","davul","domates","düğme","dünya","elma","fındık","gezegen","göz","karpuz","kavun","kayısı","kiraz","köfte","krep","kurabiye","küre","lahmacun","madalya","mandalina","marul","misket","nar","nazar boncuğu","para","portakal","saat","soğan","şeftali","tabak","top","üzüm","yoyo","zil"],
+  stick: ["anahtar","bıçak","biber","cetvel","cımbız","çatal","çivi","dal","dambıl","diş macunu","flüt","havuç","iğne","kalem","kaşık","kayak","kemik","kılıç","kibrit","kürdan","levye","makas","mandal","matkap","muz","ney","oklava","olta","pense","pipet","ruj","sigara","sihirli değnek","sopa","sosis","şırınga","şiş kebap","tebeşir","testere","tornavida","törpü","ünlem işareti","vida"],
+  striped: ["abaküs","ağ","akordeon","atkı","bal peteği","barkod","bayrak","çamaşır ipi","çikolata","çim","çit","fermuar","file","gofret","gözlük","gramofon","ızgara","iskele","kafes","kalorifer","kitaplık","klavye","korkuluk","merdiven","nota","örgü","parmaklık","patates kızartması","perde","piyano","raf","ray","satranç tahtası","sazlık","tabela","takvim","tarak","ütü","waffle","yapboz","yaya geçidi"],
+  vertical: ["ağaç","ampul","anten","asa","baca","bambu","baston","biberon","çeşme","darbuka","deney tüpü","deniz feneri","direk","döner","duş","elektrik direği","fener","gökdelen","kaktüs","kanguru","kolon","kule","lamba","mısır","mikroskop","minare","mum","musluk","nargile","pırasa","pisa kulesi","saksı","sandalye","sprey","şelale","şişe","tabure","teleskop","termometre","trafik lambası","tuzluk","tüp","varil","vinç","yangın söndürücü","yapıştırıcı","zürafa"],
   winged: ["ağaçkakan","arı","balık","baykuş","can yeleği","ceket","civciv","çekirge","devekuşu","ejderha","flamingo","gemi","gömlek","güve","güvercin","helikopter","hindi","horoz","kanat","karides","kartal","kaz","kazak","kelebek","kuğu","kulaklık","kuş","leylek","martı","melek","ördek","pantolon","penguen","peri","salatalık","salıncak","serçe","sinek","sivrisinek","sosisli","şezlong","şort","tavuk","tavus kuşu","tişört","uçak","uğur böceği","uydu","yarasa","yusufçuk"]
 };
 
@@ -1279,6 +1293,9 @@ const TEXT = {
   archiveDaily:     "günlük",
   change:           "değiştir",
   timeNotice:       "her kelime için {n} saniyen olacak",
+  howTitle:         "nasıl oynanır?",
+  howGo:            "anladım",
+  howAlt:           "her kelimeyi birkaç saniyede çiz. harf, rakam, kelime yazmak yok. sonra hangisi neydi, tahmin et.",
 
   modeOpen:         "kelimeler açık",
   modeOpenDesc:     "kelimelerle çizimleri eşleştir",
@@ -1617,6 +1634,7 @@ function restoreEntry(st){
   $("finishAsk").classList.remove("on");
   $("timeAsk").classList.remove("on");
   $("fbAsk").classList.remove("on");
+  $("howAsk").classList.remove("on");
   historyQuiet = true;
   const s = st && st.screen;
   if (s === "scores"){ openDayBoard(MODES.some(function(m){ return m.id === st.mode; }) ? st.mode : "typed"); return; }
@@ -1782,6 +1800,8 @@ function show(id, as){
     if (typeof buildDailyRow === "function") buildDailyRow();
     // So is arşiv: a round drawn or finished since the page was built belongs in it.
     if (typeof archiveButton === "function") archiveButton();
+    // A device that has never played is shown how, once.
+    if (typeof maybeHowTo === "function") maybeHowTo();
   }
   // "as" is for a screen that borrows another's section: the drawings-with-board screen
   // is the result's section, but it is not the result.
@@ -4044,6 +4064,34 @@ $("timeStart").onclick = function(){ closeTimeAsk(); rememberHint(); startGame()
 // Changing the time is an answer to the question, so it is not asked again either.
 $("timeChange").onclick = function(){ closeTimeAsk(); rememberHint(); $("secs").focus(); };
 $("timeAsk").onclick = function(e){ if (e.target === $("timeAsk")) closeTimeAsk(); };
+
+/* Nasıl oynanır: once, the first time a device that has never played reaches the start
+   screen. Anything the device keeps from a round -- a name, a word dealt to it, a day, a
+   round drawn or guessed, an unsaved drawing -- means it has played, so nobody who was
+   playing before this existed sees it. Closing it is what counts as having seen it. */
+function hasPlayed(store){
+  return !!(store.name || store.pending
+    || Object.keys(store.rounds || {}).length || Object.keys(store.days || {}).length
+    || Object.keys(store.seen || {}).length
+    || (Array.isArray(store.drafts) && store.drafts.length)
+    || (Array.isArray(store.dailyPlayed) && store.dailyPlayed.length));
+}
+function maybeHowTo(){
+  const store = loadStore();
+  if (store.howSeen || hasPlayed(store) || $("howAsk").classList.contains("on")) return;
+  const img = $("howGif");
+  if (!img.getAttribute("src")){ img.alt = TEXT.howAlt; img.src = "how-to-play.gif"; }
+  $("howAsk").classList.add("on");
+}
+function closeHowTo(){
+  $("howAsk").classList.remove("on");
+  const store = loadStore();
+  store.howSeen = true;
+  saveStore(store);
+}
+$("howGo").onclick = closeHowTo;
+$("howAsk").onclick = function(e){ if (e.target === $("howAsk")) closeHowTo(); };
+
 $("toRecall").onclick = showChoose;
 // A stray tap on Bitir used to end the round on the spot, which for the daily means
 // the day is gone. Ask first.
@@ -4126,6 +4174,7 @@ buildHome();
   }
 
   try { history.replaceState({ screen: "home", code: "", depth: 0 }, "", location.pathname); } catch (e) {}
+  maybeHowTo();             // the start screen is up without show() on a fresh visit
 })();
 })();
 </script>
