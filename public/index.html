@@ -1871,7 +1871,13 @@ function rememberRound(code, patch){
   const store = loadStore();
   const rec = store.rounds[code] || {};
   Object.keys(patch).forEach(function(k){ rec[k] = patch[k]; });
-  rec.at = Date.now();
+  // When the round was, and not a moment later. Every answer typed, every link opened
+  // again, every score posted comes through here, and stamping the time on each of them
+  // made arşiv put whatever had last been touched at the top, under today's date, instead
+  // of the newest round. It is also what the thirty-day drop and the forty kept are
+  // measured by, and the server expires a round thirty days after it was saved, so the
+  // day it was made is the right mark for those too.
+  if (!rec.at) rec.at = Date.now();
   store.rounds[code] = rec;
   saveStore(store);
 }

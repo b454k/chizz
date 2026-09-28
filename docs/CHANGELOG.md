@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-28 — arşiv keeps its order
+
+Reported: the rounds in arşiv shuffled instead of staying newest first.
+
+They were in order — the order was just of the wrong thing. A round's `at` was restamped
+on every write to its record, and nearly everything writes there: an answer typed, a link
+opened a second time, a mode chosen, a score posted. So `at` meant last touched, and
+opening an old round moved it to the top of the list and relabelled it with today's date.
+
+- `at` is now set once, when the record is made, and left alone. The 30-day drop and the
+  newest-40 limit are measured by it too, and the server expires a round 30 days after it
+  was saved, so the day it was made is the right mark for those as well.
+
+Rounds already on a device carry a last-touched stamp and keep it; from here they stop
+moving. Checked: touching the oldest round leaves both its place and its date alone, a
+new round still gets today, and unsaved drawings sit among them by their own date.
+
 ## 2026-09-28 — the renamed row came back, and stayed
 
 The screen fix earlier today was only half of it: the duplicate was also being written

@@ -566,7 +566,13 @@ What this buys:
 - **arşiv lists every round drawn here**, not only finished ones: a finished round opens
   its result, a round nobody has guessed opens its drawings with the board, and every drawing
   never saved (with at least one line in it) opens the between screen. A round drawn and then left on the start screen
-  by mistake is one tap away.
+  by mistake is one tap away. **Newest first, by when the round was made**: `at` is stamped
+  once, when the record is created, and never again. Stamping it on every write -- an
+  answer typed, a link opened a second time, a score posted -- put whatever had last been
+  touched at the top of the list under today's date, which read as the order shuffling by
+  itself. It is also what the 30-day drop and the newest-40 limit are measured by, and the
+  server expires a round 30 days after it was saved, so the day it was made is the right
+  mark for those as well.
 - **A daily duel survives a reload at every step.** Whose round you are dueling is read
   from `days[N]`, never from memory, and switching between your round and theirs always
   rewrites the address bar. A reload on the choice screen returns to it; a reload in
