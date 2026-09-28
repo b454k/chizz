@@ -811,9 +811,9 @@ namespace, keys starting with `feedback:`, or
 ## 20. Hosting
 
 Cloudflare Pages, static assets from `public/`, Functions from `functions/`, one KV
-namespace bound as `GAMES`. (The namespace's own title in the dashboard is still
-`OYUNLAR` from before the rename; the binding name in `wrangler.jsonc` is what the
-code sees, so the two need not match and the stored data is untouched.)
+namespace bound as `GAMES` and titled `GAMES` in the dashboard as well, since
+2026-09-28. (It was titled `OYUNLAR` before that. A namespace is bound by its id, not
+its title, so renaming it changed nothing in the code and left the stored data alone.)
 
 The canonical address is **https://chizz.party**. The project also answers on
 `chizz.pages.dev`, but that domain is filtered on some networks and operators, which
