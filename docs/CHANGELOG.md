@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-28 — a full phone no longer loses your round
+
+Reported: a player drew the day, sent her link, and then her own link opened as if it
+were a stranger's and stopped at `önce sen çiz`; a friend's link did the same. Her
+drawings were on the server the whole time -- her phone had simply stopped recording
+anything, and nothing said so.
+
+`saveStore` wrote once and swallowed the failure. When `localStorage` is full or
+refused, everything that says a round is yours goes with it: `days[N].drawn`, which is
+what `önce sen çiz` reads; `rounds[CODE].mine`, which is how your own link is known to
+be yours; and `scoreToken`, which is what moves your row on a board when you change
+your name instead of adding a second one.
+
+- **A write that does not fit now sheds and retries**: unsaved rounds oldest first, then
+  the pictures kept against a day, then all but the newest 5 rounds. The round being
+  played is never shed.
+- **A device that cannot write at all says so** on the share screen, where the link is.
+- Measured: a round of drawings is 15 KB sparse, 44 KB typical, 132 KB busy, and the 40
+  unsaved rounds the app was willing to keep came to 5.2 MB -- past what a phone allows.
+
+Reproduced before the fix and confirmed after, on a device with writes capped: the day
+stays drawn, the round stays yours, the token survives, and two name changes in a row
+leave exactly one row on the board. The boards themselves were never at fault: given
+the token they move a row correctly, and without it -- only ever because the device had
+forgotten -- they cannot tell two players apart.
+
 ## 2026-09-27 — nasıl oynanır on demand
 
 The loop showed itself once, to a device that had never played, and after that there

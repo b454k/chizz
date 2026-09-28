@@ -488,11 +488,22 @@ holds:
 | `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |
 | `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |
 | `seen` | Word → the day it was last dealt to this device, in either game, kept for 14 days. What sınırsız deals from (section 7) |
-| `dailyPlayed` | The different days in the last 14 on which this device started the daily game. With 2 or more, sınırsız holds back the upcoming daily words (section 7). Replaces `dailyAt`, which is still read |
+| `dailyPlayed` | The different days in the last 14 on which this device started the daily game. Read to tell a device that has played from one that never has (section 4). Replaces `dailyAt`, which is still read |
 | `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, the mode chosen for guessing it (which board its score joins), whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. Entries older than the
 server's 30-day TTL are dropped, and only the newest 40 rounds are kept.
+
+**A phone gives the page about 5 MB**, and one round of drawings measures 15 KB for a
+sparse hand and up to 130 KB for a busy one, so 40 unsaved rounds can fill it. A write
+that does not fit sheds the heavy things and is tried again: unsaved rounds oldest first,
+then the pictures kept against a day, then all but the newest 5 rounds. `pending`, the
+round the player is in the middle of, is never shed. What survives is a few hundred bytes
+-- and it is the part that matters, because a device that cannot write loses the record
+that a round is **its own**: its own link then opens as a stranger's and stops at `önce
+sen çiz`, and a name change writes a second row on the board instead of moving the first.
+A device that cannot write at all -- private browsing, storage switched off -- says so on
+the share screen, since the link is then the only way back to the drawings.
 
 What this buys:
 
