@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-28 — how it is played, shown to the people who arrive by a link
+
+`nasıl oynanır?` showed itself on the start screen to a device that had never played, and
+a friend's link was the one way in that never reached it — which is the way most people
+meet the game. Opening a link writes the round down before any of that runs, and that
+alone made the device look like a player.
+
+- Whether the device had played is decided once, as the page opens, before the link is
+  read.
+- The loop is shown over the two screens a link lands on as well: the kolay/zor question
+  and `önce sen çiz`. Both are read before anything is played, so nothing is given away.
+
+Checked on a phone that had never played: a sınırsız link and a daily link both show it,
+`anladım` leaves the link's own screen waiting underneath with its name field, opening a
+link again does not show it twice, and a device that had already played is not shown it.
+
 ## 2026-09-28 — arşiv lists a round once
 
 Reported: some dates wrong in arşiv, and the same game listed twice.

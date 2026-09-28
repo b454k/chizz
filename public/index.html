@@ -1956,6 +1956,12 @@ function show(id, as){
     // A device that has never played is shown how, once.
     if (typeof maybeHowTo === "function") maybeHowTo();
   }
+  // A friend's link is where most people meet the game, so it is shown there as well: over
+  // the question about how to guess, and over "önce sen çiz". Both are screens a link
+  // lands on, and both are read before anything is played.
+  if (id === "choose" || id === "gate"){
+    if (typeof maybeHowTo === "function") maybeHowTo();
+  }
   // "as" is for a screen that borrows another's section: the drawings-with-board screen
   // is the result's section, but it is not the result.
   if (typeof recordArrival === "function") recordArrival(as || id);
@@ -4593,9 +4599,17 @@ function openHowTo(){
   img.src = "how-to-play.gif";
   $("howAsk").classList.add("on");
 }
+/* Whether this device had played anything when the page opened. Decided once, at the
+   start, because opening a friend's link writes the round down before any of this runs --
+   and that alone made the device look like a player, which is why the people most in need
+   of being shown how, the ones arriving by a link for the first time, were the ones who
+   never saw it. */
+let newHere = false;
+
 function maybeHowTo(){
   const store = loadStore();
-  if (store.howSeen || hasPlayed(store) || $("howAsk").classList.contains("on")) return;
+  if (store.howSeen || $("howAsk").classList.contains("on")) return;
+  if (!newHere && hasPlayed(store)) return;
   openHowTo();
 }
 function closeHowTo(){
@@ -4679,6 +4693,7 @@ buildHome();
    opened fresh loads that round. Anything else is a fresh visit and starts at the start,
    with an entry of its own so there is a start screen to come back to. */
 (function(){
+  newHere = !hasPlayed(loadStore());     // before a link writes the round down
   const st = history.state;
   if (st && st.screen){ restoreEntry(st); return; }
 

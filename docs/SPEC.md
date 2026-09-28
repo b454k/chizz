@@ -90,11 +90,17 @@ the result screen.
 
 ### A new device
 
-The first time a device that has never played reaches the start screen -- a fresh visit,
-or a friend's link followed by `ana ekran` -- `nasıl oynanır?` opens over it: a nine-second
-loop of the three steps (her kelimeyi birkaç saniyede çiz · harf, rakam, kelime yazmak yok ·
-sonra hangisi neydi, tahmin et), drawn from real drawings, and `anladım`. Tapping outside
-closes it too. It never opens over a round, so a link lands on its round undisturbed.
+The first time a device that has never played arrives, wherever it arrives, `nasıl
+oynanır?` opens over it: a nine-second loop of the three steps (her kelimeyi birkaç
+saniyede çiz · harf, rakam, kelime yazmak yok · sonra hangisi neydi, tahmin et), drawn from
+real drawings, and `anladım`. Tapping outside closes it too.
+
+Three places, all of them read before anything is played: the start screen, the kolay/zor
+question a friend's link lands on, and `önce sen çiz` for a friend's daily round. **A link
+is where most people meet the game**, and it used to be the one way in that never showed
+this -- opening a link writes the round down before any of it runs, and that alone made the
+device look like a player. Whether it had played is therefore decided once, as the page
+opens, before the link is read (`newHere`).
 
 "Never played" means the device keeps nothing from a round: no name, no word dealt to it,
 no day, no round drawn or guessed, no unsaved drawing. Everyone who played before this
