@@ -570,7 +570,6 @@
   }
   #nameRow{display:flex; gap:10px; margin-bottom:10px;}
   #nameRow .txt{flex:1; text-align:center; font-weight:700; letter-spacing:.08em;}
-  #nameGo{width:auto; padding:14px 20px; border:2px solid var(--line); border-radius:14px; font-weight:700;}
   #fallback{background:var(--panel); color:var(--ink);}
   #modalPrev{background:var(--paper);}
 </style>
@@ -1088,13 +1087,6 @@ function dailyDayNumber(at){
   return Math.floor(((at === undefined ? Date.now() : at) - DAILY_EPOCH) / DAY_MS) + 1;
 }
 
-// When the current day ends, so a saved daily round can expire with it.
-function dailyEndsIn(at){
-  const now = at === undefined ? Date.now() : at;
-  const next = DAILY_EPOCH + dailyDayNumber(now) * DAY_MS;
-  return Math.max(60, Math.round((next - now) / 1000));
-}
-
 function dailyDateLabel(day){
   const d = new Date(DAILY_EPOCH + (day - 1) * DAY_MS + DAY_MS / 2);
   const p = function (n){ return n < 10 ? "0" + n : String(n); };
@@ -1311,7 +1303,6 @@ const TEXT = {
   start:            "başla",
   join:             "katıl",
   codePlaceholder:  "kod",
-  namePrompt:       "adın?",
   namePlaceholder:  "adın",
   continue:         "devam",
   clearPad:         "ekranı temizle",
@@ -1456,7 +1447,6 @@ const TEXT = {
   dailyPlayed:      "bugünü oynadın",
   dailyScores:      "günün skorları",
   dailyBoardTitle:  "günün skorları · {date}",
-  dailyNote:        "herkes bugün aynı 20 kelimeyi çiziyor. kelimeler gizli, 3 sn.",
   dailyTime:        "3 sn",
   gateTitle:        "önce sen çiz",
   gateBody:         "bugün herkes aynı kelimeleri çiziyor. arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. önce sen çiz, sonra tahmin et.",
