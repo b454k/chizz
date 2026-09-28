@@ -566,7 +566,18 @@ What this buys:
 - **arşiv lists every round drawn here**, not only finished ones: a finished round opens
   its result, a round nobody has guessed opens its drawings with the board, and every drawing
   never saved (with at least one line in it) opens the between screen. A round drawn and then left on the start screen
-  by mistake is one tap away. **Newest first, by when the round was made**: `at` is stamped
+  by mistake is one tap away. A round saved from a drawing kept here is dated by when it
+  was **drawn**, not when it was saved, which can be days later.
+
+  **The same round is not listed twice.** A drawing kept on the device and the round it
+  was saved as are the same twenty pictures, and the copy outlived the save whenever the
+  device could not write at the moment the round got its code. A saved round keeps no
+  words on the device, so the record alone cannot match them; the archive fetches them to
+  paint its thumbnails, and the unsaved twin is recognised there and dropped -- twenty
+  words in one order belong to one round, since they are dealt shuffled. `pending` is left
+  alone, being the round the player may be standing in the middle of.
+
+  **Newest first, by when the round was made**: `at` is stamped
   once, when the record is created, and never again. Stamping it on every write -- an
   answer typed, a link opened a second time, a score posted -- put whatever had last been
   touched at the top of the list under today's date, which read as the order shuffling by

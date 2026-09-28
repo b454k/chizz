@@ -1838,6 +1838,30 @@ function clearPending(){
   saveStore(store);
 }
 
+/* The same twenty drawings can sit in arşiv twice: once as the round that was saved, and
+   once as the drawing it was made from, when the copy on the device outlived the save --
+   which is what happened whenever the device could not write at the moment the round got
+   its code. A saved round keeps no words on the device, so the record alone cannot tell
+   the two apart; the archive fetches them to paint its thumbnails, and that is where the
+   unsaved twin is recognised. Twenty words in one order belong to one round: they are
+   dealt shuffled, so two rounds sharing all of them in sequence does not happen.
+
+   store.pending is left alone. It is the round the player may be standing in the middle
+   of, and it becomes a draft of its own accord as soon as another round starts. */
+function dropDraftsLike(words){
+  if (!Array.isArray(words) || words.length !== N) return false;
+  const key = words.join(" ");
+  const store = loadStore();
+  const drafts = store.drafts || [];
+  const kept = drafts.filter(function(d){
+    return !(d && Array.isArray(d.words) && d.words.join(" ") === key);
+  });
+  if (kept.length === drafts.length) return false;
+  store.drafts = kept;
+  saveStore(store);
+  return true;
+}
+
 /* The round on the between screen is store.pending; a new round used to delete it, so
    only the last unsaved drawing ever survived. Now it moves to store.drafts instead, if
    anything was drawn in it -- a round with no line anywhere is not worth keeping. */
@@ -2221,18 +2245,36 @@ function buildArchive(boxId, limit){
 
 /* One row's drawings. A round that has expired on the server simply keeps its empty
    squares: the score beside them is this device's own record and still true. */
+// The list is rebuilt where it stands when a twin goes, so the row that is gone is not
+// left behind on the screen.
+function archiveAgain(row){
+  if (row.closest("#archiveFull")) buildArchive("archiveFull", 0);
+  else archiveButton();
+}
+
 function fillArchiveRow(row){
   const code = row.dataset.code;
   if (!code) return;
-  if (archiveSeen[code]){ paintArchiveRow(row, archiveSeen[code]); return; }
+  const had = archiveSeen[code];
+  if (had){
+    // Read once, checked every time: a drawing kept here may have been shelved after the
+    // round beside it was first looked at.
+    if (dropDraftsLike(had.words)){ archiveAgain(row); return; }
+    paintArchiveRow(row, had);
+    return;
+  }
   api("/api/game/" + encodeURIComponent(code)).then(function(r){
     if (!r.ok || !r.data) return;
     const round = {
       drawings: decodeDrawings(r.data.drawings),
       day: Number(r.data.day) > 0 ? Number(r.data.day) : 0,
-      name: typeof r.data.name === "string" ? r.data.name : ""
+      name: typeof r.data.name === "string" ? r.data.name : "",
+      words: Array.isArray(r.data.words) ? r.data.words : null
     };
     archiveSeen[code] = round;
+    // Now that the words are known, an unsaved copy of this very round can be recognised
+    // and dropped.
+    if (dropDraftsLike(round.words)){ archiveAgain(row); return; }
     paintArchiveRow(row, round);
   }).catch(function(){ /* offline: the row keeps its score and its empty squares */ });
 }
@@ -4253,8 +4295,13 @@ function postRound(name){
     if (name) drawerName = name;
     // Guessing may have started before this save returned, when there was no code to
     // stamp the start time on, so it travels with the save.
-    rememberRound(lastCode, { mine: true, owner: r.data.owner || "", order: order, picks: picks, startedAt: recallStart || 0 });
+    // Dated by when it was drawn rather than when it was saved: that is what arşiv shows,
+    // and the two can be minutes or days apart when a drawing is picked up again later.
+    const drawn = (loadStore().pending || {}).at || 0;
+    rememberRound(lastCode, { mine: true, owner: r.data.owner || "", order: order, picks: picks,
+                              startedAt: recallStart || 0, at: drawn });
     clearPending();                 // it has a code now; that is the better record
+    dropDraftsLike(words);          // and so is any older copy of the same drawings
     if (isDaily) rememberDay(dailyDay, { code: lastCode });
     setUrlCode(lastCode);
     return lastCode;

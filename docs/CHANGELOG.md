@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-28 — arşiv lists a round once
+
+Reported: some dates wrong in arşiv, and the same game listed twice.
+
+- **A round saved from a drawing kept on the device is dated by when it was drawn.** It
+  was dated by the save, which is days later for a drawing picked up again from arşiv.
+- **The unsaved twin is dropped.** A drawing kept here and the round it was saved as are
+  the same twenty pictures; the copy outlived the save whenever the device could not
+  write at the moment the round got its code. The record alone cannot match them — a
+  saved round keeps no words on the device — but the archive fetches them to paint its
+  thumbnails, so the pair is recognised there and the copy goes. Saving a round now
+  drops any older copy of the same drawings as well, so no new pair is made.
+
+The ones already on a device go as arşiv reads them, which is to say as they are
+scrolled past. Checked both ways round: fetched fresh and already cached.
+
 ## 2026-09-28 — a name on the way in, and three smaller things
 
 - **A friend's link asks for a name before the guessing**, on the kolay/zor screen, when
