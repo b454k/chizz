@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-28 — the speed is asked again before a replay
+
+`tekrar oyna` and `sen de çiz` started the next round at whatever the last one used,
+with the slider two screens away on the start screen. They now ask `her kelime için 3
+saniyen olacak` with başla and değiştir, the same question the first round of the day
+gets.
+
+- **`değiştir` opens the slider inside the card** instead of sending anyone back to the
+  start screen, and the sentence above it follows the slider, so the choice is read in
+  the words it will be played under. `başla` begins the round at that setting, keeps it
+  on the device, and moves the start screen's slider to match.
+- From the start screen it is still asked once a day; from a finished round, every time.
+
 ## 2026-09-28 — the way back out of kolay
 
 Reported: guessing a friend's round in kolay, the browser's back button returned to the

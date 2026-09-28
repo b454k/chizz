@@ -64,8 +64,7 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 Overlays sit outside the screen system: `#sheet` (the word pool), `#modal` (the
 typed-answer card) and `#reveal` (the word alone before each drawing), plus three
 questions -- `#confirm` before abandoning a round, `#finishAsk` before ending the
-guessing, `#timeAsk` before the first unlimited round of the day, and `#nameAsk` for a
-name after the first round drawn on a device -- and `#howAsk`, nasıl oynanır, which opens
+guessing and `#timeAsk` before an unlimited round -- and `#howAsk`, nasıl oynanır, which opens
 by itself on a device that has never played and from `nasıl oynanır?` on the start screen.
 
 ## 4. Flow
@@ -74,7 +73,7 @@ by itself on a device that has never played and from `nasıl oynanır?` on the s
 
 1. `home` — adjust the settings if you want, press start. The first unlimited round of
    the day answers the question "her kelime için 3 saniyen olacak" before the countdown,
-   with başla and değiştir
+   with başla and değiştir. `tekrar oyna` and `sen de çiz` ask it every time
 2. `countdown` — 3, 2, 1
 3. `draw` — 20 words, one at a time, auto-advancing, each opening with the word shown
    on the paper for a second
@@ -183,9 +182,18 @@ joins. Everyone on one board played it the same way, which is what makes the ran
 something. That is why the slider sits inside the `sınırsız` section rather than above
 both games.
 
-Because the setting outlives the visit, the first unlimited round of each day says what
-it is — `her kelime için 3 saniyen olacak` — offering başla and değiştir. The device
-remembers the day it last asked, so it is asked once a day and not before every round.
+Because the setting outlives the visit, an unlimited round says what it is before it
+starts — `her kelime için 3 saniyen olacak` — offering başla and değiştir.
+
+From the start screen it is asked once a day (`hintDay`), since the slider is right there
+under the button. **From `tekrar oyna` and `sen de çiz` it is asked every time**: a round
+has just finished, which is exactly when the speed is worth changing, and from the result
+screen the slider is a screen away.
+
+`değiştir` opens the slider inside the same card rather than sending anyone back to the
+start screen for it, and the sentence above it follows the slider as it moves, so what is
+chosen is read in the words it will be played under. `başla` then begins the round at that
+setting, keeps it on the device and moves the start screen's own slider to match.
 
 There is deliberately no difficulty grade. One existed briefly, read back from these
 two settings, but it was a label placed on top of choices the player had already made

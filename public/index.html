@@ -173,10 +173,12 @@
   .srow + .srow{margin-top:10px;}
   .srow .lbl{font-size:14px; font-weight:600; color:var(--muted);}
   .srow output{font-size:15px; font-weight:800; font-variant-numeric:tabular-nums;}
-  #secs{
+  #secs, #askSecs{
     width:100%; margin:8px 0 2px; accent-color:var(--accent);
     background:transparent; touch-action:manipulation;
   }
+  /* değiştir opens this inside the same card, so the answer is given where it was asked */
+  #timeAskEdit{border:2px solid var(--line); border-radius:14px; padding:12px 14px; margin:12px 0 0; text-align:left;}
   .shint{color:var(--muted); font-size:12px; margin:2px 0 0;}
   .nlabel{color:var(--muted); font-size:13px; font-weight:600; margin:0 0 6px;}
 
@@ -929,6 +931,14 @@
 <div id="timeAsk">
   <div id="timeAskCard">
     <b id="timeAskText"></b>
+    <div id="timeAskEdit" hidden>
+      <div class="srow">
+        <span class="lbl" data-t="perWord"></span>
+        <output id="askSecsOut"></output>
+      </div>
+      <input type="range" id="askSecs" min="1" max="10" step="0.5" data-tal="perWord">
+      <p class="shint" data-t="recommended"></p>
+    </div>
     <button class="primary" id="timeStart" data-t="start"></button>
     <button class="ghost" id="timeChange" data-t="change"></button>
   </div>
@@ -4590,14 +4600,51 @@ function rememberHint(){
 }
 function closeTimeAsk(){ $("timeAsk").classList.remove("on"); }
 
+/* How long each word gets, asked before an unlimited round. The start screen asks once a
+   day, since the slider is right there under it. tekrar oyna and sen de çiz ask every
+   time: a round has just finished, which is exactly when the speed is worth changing, and
+   the slider is a screen away from there. */
+function askTime(){
+  $("timeAskEdit").hidden = true;      // the question first, the slider only if asked for
+  $("timeChange").hidden = false;
+  timeSays(secs);
+  $("timeAsk").classList.add("on");
+}
+
+function timeSays(v){
+  $("timeAskText").textContent = TEXT.timeNotice.replace("{n}", String(v).replace(".", ","));
+}
+
 $("start").onclick = function(){     // the countdown wakes the audio itself
   if (hintedToday()){ startGame(); return; }
-  $("timeAskText").textContent = TEXT.timeNotice.replace("{n}", String(secs).replace(".", ","));
-  $("timeAsk").classList.add("on");
+  askTime();
 };
-$("timeStart").onclick = function(){ closeTimeAsk(); rememberHint(); startGame(); };
-// Changing the time is an answer to the question, so it is not asked again either.
-$("timeChange").onclick = function(){ closeTimeAsk(); rememberHint(); $("secs").focus(); };
+
+// değiştir opens the slider in the same card rather than sending anyone back to the start
+// screen for it; başla then begins the round at whatever it says.
+$("timeChange").onclick = function(){
+  $("askSecs").value = secs;
+  $("askSecsOut").textContent = secsText(secs);
+  $("timeAskEdit").hidden = false;
+  $("timeChange").hidden = true;
+};
+$("askSecs").addEventListener("input", function(){
+  const v = clampSecs($("askSecs").value);
+  $("askSecsOut").textContent = secsText(v);
+  timeSays(v);                       // the sentence above says what it will be
+});
+
+$("timeStart").onclick = function(){
+  if (!$("timeAskEdit").hidden){
+    secs = clampSecs($("askSecs").value);
+    $("secs").value = secs;            // the start screen's own slider says the same
+    $("secsOut").textContent = secsText(secs);
+    rememberSettings();
+  }
+  closeTimeAsk();
+  rememberHint();                      // answered either way, so not asked again today
+  startGame();
+};
 $("timeAsk").onclick = function(e){ if (e.target === $("timeAsk")) closeTimeAsk(); };
 
 /* Nasıl oynanır: once, the first time a device that has never played reaches the start
@@ -4668,7 +4715,7 @@ $("share").onclick = function(){
   });
 };
 
-$("again").onclick = function(){ clearTimeout(cdTimer); startGame(); };
+$("again").onclick = function(){ clearTimeout(cdTimer); askTime(); };
 $("home2").onclick = function(){ clearTimeout(cdTimer); closeSheet(); closeModal(); show("home"); };
 
 /* iOS stopped honouring user-scalable=no years ago, so the meta tag alone leaves
