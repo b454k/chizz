@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-28 — the round as a picture
+
+A round is twenty drawings and what everyone made of them, and until now the only way
+to keep it was a screenshot — which gets the grid in pieces, because it scrolls, and
+brings the browser along with it.
+
+- **`görsel olarak indir`** on the result screen: the whole round as one PNG. Four
+  across, five down, each drawing on its paper square with its number, the answer given
+  struck through in red where it was wrong, and the word in green under it.
+- **`bu çizimi indir`** in the zoom: one drawing on its own, with the answer and the
+  word. Before the round is guessed it goes out without the word, as the zoom does.
+- Both are drawn on a canvas in whichever theme is on, headed the way the result screen
+  is and footed `chizz.party`. Twice the size for sharpness: 2172 × 3760, about 470 KB.
+- Encoding takes about a second, so the button holds and says `hazırlanıyor…` rather
+  than appearing dead.
+
 ## 2026-09-28 — a full phone no longer loses your round
 
 Reported: a player drew the day, sent her link, and then her own link opened as if it

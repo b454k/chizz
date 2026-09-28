@@ -200,6 +200,7 @@
   /* a primary button that is not ready to be pressed yet, but still takes a tap
      so it can say why */
   .primary.off{opacity:.45;}
+  button[disabled]{opacity:.5;}
 
   /* name asked at the point it is needed, rather than before the game */
   .namerow{display:flex; gap:8px; align-items:flex-start; margin:0 0 10px;}
@@ -465,6 +466,9 @@
   #zoomCap .bad{color:var(--no); text-decoration:line-through; margin-right:8px;}
   #zoomCap .good{color:var(--ok); font-weight:700;}
   #zoomClose{max-width:220px; margin:0 auto;}
+  /* over the dimmed grid, so it needs a back of its own */
+  #zoomSave{max-width:220px; margin:0 auto 10px; background:var(--panel);}
+  #saveShot{margin:0 0 10px;}
   .cell.tappable{cursor:pointer;}
 
   /* duel: send screen */
@@ -819,6 +823,8 @@
       <button class="primary" id="share" style="margin:0 0 6px" data-t="share"></button>
       <p id="copyNote"></p>
       <textarea id="fallback" rows="7" readonly></textarea>
+      <!-- Beside paylaş, which sends the score as text: this keeps the drawings. -->
+      <button class="ghost" id="saveShot" data-t="saveImage"></button>
       <button class="ghost" id="switchRound" hidden style="margin:0 0 10px"></button>
       <button class="ghost" id="reviewGuess" hidden style="margin:0 0 10px" data-t="guessMineToo"></button>
       <div class="btnrow">
@@ -925,6 +931,7 @@
   <div id="zoomCard">
     <canvas id="zoomPrev" width="560" height="560"></canvas>
     <p id="zoomCap"></p>
+    <button class="ghost" id="zoomSave" data-t="saveDrawing"></button>
     <button class="primary" id="zoomClose" data-t="close"></button>
   </div>
 </div>
@@ -1398,6 +1405,10 @@ const TEXT = {
 
 
   share:            "paylaş",
+  saveImage:        "görsel olarak indir",
+  preparing:        "hazırlanıyor…",
+  saveDrawing:      "bu çizimi indir",
+  drawingsOf:       "{whose} çizimleri",
   copied:           "panoya kopyalandı ✓",
   copyFailedSelect: "kopyalanamadı — aşağıdaki metni seç:",
   playAgain:        "tekrar oyna",
@@ -3078,9 +3089,264 @@ $("pickTheirs").onclick = function(){
 };
 $("switchRound").onclick = goToOther;
 
+/* --------------------------------------------------------- the picture --- */
+/* A round is twenty drawings and what everyone made of them, which is the part worth
+   keeping, and a screenshot of the screen gets it in pieces: the grid scrolls, and what
+   comes out carries the browser with it. So the picture is drawn here instead -- the same
+   grid at a fixed width, each answer under its drawing, in whichever theme is on. */
+const SHOT = 2;                     // drawn at twice the size, so it stays sharp
+const SHOT_FACE = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+
+function shotFont(size, weight){ return (weight || 400) + " " + size + "px " + SHOT_FACE; }
+
+function shotTheme(){
+  const cs = getComputedStyle(document.documentElement);
+  const pick = function(n, fallback){ return (cs.getPropertyValue(n) || "").trim() || fallback; };
+  return {
+    bg:    pick("--bg",    "#131418"),
+    ink:   pick("--ink",   "#f1f2f4"),
+    muted: pick("--muted", "#949aa5"),
+    line:  pick("--line",  "#2f333c"),
+    ok:    pick("--ok",    "#4ade80"),
+    no:    pick("--no",    "#f87171"),
+    paper: pick("--paper", "#e8e5de")
+  };
+}
+
+function roundedPath(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// A long word is set smaller before it is cut, so answers stay readable rather than
+// disappearing. Leaves the font it settled on in place for measuring the strike-through.
+function fitLine(ctx, text, max, size, weight){
+  let s = size;
+  ctx.font = shotFont(s, weight);
+  while (s > size - 7 && ctx.measureText(text).width > max){ s -= 1; ctx.font = shotFont(s, weight); }
+  if (ctx.measureText(text).width <= max) return text;
+  let out = text;
+  while (out.length > 1 && ctx.measureText(out + "\u2026").width > max) out = out.slice(0, -1);
+  return out + "\u2026";
+}
+
+// One answer, centred under its drawing. A wrong one is struck through, the way the
+// screen strikes it.
+function shotCap(ctx, text, cx, y, max, size, colour, strike){
+  const shown = fitLine(ctx, text, max, size, 700);
+  ctx.fillStyle = colour;
+  ctx.textAlign = "center";
+  ctx.fillText(shown, cx, y);
+  if (!strike) return;
+  const w = ctx.measureText(shown).width;
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - w / 2, y - size * 0.3);
+  ctx.lineTo(cx + w / 2, y - size * 0.3);
+  ctx.stroke();
+}
+
+// The paper square with the drawing on it, and the number the grid showed.
+function shotTile(ctx, t, x, y, size, di, num){
+  ctx.save();
+  roundedPath(ctx, x, y, size, size, size * 0.06);
+  ctx.fillStyle = t.paper;
+  ctx.fill();
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.clip();
+  ctx.translate(x, y);
+  paintStrokes(ctx, drawings[di] || [], size, Math.max(3, size * 0.025));
+  ctx.restore();
+  if (!num) return;
+  ctx.font = shotFont(Math.round(size * 0.08), 700);
+  ctx.fillStyle = "#a9a49a";
+  ctx.textAlign = "left";
+  ctx.fillText(num, x + size * 0.055, y + size * 0.135);
+}
+
+// What the round was, in one line: whose drawings, which day, how it was played, how long.
+function shotLine(){
+  const bits = [];
+  if (role === "guesser" && drawerName) bits.push(TEXT.drawingsOf.replace("{whose}", whose(drawerName)));
+  if (isDaily && dailyDay) bits.push(TEXT.dailyTitle + " \u00b7 " + dailyDateLabel(dailyDay));
+  bits.push(roundLabel());
+  bits.push(TEXT.totalTime + " " + timeLabel(recallMs || elapsedMs()));
+  return bits.join(" \u00b7 ");
+}
+
+// chizz, the line above, and the score: the same three things the result screen leads with.
+function shotHead(ctx, t, W, PAD, top){
+  ctx.textBaseline = "alphabetic";
+  ctx.textAlign = "right";
+  ctx.fillStyle = t.ink;
+  ctx.font = shotFont(40, 800);
+  const tally = score + "/" + N;
+  ctx.fillText(tally, W - PAD, top + 40);
+  const room = W - PAD * 2 - ctx.measureText(tally).width - 24;
+  if (myName){
+    ctx.fillStyle = t.muted;
+    ctx.font = shotFont(21, 600);
+    ctx.fillText(myName, W - PAD, top + 74);
+  }
+  ctx.textAlign = "left";
+  ctx.fillStyle = t.ink;
+  ctx.font = shotFont(42, 800);
+  ctx.fillText("chizz", PAD, top + 40);
+  ctx.fillStyle = t.muted;
+  ctx.fillText(fitLine(ctx, shotLine(), room, 21, 600), PAD, top + 74);
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(PAD, top + 100);
+  ctx.lineTo(W - PAD, top + 100);
+  ctx.stroke();
+}
+
+function shotFoot(ctx, t, W, y){
+  ctx.textAlign = "center";
+  ctx.fillStyle = t.muted;
+  ctx.font = shotFont(21, 700);
+  ctx.fillText("chizz.party", W / 2, y);
+}
+
+function shotCanvas(W, H, t){
+  const cv = document.createElement("canvas");
+  cv.width = W * SHOT;
+  cv.height = H * SHOT;
+  const ctx = cv.getContext("2d");
+  ctx.scale(SHOT, SHOT);
+  ctx.fillStyle = t.bg;
+  ctx.fillRect(0, 0, W, H);
+  return { cv: cv, ctx: ctx };
+}
+
+/* The whole round: four across, the answer and the word under each drawing. */
+function shotBoard(){
+  const t = shotTheme();
+  const COLS = 4, CELL = 236, GAP = 18, PAD = 44, CAP = 76, HEAD = 132, FOOT = 72;
+  const rows = Math.ceil(N / COLS);
+  const W = PAD * 2 + COLS * CELL + (COLS - 1) * GAP;
+  const H = PAD + HEAD + rows * (CELL + CAP) + (rows - 1) * GAP + FOOT;
+  const c = shotCanvas(W, H, t);
+  const ctx = c.ctx;
+  shotHead(ctx, t, W, PAD, PAD);
+  order.forEach(function(di, pos){
+    const x = PAD + (pos % COLS) * (CELL + GAP);
+    const y = PAD + HEAD + Math.floor(pos / COLS) * (CELL + CAP + GAP);
+    shotTile(ctx, t, x, y, CELL, di, String(pos + 1));
+    const cx = x + CELL / 2;
+    let line = y + CELL + 30;
+    if (!isCorrect(picks[pos], words[di])){
+      const said = (picks[pos] && String(picks[pos]).trim()) || "\u2014";
+      shotCap(ctx, said, cx, line, CELL, 21, t.no, true);
+      line += 29;
+    }
+    shotCap(ctx, words[di], cx, line, CELL, 23, t.ok, false);
+  });
+  shotFoot(ctx, t, W, H - 30);
+  return c.cv;
+}
+
+/* One drawing, as the zoom shows it. Before the round is guessed there is nothing to
+   tell, so the picture keeps the word to itself as well. */
+function shotOne(pos){
+  const t = shotTheme();
+  const di = order[pos];
+  const PAD = 44, TILE = 560, HEAD = 132, FOOT = 72;
+  const ok = isCorrect(picks[pos], words[di]);
+  const lines = viewOnly ? 0 : (ok ? 1 : 2);
+  const W = PAD * 2 + TILE;
+  const H = PAD + HEAD + TILE + (lines ? 26 + lines * 42 : 0) + FOOT;
+  const c = shotCanvas(W, H, t);
+  const ctx = c.ctx;
+  shotHead(ctx, t, W, PAD, PAD);
+  shotTile(ctx, t, PAD, PAD + HEAD, TILE, di, String(pos + 1));
+  let line = PAD + HEAD + TILE + 60;
+  if (lines === 2){
+    const said = (picks[pos] && String(picks[pos]).trim()) || "\u2014";
+    shotCap(ctx, said, W / 2, line, TILE, 30, t.no, true);
+    line += 44;
+  }
+  if (lines) shotCap(ctx, words[di], W / 2, line, TILE, 36, t.ok, false);
+  shotFoot(ctx, t, W, H - 30);
+  return c.cv;
+}
+
+// Named after the round it came from, in characters every phone can keep.
+function shotName(suffix){
+  const what = isDaily && dailyDay ? dailyDateLabel(dailyDay).replace(/\//g, "-")
+             : (lastCode || "cizim");
+  return "chizz-" + what + (suffix || "") + ".png";
+}
+
+/* Saving it. download is what keeps the file; where that is missing -- an older iPhone --
+   the picture is opened instead, to be kept with a long press. */
+function saveCanvas(cv, name, then){
+  const done = function(){ if (then) then(); };
+  const hand = function(url, temp){
+    done();
+    const a = document.createElement("a");
+    if (typeof a.download === "string"){
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      if (temp) setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+      return;
+    }
+    window.open(url, "_blank");           // the new tab is using the url, so it stays
+  };
+  try {
+    if (cv.toBlob){
+      cv.toBlob(function(b){
+        if (b) hand(URL.createObjectURL(b), true);
+        else hand(cv.toDataURL("image/png"), false);
+      }, "image/png");
+      return;
+    }
+    hand(cv.toDataURL("image/png"), false);
+  } catch(e){ done(); }             // nothing saved is better than a button stuck saying so
+}
+
+// The drawing takes no time; the encoding does, so the button is held while it runs and
+// the screen is given a frame to show that before the thread goes.
+function saveFrom(btn, make, name){
+  if (btn.disabled) return;
+  const was = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = TEXT.preparing;
+  setTimeout(function(){
+    saveCanvas(make(), name, function(){
+      btn.disabled = false;
+      btn.textContent = was;
+    });
+  }, 30);
+}
+
+$("saveShot").onclick = function(){
+  saveFrom(this, shotBoard, shotName(""));
+};
+$("zoomSave").onclick = function(){
+  if (zoomPos < 0) return;
+  const pos = zoomPos;
+  saveFrom(this, function(){ return shotOne(pos); }, shotName("-" + (pos + 1)));
+};
+
 /* ------------------------------------------------------------------ zoom --- */
 
+let zoomPos = -1;
+
 function openZoom(pos){
+  zoomPos = pos;
   const di = order[pos];
   paintPreview($("zoomPrev"), di);
   const cap = $("zoomCap");

@@ -345,7 +345,33 @@ The round is also timed: the clock runs from the recall grid first appearing to 
 finish button, survives a reload, and is shown beside the score and used to break
 ties on the board.
 
-## 11. Share text
+## 11. Taking the round away
+
+### The picture
+
+`görsel olarak indir` on the result screen saves the whole round as one PNG, and
+`bu çizimi indir` in the zoom saves a single drawing with its answer. Both are drawn on
+a canvas rather than screenshotted: the grid scrolls on a phone, so a screenshot gets a
+round in pieces and carries the browser along with it.
+
+- Four drawings across, five down, each on its paper square with the number the grid
+  showed. Under each: the answer given, struck through in red where it was wrong, then
+  the word in green. A right answer is the word alone.
+- The head carries what the result screen leads with — `chizz`, whose drawings, which
+  day, how it was played, how long it took, the score and the name — and the foot says
+  `chizz.party`.
+- Whichever theme is on is the theme of the picture: the colours are read from the CSS
+  variables as it is drawn.
+- Drawn at twice the size: 2172 × 3760 for a full round, about 470 KB. Drawing costs
+  2 ms and encoding the PNG about a second, long enough to look broken, so the button
+  holds and says `hazırlanıyor…` until the file is handed over.
+- A long word is set smaller before it is cut with an ellipsis, so answers stay readable.
+- Saved through a link with `download`; where that attribute is missing — an older
+  iPhone — the picture is opened in a tab instead, to be kept with a long press.
+- Before a round has been guessed the zoom tells nothing, and neither does its picture:
+  the drawing goes out on its own, without the word.
+
+### Share text
 
 The share button copies to the clipboard, falling back to a selectable text box when the
 clipboard API is unavailable — which is the case over plain HTTP, so the fallback is
