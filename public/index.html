@@ -3675,8 +3675,28 @@ function fillBoard(box, list, opens){
 }
 
 /* The board under a round's drawings. */
+/* The name this device's row was written under before it was changed, while a board may
+   still be showing it. Renaming moves the row on the server, but the board in hand is the
+   one from before: the score just re-posted has not come back yet, and the summary every
+   reader gets is cached for half a minute. Beside the new name that made one player look
+   like two rows with the same score and the same time -- so the old name is held back
+   until a board arrives without it. */
+let renamedFrom = "", renamedOn = "", renamedAt = 0;
+// Long enough to outlast the half-minute the board is cached for, short enough that a
+// different player who happens to take that name is not hidden for any length of time.
+const RENAME_GRACE = 60 * 1000;
+
 function renderScores(){
-  const liste = rankScores(scores);
+  if (renamedFrom && renamedOn !== boardUrl()) renamedFrom = "";      // a different board
+  if (renamedFrom && Date.now() - renamedAt > RENAME_GRACE) renamedFrom = "";
+  const hiding = !!renamedFrom && !!myName && !viewOnly;
+  const liste = rankScores(scores).filter(function(s){
+    return !(hiding && sameName(s.name, renamedFrom));
+  });
+  // The move has landed once the board itself stops carrying the old name.
+  if (renamedFrom && !scores.some(function(s){ return sameName(s.name, renamedFrom); })){
+    renamedFrom = "";
+  }
   // Always show your own row: KV listing is eventually consistent, so a score
   // just written may not be in the list yet.
   if (myName && !viewOnly && !liste.some(function(s){ return sameName(s.name, myName); })){
@@ -4396,6 +4416,13 @@ $("nameSave").onclick = function(){
   const was = myName;
   if (!setName($("nameField").value)){ $("nameField").focus(); return; }
   if (myName === was && scoreSent){ fillNameRow(); return; }   // nothing to do
+  // A row is already on the board under the old name, and the board will go on saying so
+  // until the move comes back to us.
+  if (was && scoreSent && !sameName(was, myName)){
+    renamedFrom = was;
+    renamedOn = boardUrl();
+    renamedAt = Date.now();
+  }
 
   syncRoundName();           // the round was saved before this name, or under an old one
   // Re-post under the new name. sendScore carries the old one and the row token, so

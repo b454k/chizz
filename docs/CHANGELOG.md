@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-28 — one score, not two, when the name changes
+
+Reported: changing a name made the score appear twice in günün skorları.
+
+Nothing was wrong with the stored board — every row on the live boards has its token and
+the server moves a row correctly. The duplicate was on screen. `renderScores` always adds
+this device's own row, since a freshly written score may not be listed yet; after a
+rename the board in hand still carried the old name, so the old row and the added one sat
+there together, the same score and the same time twice. It lasted as long as the re-post
+took — and a poll in the meantime brings back the summary, which readers get from a
+half-minute cache, so it could keep coming back.
+
+- The name the row was written under is now held back until a board arrives without it,
+  on that board only and for at most a minute, so a different player who happens to hold
+  that name is not hidden.
+
+Reproduced with the network slowed to 2.5 seconds a request: two rows before, one
+throughout after, and another player's row under the old name stays visible.
+
 ## 2026-09-28 — the picture can reach the photo library
 
 Reported: on an iPhone the saved picture went to Dosyalar and never appeared in the

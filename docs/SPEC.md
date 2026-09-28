@@ -628,7 +628,15 @@ the name on the round already saved rather than saving a second copy.
 Changing it does three things: stores the new name, renames the round this device
 saved, and re-posts the score. **The board row moves rather than multiplying**: the
 score endpoint accepts the previous name along with a token it handed the writer when
-the row was created, and only that token can move a row. Without it a caller can add
+the row was created, and only that token can move a row.
+
+**On screen the old name is held back while the move is in flight.** The board in hand is
+the one from before -- the re-post has not come back yet, and the summary every reader
+gets is cached for half a minute -- so the row under the old name would sit there beside
+the new one, the same score and the same time twice, which is what a player reads as their
+score having doubled. `renderScores` drops the name the row was written under until a
+board arrives without it, at most for a minute, and only on the board it was renamed on:
+another player who happens to hold that name is not hidden for longer than that. Without it a caller can add
 their own row but never remove anyone else's, so a stranger reading the board cannot
 delete a score by claiming to have been that player. The row keeps the finishing
 position it earned.
