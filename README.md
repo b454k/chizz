@@ -1,79 +1,85 @@
-# Chizz
+<p align="center">
+  <img src="docs/chizz-showreel.gif" alt="A round of chizz: twenty words drawn against the clock, then matched back to the drawings" width="560">
+</p>
 
-A drawing and memory game that runs in the browser.
-**Play at [chizz.party](https://chizz.party)**
+<h1 align="center">chizz</h1>
 
-You get 20 words, a couple of seconds each, and scribble something for every one.
-Then the drawings come back in a shuffled grid and you have to remember which was
-which. The words in a round are picked to share silhouettes — `fil` and `kanepe` are
-the same rough shape — so your own drawings turn against you.
+<p align="center">
+  A drawing and memory game, in Turkish.<br>
+  <b>Play at <a href="https://chizz.party">chizz.party</a></b>
+</p>
 
-You can also send a round to a friend. They guess your drawings and land on a live
-score board for that round.
+---
 
-The interface is in Turkish.
+Twenty words arrive one at a time, three seconds each, and you scribble something for
+every one. Then your drawings come back shuffled and you have to say which was which.
 
-> **Work in progress.** It works and people are playing it, but the timing
-> defaults have not been tested on real players yet and there is no English edition.
+The catch: the words in a round are picked to share a silhouette — `fil` and `koltuk`
+are the same rough shape — so your own drawings turn against you.
 
-## How to play
+## The two games
 
-1. Pick a mode, set the seconds per word if you want, and press start
-2. Draw all 20 words — the timer advances on its own, there is no way back
-3. Either guess your own drawings, or send them to a friend
-4. Assign a word to each drawing, then finish
+**günlük** — the same twenty words for everyone, once a day, with a board to land on.
 
-Nothing is asked before you start. A name is only needed to send a round to someone
-or to take a place on a score board, so it is asked at those points and nowhere else.
+**sınırsız** — as many rounds as you like, dealt to your device so words do not repeat.
 
-Two modes, and the clock set separately. Answering is either picking from a pool of the
-remaining words or typing the word yourself; the time per word is a slider from 1 to 10
-seconds, defaulting to 2.5. There is also a dark or light theme. All of it is remembered
-on the device.
+Either one can be sent to a friend as a link. They guess your drawings and appear on a
+live score board for that round. When it is over, `görsel olarak indir` saves the whole
+round — every drawing, every answer, every right word — as one picture to keep or send.
 
-Typed answers forgive a one-character typo, so `kanepa` still counts for `kanepe`.
+## Playing
 
-## Running it locally
+1. Press **çiz** for the day, or **başla** for an unlimited round
+2. Draw all twenty — the clock moves on by itself, there is no going back
+3. Guess your own drawings, or send them to someone
+4. Choose **kolay** (match the words to the drawings) or **zor** (type them yourself),
+   then finish
 
-Solo play needs nothing at all — open `public/index.html` in a browser.
+Nothing is asked before you start. A name is wanted only to share a round or join a
+board, so it is asked then and never again. Typed answers forgive one typo: `koltok`
+still counts for `koltuk`.
 
-The duel and score board need the API, which means the Cloudflare toolchain:
+No account, no login, no tracking, no cookie banner, nothing loaded from anywhere else.
+
+## The words
+
+713 words in 15 **silhouette families** — the shape a thing draws as, not what it is, so
+a lion and a sofa can share a round. A word does not come back for 14 days. The same
+words are also sorted by subject, 20 of them, in
+[docs/CATEGORIES.md](docs/CATEGORIES.md).
+
+## Running it
+
+Solo play needs nothing: open `public/index.html` in a browser. Links and score boards
+need the API:
 
 ```bash
 npx wrangler pages dev
 ```
 
-Then open `http://localhost:8788`. On Windows, `start.cmd` does the same thing on a
-double-click. If your project path is long, workerd may fail with `SQLITE_CANTOPEN`
-because the local state directory exceeds the 260-character path limit — pass
-`--persist-to C:/wr` to work around it.
+Then `http://localhost:8788` — or double-click `start.cmd` on Windows. If the project
+path is long, workerd fails with `SQLITE_CANTOPEN`; pass `--persist-to C:/wr`.
 
-Deploying needs your own Cloudflare account, a KV namespace bound as `GAMES`, and its
-id in `wrangler.jsonc`. Full steps: [docs/DEPLOY.md](docs/DEPLOY.md).
+Deploying needs a Cloudflare account and a KV namespace bound as `GAMES`:
+[docs/DEPLOY.md](docs/DEPLOY.md).
 
-## Tech
+## How it is built
 
-- One `public/index.html` — HTML, CSS and vanilla JavaScript in a single file. No
-  framework, no build step, no dependencies, nothing loaded from a CDN.
-- Drawings are stored as stroke coordinate arrays normalised to 0–1, never as images,
-  so they rescale cleanly into small grid cells. For transport they are quantised to
-  0–255 integers with near-duplicate points dropped.
-- Pointer events with `touch-action: none`, so it is drawable with a finger on a phone
-  without scrolling the page.
-- [Cloudflare Pages](https://pages.cloudflare.com/) for hosting, Pages Functions for
-  the API, Workers KV for storage. Saved rounds expire after 30 days.
-- Pasting a round into a chat shows its drawings: the preview image is a PNG encoded
-  by hand from the stored strokes, no image library and nothing stored for it.
-- No account, no login, no tracking. Stored on the server: the words, the drawings, the
-  mode, the seconds per word and a name of up to 10 characters. Stored in the browser:
-  your name, your settings, and rounds in progress so a reload does not lose your game.
+- **One file.** `public/index.html` is the whole game — HTML, CSS and plain JavaScript.
+  No framework, no build step, no dependencies, nothing from a CDN.
+- **Drawings are strokes, not images**: coordinate arrays normalised to 0–1, quantised
+  to bytes for transport, so they redraw cleanly at any size — a grid cell, a zoom, or
+  a downloaded picture.
+- [Cloudflare Pages](https://pages.cloudflare.com/) for hosting, Pages Functions for the
+  API, Workers KV for storage. Rounds expire after 30 days.
+- Paste a link into a chat and the preview shows the drawings: the PNG is encoded by
+  hand from the stored strokes, with no image library.
+- The server keeps the words, the drawings, the mode, the seconds and a name of up to
+  ten characters. Your device keeps your name, your settings and rounds in progress, so
+  a reload does not cost you a game.
 
 ## Docs
 
-- [docs/SPEC.md](docs/SPEC.md) — what the game actually does right now, written from
-  the code
-- [docs/DEPLOY.md](docs/DEPLOY.md) — hosting and deployment setup
-- [docs/CHANGELOG.md](docs/CHANGELOG.md)
-- `docs/chizz-original-spec.md` and `docs/chizz-v15-spec.md` — the original design
-  briefs, translated from Turkish and kept as historical documents. The code has moved
-  well past them; SPEC.md lists where they disagree.
+- [docs/SPEC.md](docs/SPEC.md) — what the game does today, written from the code
+- [docs/WORDS.md](docs/WORDS.md) and [docs/CATEGORIES.md](docs/CATEGORIES.md) — the pool
+- [docs/DEPLOY.md](docs/DEPLOY.md) · [docs/CHANGELOG.md](docs/CHANGELOG.md)
