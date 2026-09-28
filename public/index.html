@@ -1410,7 +1410,7 @@ const TEXT = {
   dailyScores:      "günün skorları",
   dailyBoardTitle:  "günün skorları · {date}",
   dailyNote:        "herkes bugün aynı 20 kelimeyi çiziyor. kelimeler gizli, 3 sn.",
-  dailyMode:        "kelimeler gizli · 3 sn",
+  dailyTime:        "3 sn",
   gateTitle:        "önce sen çiz",
   gateBody:         "bugün herkes aynı kelimeleri çiziyor. arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. önce sen çiz, sonra tahmin et.",
   pickTitle:        "şimdi ne olsun?",
@@ -2186,7 +2186,7 @@ function buildDailyRow(){
   $("dailyDate").textContent = dailyDateLabel(day);
   $("dailyState").textContent = rec.done
     ? TEXT.dailyPlayed + " " + rec.score + "/" + N
-    : TEXT.dailyMode;
+    : TEXT.dailyTime;
   if (rec.done){
     go.textContent = TEXT.dailyScores;
     go.classList.add("done");
