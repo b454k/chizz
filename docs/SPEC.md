@@ -365,8 +365,8 @@ ties on the board.
 
 ### The picture
 
-`görsel olarak indir` on the result screen saves the whole round as one PNG, and
-`bu çizimi indir` in the zoom saves a single drawing with its answer. Both are drawn on
+`görseli kaydet` on the result screen saves the whole round as one PNG, and
+`bu çizimi kaydet` in the zoom saves a single drawing with its answer. Both are drawn on
 a canvas rather than screenshotted: the grid scrolls on a phone, so a screenshot gets a
 round in pieces and carries the browser along with it.
 
@@ -382,8 +382,15 @@ round in pieces and carries the browser along with it.
   2 ms and encoding the PNG about a second, long enough to look broken, so the button
   holds and says `hazırlanıyor…` until the file is handed over.
 - A long word is set smaller before it is cut with an ellipsis, so answers stay readable.
-- Saved through a link with `download`; where that attribute is missing — an older
-  iPhone — the picture is opened in a tab instead, to be kept with a long press.
+- **A phone is offered the share sheet, a computer gets the file.** A download on an
+  iPhone lands in Dosyalar and the photo library never sees it, and no page may write to
+  that library itself; the sheet can, through `Fotoğraflara Kaydet`, and it also sends the
+  picture straight to a chat. So where `navigator.canShare({files})` says yes and the
+  device has a touch screen, the PNG goes to `navigator.share`. Closing the sheet is taken
+  as an answer and nothing is downloaded; any other refusal means the sheet never opened,
+  and the file is handed over instead.
+- Otherwise it is saved through a link with `download`; where that attribute is missing —
+  an older iPhone — the picture is opened in a tab instead, to be kept with a long press.
 - Before a round has been guessed the zoom tells nothing, and neither does its picture:
   the drawing goes out on its own, without the word.
 

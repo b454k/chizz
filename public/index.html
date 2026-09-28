@@ -1414,9 +1414,9 @@ const TEXT = {
 
 
   share:            "paylaş",
-  saveImage:        "görsel olarak indir",
+  saveImage:        "görseli kaydet",
   preparing:        "hazırlanıyor…",
-  saveDrawing:      "bu çizimi indir",
+  saveDrawing:      "bu çizimi kaydet",
   drawingsOf:       "{whose} çizimleri",
   copied:           "panoya kopyalandı ✓",
   copyFailedSelect: "kopyalanamadı — aşağıdaki metni seç:",
@@ -3312,10 +3312,21 @@ function shotName(suffix){
   return "chizz-" + what + (suffix || "") + ".png";
 }
 
-/* Saving it. download is what keeps the file; where that is missing -- an older iPhone --
-   the picture is opened instead, to be kept with a long press. */
+/* Saving it. A download on a phone lands in the files, not in the photos -- on an iPhone
+   it goes to Dosyalar and the gallery never sees it -- and no page may write to the photo
+   library itself. The share sheet may: it carries "Fotoğraflara Kaydet", and the same
+   sheet sends the picture straight to a chat, which is what it is usually for anyway. So
+   a phone is offered the sheet and everything else keeps the file, which is what a mouse
+   and a downloads folder expect. */
+function canShareFile(file){
+  return !!(navigator.canShare && navigator.share && navigator.maxTouchPoints > 0 &&
+            typeof File === "function" && navigator.canShare({ files: [file] }));
+}
+
 function saveCanvas(cv, name, then){
   const done = function(){ if (then) then(); };
+  // download is what keeps the file; where that attribute is missing -- an older iPhone --
+  // the picture is opened instead, to be kept with a long press.
   const hand = function(url, temp){
     done();
     const a = document.createElement("a");
@@ -3330,10 +3341,21 @@ function saveCanvas(cv, name, then){
     }
     window.open(url, "_blank");           // the new tab is using the url, so it stays
   };
+  const offer = function(b){
+    let file = null;
+    try { file = new File([b], name, { type: "image/png" }); } catch(e){ file = null; }
+    if (!file || !canShareFile(file)){ hand(URL.createObjectURL(b), true); return; }
+    navigator.share({ files: [file] }).then(done, function(e){
+      // Closing the sheet is an answer, and the picture is not wanted after all. Any
+      // other refusal means the sheet never opened, so the file is handed over instead.
+      if (e && e.name === "AbortError") done();
+      else hand(URL.createObjectURL(b), true);
+    });
+  };
   try {
     if (cv.toBlob){
       cv.toBlob(function(b){
-        if (b) hand(URL.createObjectURL(b), true);
+        if (b) offer(b);
         else hand(cv.toDataURL("image/png"), false);
       }, "image/png");
       return;

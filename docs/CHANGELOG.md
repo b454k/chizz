@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-28 — the picture can reach the photo library
+
+Reported: on an iPhone the saved picture went to Dosyalar and never appeared in the
+gallery. No page may write to the photo library, but the share sheet may, through
+`Fotoğraflara Kaydet` — and the same sheet sends the picture straight to a chat, which
+is what it is usually wanted for.
+
+- A device with a touch screen whose `navigator.canShare({files})` says yes is offered
+  the sheet; everything else keeps the download, which is what a mouse and a downloads
+  folder expect.
+- Closing the sheet is an answer: nothing is downloaded behind it. Any other refusal
+  means the sheet never opened, so the file is handed over as before.
+- The buttons are `görseli kaydet` and `bu çizimi kaydet` now, since on a phone they no
+  longer only download.
+
 ## 2026-09-28 — the name is asked where it is used
 
 The card that asked for a name right after the first round drawn is gone. It asked
