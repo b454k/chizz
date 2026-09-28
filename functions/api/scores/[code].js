@@ -84,6 +84,21 @@ function mergeBoards(summary, scanned) {
   return rank(Array.from(known.values())).slice(0, MAX_PLAYERS);
 }
 
+/* Repairing is not the same as reading, and it only happens when the summary is at least
+   REPAIR_AFTER old. Writing a row writes the summary in the same request, so by the time a
+   repair runs every row that belongs on the board has been listable for minutes -- far
+   longer than the minute or so a listing lags. A name the keys no longer have has
+   therefore gone: renamed away, or expired. Keeping it is how a row a player renamed came
+   back and stayed: the summary read here can itself be a cached copy from before the
+   rename, and merging it with a listing that had not caught up yet put the old name back
+   and wrote it down. So a repair takes the keys as they are.
+
+   Unless the listing hit its limit, where it may be short of rows it never reached: then
+   the old merge stands, which never drops anybody. */
+function repairBoard(summary, scanned) {
+  return scanned.length >= MAX_PLAYERS ? mergeBoards(summary, scanned) : rank(scanned.slice());
+}
+
 function writeBoard(env, code, scores) {
   return env.GAMES.put(
     code + ":board",
@@ -150,17 +165,13 @@ export async function onRequestGet({ params, request, env }) {
   // A summary written while listing was lagging can be missing players outright;
   // this is what puts them back, and without it an incomplete board would stay
   // incomplete until somebody happened to finish the round again.
-  const merged = mergeBoards(summary, await scanBoard(env, code));
-  const had = summary && Array.isArray(summary.scores) ? summary.scores.length : 0;
-
-  // Never persist a board smaller than the one just read. If listing is lagging and
-  // the summary read was stale, the merge can come back short or empty, and writing
-  // that back would delete players rather than restore them.
-  if (merged.length > 0 && merged.length >= had) {
-    await writeBoard(env, code, merged);
-    return json({ scores: merged });
+  const repaired = repairBoard(summary, await scanBoard(env, code));
+  // An empty result means the listing failed or lagged completely; the summary stands.
+  if (repaired.length > 0) {
+    await writeBoard(env, code, repaired);
+    return json({ scores: repaired });
   }
-  return json({ scores: had ? rank(summary.scores) : merged });
+  return json({ scores: rank(summary.scores) });
 }
 
 export async function onRequestPost({ params, request, env }) {

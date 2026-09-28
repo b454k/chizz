@@ -630,6 +630,16 @@ saved, and re-posts the score. **The board row moves rather than multiplying**: 
 score endpoint accepts the previous name along with a token it handed the writer when
 the row was created, and only that token can move a row.
 
+**A repair trusts the keys, not the summary it was reading.** A read older than five
+minutes rebuilds the board from the per-player keys. It used to merge them with the
+summary, keeping anyone either source had -- and since the summary a reader gets can be a
+cached copy from before a rename, that merge put the renamed-away row back and wrote it
+down, where it stayed. Writing a row writes the summary in the same request, so by the
+time a repair runs every row that belongs on the board has been listable for minutes: a
+name the keys no longer have has gone. The merge still stands when the listing hits its
+200-row limit, where it may be short of rows it never reached, and an empty listing never
+overwrites the summary.
+
 **On screen the old name is held back while the move is in flight.** The board in hand is
 the one from before -- the re-post has not come back yet, and the summary every reader
 gets is cached for half a minute -- so the row under the old name would sit there beside

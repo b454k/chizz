@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-09-28 — the renamed row came back, and stayed
+
+The screen fix earlier today was only half of it: the duplicate was also being written
+down. The owner's board showed `bsk` and `basak`, same score, same time — while the
+per-player keys held one row, `bsk`, with the token and the finishing time carried over
+from `basak`. The server had moved the row correctly. The summary every reader gets had
+two.
+
+The repair path put it there. A read of a summary older than five minutes rebuilds the
+board from the keys and merges it with the summary, keeping whoever either source has —
+and the summary it reads can be a cached copy from before the rename, while the listing
+can still be carrying the key the rename deleted. Merging those two put `basak` back and
+wrote it down, and from then on every reader saw it.
+
+- **A repair now takes the keys as they stand.** Writing a row writes the summary in the
+  same request, so when a repair runs every row that belongs has been listable for
+  minutes: a name the keys do not have has gone.
+- The merge still stands when the listing hits its 200-row limit, and an empty listing
+  never overwrites the summary — the two cases the old guard was there for.
+
+Checked against the exact state: a day-old summary saying `basak` beside keys saying
+`bsk` wrote `basak, bsk` before and writes `bsk` now. The live board was rewritten by
+hand to match its keys.
+
 ## 2026-09-28 — one score, not two, when the name changes
 
 Reported: changing a name made the score appear twice in günün skorları.
