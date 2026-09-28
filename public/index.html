@@ -890,7 +890,7 @@
 <div id="confirm">
   <div id="confirmCard">
     <b data-t="leaveTitle"></b>
-    <p data-t="leaveBody"></p>
+    <p id="confirmBody" data-t="leaveBody"></p>
     <button class="primary" id="confirmStay" data-t="stay"></button>
     <button class="ghost" id="confirmLeave" data-t="leave"></button>
   </div>
@@ -1409,6 +1409,7 @@ const TEXT = {
 
   leaveTitle:       "oyundan çıkılsın mı?",
   leaveBody:        "çizimlerin ve cevapların kaybolur.",
+  leaveBodyGuess:   "cevapların duruyor. linke yeniden girersen kaldığın yerden devam edersin.",
   finishTitle:      "bitirdin mi?",
   finishBody:       "yanlışlıkla tıklamadığından emin oluyorum",
   keepGuessing:     "tahmine devam et",
@@ -1777,7 +1778,9 @@ function restoreEntry(st){
       if (s === "send"){ openShareScreen("home"); return; }
       if (s === "pick"){ showPick(); return; }
       if (s === "gate"){ show("gate"); return; }
-      if (s === "choose"){ showChoose(); return; }
+      // Once guessing has begun the mode is settled: going back to the question would let
+      // a round begun in kolay, with the words in front of you, be begun again in zor.
+      if (s === "choose"){ if (recallStart) buildRecall(); else showChoose(); return; }
       if (s === "answers" && st.who){ openAnswers(st.who); return; }
     }
     loadGame(st.code, s, st.who);
@@ -1804,6 +1807,18 @@ window.addEventListener("popstate", function(e){
   if ($("between").classList.contains("on")){
     closeOverlays();
     show("home");
+    return;
+  }
+  // Guessing is not something to step out of by accident either, and the step landed on
+  // the kolay/zor question -- which, once the words have been seen in kolay, is a way to
+  // begin again in zor already knowing them. The entry goes back and the question is the
+  // one the arrow on this screen asks: çık, or oyuna dön.
+  if ($("recall").classList.contains("on") && !leavingRound){
+    try {
+      history.pushState({ screen: "recall", code: lastCode, depth: ((e.state && e.state.depth) || 0) + 1 },
+                        "", historyUrl("recall"));
+    } catch (err) {}
+    askExit();
     return;
   }
   leavingRound = false;
@@ -2836,6 +2851,12 @@ function resumeTimer(){
 
 function askExit(){
   pauseTimer();
+  // Leaving a drawing loses it; leaving the guessing does not, since every answer is
+  // written down as it is given and the link comes back to them. The question is the same
+  // one either way, so it says which of the two this is.
+  $("confirmBody").textContent = $("recall").classList.contains("on")
+    ? TEXT.leaveBodyGuess
+    : TEXT.leaveBody;
   $("confirm").classList.add("on");
 }
 

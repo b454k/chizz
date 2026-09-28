@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-28 — the way back out of kolay
+
+Reported: guessing a friend's round in kolay, the browser's back button returned to the
+kolay/zor question — so the round could be begun again in zor with the words already
+seen, and the answers picked from the list still written under the drawings.
+
+- **Back out of guessing asks**, the way the arrow on that screen already did: `çık` or
+  `oyuna dön`.
+- **The mode is settled once guessing begins.** A `choose` entry in the history now opens
+  the grid instead of the question when the round has been started; every other way in
+  already worked that way.
+- The dialog tells the truth about each case: leaving a drawing loses it, leaving the
+  guessing does not, since the answers are written down as they are given.
+
+Checked: two answers picked in kolay, back asks and stays put; `oyuna dön` keeps the
+round; `çık` goes to the start screen; walking back from there never reaches the question
+again; reopening the link resumes kolay with both answers. Backing out of a drawing still
+asks, with its own wording.
+
 ## 2026-09-28 — how it is played, shown to the people who arrive by a link
 
 `nasıl oynanır?` showed itself on the start screen to a device that had never played, and

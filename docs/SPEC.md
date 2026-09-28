@@ -328,6 +328,22 @@ Finishing is always enabled in both modes; anything left blank counts as wrong.
 Cells are repainted through a `ResizeObserver`, so drawings still render correctly if
 the grid is built before the page has been laid out.
 
+### Leaving a round
+
+The back button is caught on the two screens a round is played on. **While drawing** the
+round's entry is put back and `oyundan çıkılsın mı?` asked, since a half-drawn round is
+not something to step out of by accident. **While guessing** the same question is asked,
+for a different reason: the step back landed on the kolay/zor question, and a round begun
+in kolay -- with the words listed in front of you -- could be begun again in zor already
+knowing them, with the answers picked from the list still written under the drawings. The
+question is settled once guessing begins: `restoreEntry` sends a `choose` entry to the
+grid instead when the round has been started (`recallStart`), and every other way in
+already did the same.
+
+The dialog says which of the two it is. Leaving a drawing loses it; leaving the guessing
+does not, since every answer is written down as it is given and the link comes back to
+them, so the second case says so rather than threatening a loss that will not happen.
+
 ### The width of things
 
 The game is a column 600px wide down the middle of the window. That column used to be the
