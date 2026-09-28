@@ -256,7 +256,10 @@
 
   /* countdown */
   #countdown{align-items:center; justify-content:center;}
-  #cdNum{font-size:26vh; font-weight:800; line-height:1; letter-spacing:-.05em;}
+  /* The screen centres this by flex, which only worked while the box was as wide as the
+     number. It is as wide as the screen now, like every other child of a screen, so the
+     number is centred in it rather than by it. */
+  #cdNum{font-size:26vh; font-weight:800; line-height:1; letter-spacing:-.05em; text-align:center;}
   #cdNum.pop{animation:pop .28s ease-out;}
   @keyframes pop{from{transform:scale(.6); opacity:.2} to{transform:scale(1); opacity:1}}
 
@@ -324,6 +327,10 @@
   #counter{font-variant-numeric:tabular-nums; color:var(--muted); font-weight:700; font-size:15px;}
   #track{height:6px; background:var(--line); border-radius:99px; margin:10px 0 12px; overflow:hidden;}
   #bar{height:100%; background:var(--accent); transform-origin:left center; transform:scaleX(1);}
+  #clearPad{
+    display:block; width:auto; margin:8px auto 0; border:2px solid var(--line); border-radius:999px;
+    padding:5px 14px; font-size:13px; font-weight:700; color:var(--muted); background:var(--panel);
+  }
   #stage{flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding-bottom:14px;}
   #pad{background:var(--paper); border:2px solid var(--line); border-radius:16px; touch-action:none; display:block;}
 
@@ -487,7 +494,11 @@
   #zoomClose{max-width:220px; margin:0 auto;}
   /* over the dimmed grid, so it needs a back of its own */
   #zoomSave{max-width:220px; margin:0 auto 10px; background:var(--panel);}
-  #saveShot{margin:0 0 10px;}
+  #chooseName{margin:0 0 18px; text-align:left;}
+  #chooseName .txt{margin:0;}
+  #chooseName .shint{margin:6px 0 0;}
+  #chooseNameErr{margin:6px 0 0;}
+  #saveShot{margin:2px 0 4px;}
   .cell.tappable{cursor:pointer;}
 
   /* duel: send screen */
@@ -655,6 +666,16 @@
     <div class="stack">
       <h2 id="chooseTitle"></h2>
       <p id="chooseBody"></p>
+      <!-- A friend's round ends on a score board, so the name that will sit on it is asked
+           here, on the way in. Asked afterwards it was a field under a score nobody was
+           looking for any more, and the round went up under nobody. -->
+      <div id="chooseName" hidden>
+        <p class="nlabel" data-t="askNameLabel"></p>
+        <input class="txt" id="chooseNameField" maxlength="10" data-tph="nameHint"
+               autocorrect="off" spellcheck="false" enterkeyhint="done">
+        <p class="shint" data-t="askNameWhy"></p>
+        <p class="err" id="chooseNameErr"></p>
+      </div>
       <div class="diffs" id="chooseModes"></div>
       <button class="ghost" id="chooseHome" data-t="home"></button>
     </div>
@@ -698,6 +719,9 @@
       <div id="counter">1 / 20</div>
     </div>
     <div id="track"><div id="bar"></div></div>
+    <!-- A scribble that went wrong, with seconds left to redo it. Above the paper, where
+         a thumb is not about to draw. -->
+    <button id="clearPad" data-t="clearPad"></button>
     <div id="stage"><canvas id="pad"></canvas></div>
   </section>
 
@@ -812,6 +836,8 @@
     <p class="lvl" id="scoreSub"></p>
     <div id="score"></div>
     <div class="scroll"><div class="grid" id="resultGrid"></div></div>
+    <!-- Under the drawings it is about: every answer, and the word each one was. -->
+    <button class="ghost" id="saveShot" data-t="saveImage"></button>
     <div style="padding-top:8px">
       <!-- Outside the board, so the name can be set even on a round that has no
            score table: it still decides what a shared link says. -->
@@ -842,8 +868,6 @@
       <button class="primary" id="share" style="margin:0 0 6px" data-t="share"></button>
       <p id="copyNote"></p>
       <textarea id="fallback" rows="7" readonly></textarea>
-      <!-- Beside paylaş, which sends the score as text: this keeps the drawings. -->
-      <button class="ghost" id="saveShot" data-t="saveImage"></button>
       <button class="ghost" id="switchRound" hidden style="margin:0 0 10px"></button>
       <button class="ghost" id="reviewGuess" hidden style="margin:0 0 10px" data-t="guessMineToo"></button>
       <div class="btnrow">
@@ -1290,7 +1314,10 @@ const TEXT = {
   namePrompt:       "adın?",
   namePlaceholder:  "adın",
   continue:         "devam",
+  clearPad:         "ekranı temizle",
   enterName:        "önce adını yaz.",
+  askNameLabel:     "adın ne?",
+  askNameWhy:       "skor tablosunda bu adla görüneceksin.",
   joinBoard:        "katıl",
   saveName:         "kaydet",
   perWord:          "kelime başına süre",
@@ -1414,7 +1441,7 @@ const TEXT = {
 
 
   share:            "paylaş",
-  saveImage:        "görseli kaydet",
+  saveImage:        "cevaplarımı kaydet",
   preparing:        "hazırlanıyor…",
   saveDrawing:      "bu çizimi kaydet",
   drawingsOf:       "{whose} çizimleri",
@@ -1997,11 +2024,22 @@ function showChoose(){
     ? (drawerName ? TEXT.whatDidDraw.replace("{name}", drawerName) : TEXT.whatWasDrawn)
     : TEXT.chooseTitle;
   $("chooseBody").textContent = theirs ? TEXT.chooseTitle : "";
+  // Somebody else's round, and no name on this device yet: the board at the end of it is
+  // what the name is for, so it is asked before the guessing rather than after.
+  $("chooseName").hidden = !(theirs && !myName);
+  $("chooseNameField").value = "";
+  $("chooseNameErr").textContent = "";
   const box = $("chooseModes");
   box.innerHTML = "";
   MODES.forEach(function(m){
     const b = modeCard(m);
     b.onclick = function(){
+      // The name travels with the choice: one tap, not a second screen.
+      if (!$("chooseName").hidden && !setName($("chooseNameField").value)){
+        $("chooseNameErr").textContent = TEXT.enterName;
+        $("chooseNameField").focus();
+        return;
+      }
       modeId = m.id;
       rememberRound(lastCode, { modeId: m.id });
       // The day keeps it too: it decides which of the day's two boards the score joins,
@@ -2567,6 +2605,13 @@ function endStroke(e){
   e.preventDefault();
   live.delete(e.pointerId);
 }
+// Start this drawing again. The word and its clock carry on: the time lost is the point.
+$("clearPad").onclick = function(){
+  endStroke();                  // a finger still down is not left drawing on a clean page
+  strokes = [];
+  paintPad();
+};
+
 pad.addEventListener("pointerup", endStroke);
 pad.addEventListener("pointercancel", endStroke);
 pad.addEventListener("pointerleave", endStroke);
@@ -3492,6 +3537,7 @@ function buildResult(){
   // One way to hand the round on: paylaş, which copies the score and the link
   // together. A second button beside it only made the two look like different things.
   $("reviewGuess").hidden = true;
+  $("saveShot").hidden = false;
   $("nameBlock").hidden = false;
   fillNameRow();
   // Record the finish before the board goes up: opening this code again on this
@@ -3611,6 +3657,7 @@ function buildReview(){
   $("again").textContent = TEXT.playAgain;
   $("switchRound").hidden = true;
   $("reviewGuess").hidden = false;
+  $("saveShot").hidden = true;          // nothing answered yet, so nothing to save
   /* No name field here. This screen comes before the round has been guessed, and
      saving a name on it put a score of 0/20 on the board without a game being played.
      The name is asked on the result, where there is a score to put under it. */
@@ -4442,6 +4489,14 @@ $("nameSave").onclick = function(){
 
 $("nameField").addEventListener("keydown", function(e){
   if (e.key === "Enter"){ e.preventDefault(); $("nameSave").click(); }
+});
+
+// Enter here only puts the keyboard away: the choice below it is the button.
+$("chooseNameField").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); e.target.blur(); }
+});
+$("chooseNameField").addEventListener("input", function(){
+  $("chooseNameErr").textContent = "";
 });
 
 $("loadHome").onclick = function(){ show("home"); };

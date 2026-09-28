@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-28 — a name on the way in, and three smaller things
+
+- **A friend's link asks for a name before the guessing**, on the kolay/zor screen, when
+  the device has none. That round ends on a score board, and asked afterwards it was a
+  field under a score nobody was looking for any more, so the round went up under nobody.
+  The name travels with the choice: one tap, not a second screen. Both games, since a
+  daily round opened from a friend comes through the same screen.
+- **`görseli kaydet` is `cevaplarımı kaydet`**, and it sits under the drawings it is
+  about rather than at the foot of the screen among the ways out. Hidden on a round that
+  has not been guessed yet, where there are no answers to keep.
+- **`ekranı temizle`** on the drawing screen, between the clock and the paper: a scribble
+  that went wrong can be started again without losing the word. The clock runs on.
+- **The 3-2-1 is centred again.** Making the scrolling element full width gave every
+  child of a screen the full width too, and the countdown had been centred by being only
+  as wide as the number. It centres the number inside its box now.
+
 ## 2026-09-28 — arşiv keeps its order
 
 Reported: the rounds in arşiv shuffled instead of staying newest first.
