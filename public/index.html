@@ -286,20 +286,19 @@
   .chip2 .cl{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
 
   /* leave-game confirmation */
-  #confirm, #finishAsk, #timeAsk, #nameAsk, #fbAsk, #howAsk{
+  #confirm, #finishAsk, #timeAsk, #fbAsk, #howAsk{
     position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.62);
     display:none; align-items:center; justify-content:center; padding:16px;
   }
-  #confirm.on, #finishAsk.on, #timeAsk.on, #nameAsk.on, #fbAsk.on, #howAsk.on{display:flex;}
-  #confirmCard, #finishAskCard, #timeAskCard, #nameAskCard, #fbAskCard, #howAskCard{
+  #confirm.on, #finishAsk.on, #timeAsk.on, #fbAsk.on, #howAsk.on{display:flex;}
+  #confirmCard, #finishAskCard, #timeAskCard, #fbAskCard, #howAskCard{
     box-sizing:border-box;   /* the padding has to fit inside 100%, or the card runs off a narrow phone */
     background:var(--panel); border-radius:18px; padding:20px; width:100%; max-width:360px;
     box-shadow:0 20px 60px rgba(0,0,0,.28); text-align:center;
   }
-  #confirmCard b, #finishAskCard b, #timeAskCard b, #nameAskCard b, #fbAskCard b, #howAskCard b{display:block; font-size:19px; margin-bottom:6px;}
-  #confirmCard p, #finishAskCard p, #timeAskCard p, #nameAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
-  #nameAskCard .txt{margin:14px 0 0; text-align:center;}
-  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary, #nameAskCard .primary, #fbAskCard .primary, #howAskCard .primary{margin:14px 0 8px;}
+  #confirmCard b, #finishAskCard b, #timeAskCard b, #fbAskCard b, #howAskCard b{display:block; font-size:19px; margin-bottom:6px;}
+  #confirmCard p, #finishAskCard p, #timeAskCard p{color:var(--muted); font-size:14px; margin:0 0 4px;}
+  #confirmCard .primary, #finishAskCard .primary, #timeAskCard .primary, #fbAskCard .primary, #howAskCard .primary{margin:14px 0 8px;}
   /* nasıl oynanır: the loop is drawn at 600px square and shown at half, so it stays sharp
      on a phone. Its own dark background shows while it loads, in either theme. */
   #howGif{display:block; width:100%; max-width:300px; height:auto; aspect-ratio:1/1;
@@ -876,15 +875,6 @@
 
 <!-- Asked once, after the first drawing on a device. There is no way past it without a
      name: the score table and every shared line carry one. -->
-<div id="nameAsk">
-  <div id="nameAskCard">
-    <b data-t="nameAskTitle"></b>
-    <p data-t="nameAskBody"></p>
-    <input class="txt" id="nameAskField" maxlength="10" data-tph="namePlaceholder"
-           autocorrect="off" spellcheck="false" enterkeyhint="done">
-    <button class="primary off" id="nameAskGo" data-t="saveName"></button>
-  </div>
-</div>
 
 <!-- A bug report or a suggestion. What the page knows about where it was sent from goes
      with it, which is what a screenshot would mostly have been for. -->
@@ -1326,8 +1316,7 @@ const TEXT = {
   noAnswers:        "bu cevaplar kaydedilmemiş.",
   changeName:       "adını değiştirmek ister misin?",
   noStore:          "bu cihaz oyunu hatırlayamıyor. linki kaybetme: çizimlerine yalnızca o linkle dönebilirsin.",
-  nameAskTitle:     "adın ne?",
-  nameAskBody:      "skor tablolarında ve paylaştığın linklerde bu adla görüneceksin.",
+
   archiveUnsaved:   "henüz kaydedilmedi",
   nameHint:         "adını yaz",
   nameSaved:        "kaydedildi ✓",
@@ -1734,7 +1723,7 @@ function goBack(fallback){
    these were already closed here and the rest were not, which is how a card asking for a
    name came to be left standing over somebody else's round. */
 function closeOverlays(){
-  ["confirm", "finishAsk", "timeAsk", "nameAsk", "fbAsk", "howAsk"].forEach(function(id){
+  ["confirm", "finishAsk", "timeAsk", "fbAsk", "howAsk"].forEach(function(id){
     const el = $(id);
     if (el) el.classList.remove("on");
   });
@@ -1870,8 +1859,6 @@ function resumePending(rec){
   picks = new Array(N).fill(null);
   selPos = -1;
   show("between");
-  // A reload can land here with the name question unanswered; it is still required.
-  if (!myName) askName();
 }
 
 function drewToday(){
@@ -2720,9 +2707,6 @@ function nextWord(){
   }
   if (afterDraw === "pick"){ afterDraw = ""; showPick(); }
   else show("between");
-  // The first round drawn on a device is where a name is asked for, over whatever
-  // screen comes next. Once there is one it is never asked again.
-  if (!myName) askName();
 }
 
 // rAF stops while the tab is in the background. Push wordStart forward by the
@@ -4382,23 +4366,6 @@ function fillNameRow(){
 
 /* The name question after drawing. Required: the card has no way out but a name, and the
    screen behind it cannot be reached until one is given. */
-function askName(){
-  $("nameAskField").value = "";
-  $("nameAskGo").classList.add("off");
-  $("nameAsk").classList.add("on");
-  setTimeout(function(){ try { $("nameAskField").focus(); } catch (e) {} }, 60);
-}
-
-$("nameAskField").addEventListener("input", function(){
-  $("nameAskGo").classList.toggle("off", !$("nameAskField").value.trim());
-});
-$("nameAskField").addEventListener("keydown", function(e){
-  if (e.key === "Enter"){ e.preventDefault(); $("nameAskGo").click(); }
-});
-$("nameAskGo").onclick = function(){
-  if (!setName($("nameAskField").value)){ $("nameAskField").focus(); return; }
-  $("nameAsk").classList.remove("on");
-};
 
 $("nameSave").onclick = function(){
   // Nothing to post from a round that has not been played: the field is hidden there,

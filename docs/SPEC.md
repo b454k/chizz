@@ -597,11 +597,17 @@ where previously only an explicit share did. The free tier allows 1,000 writes a
 
 ## 16. Where the name is asked
 
-Once, required, right after the first round drawn on a device: the rounds it shares and
-the scores it posts all carry it. After that, on the result screen, under the grid,
-headed "adını değiştirmek ister misin?" when a name exists and "adın" when it does not
-(a guesser who has never drawn). The field is prefilled; the button reads katıl when
-there is no name yet and kaydet when there is.
+Where it is used, and nowhere else: the share screen, and the score board. Somebody who
+only ever plays alone is never asked and never has one; their rounds are saved with an
+empty name and their share text says `chizz 🎨` with nobody's name on it.
+
+On the result screen it sits under the grid, headed "adını değiştirmek ister misin?" when
+a name exists and "adın" when it does not. The field is prefilled; the button reads katıl
+when there is no name yet and kaydet when there is.
+
+A card asking for one, required, right after the first round drawn, was tried between
+17 and 28 September and taken out: it asked before the answer was needed, and a player
+who never shares anything has no use for a name.
 
 It sits outside the score board, so a round with no board of its own can still be
 named -- the name still decides what a shared link says.
@@ -620,8 +626,7 @@ their own row but never remove anyone else's, so a stranger reading the board ca
 delete a score by claiming to have been that player. The row keeps the finishing
 position it earned.
 
-A field on the start screen was tried first and moved here; it asked for a name in the
-one place it was not needed.
+A field on the start screen was tried before that and moved here, for the same reason.
 
 ### Which round a name belongs to
 

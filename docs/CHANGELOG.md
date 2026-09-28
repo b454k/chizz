@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-28 — the name is asked where it is used
+
+The card that asked for a name right after the first round drawn is gone. It asked
+before the answer was needed, and a player who never shares a round and never joins a
+board has no use for a name at all.
+
+- **Nothing is asked after drawing.** The name is wanted on the share screen, which now
+  asks whenever the device has none, and on the result screen to join a board.
+- A round played alone is saved with an empty name and its share text carries none.
+
 ## 2026-09-28 — a round that went out under somebody else's name
 
 Reported: a friend opened a shared link, played it, drew a round of his own and sent it
