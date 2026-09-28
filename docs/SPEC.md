@@ -305,15 +305,31 @@ having swapped places, by an amount that varied with screen size. The scroll off
 from before the sheet opened is therefore restored on close; it was reached with the
 padding collapsed, so it is always reachable again.
 
-**Typed mode**: tapping a drawing opens a card near the top of the
-screen — deliberately not a bottom sheet, so the phone keyboard cannot cover it —
-showing a large preview of the drawing, a text field, a save button and a skip button.
-Answers can be edited by tapping again. Passing is allowed.
+**Typed mode**: tapping a drawing opens a card up from the bottom of the screen with a
+large preview of the drawing, a text field, a save button and a skip button. Answers can
+be edited by tapping again. Passing is allowed.
+
+The card is as tall as the visual viewport and sits on top of the keyboard, and the
+preview is sized from that same space (`--sheet`) rather than from the window, which the
+keyboard does not change. Sized from the window the card came out taller than the room it
+had, so it scrolled, and the browser bringing the focused field into view carried the
+drawing up with it — a small jump every time a word was typed. The height left by the
+keyboard is remembered for as long as the phone is held the same way round, so every card
+after the first opens at the size it will keep.
 
 Finishing is always enabled in both modes; anything left blank counts as wrong.
 
 Cells are repainted through a `ResizeObserver`, so drawings still render correctly if
 the grid is built before the page has been laid out.
+
+### The width of things
+
+The game is a column 600px wide down the middle of the window. That column used to be the
+scrolling element, which meant a wheel did nothing anywhere else on a desktop or an iPad:
+either side of it was the body, which does not scroll. The screen is the full width of the
+window now — so a wheel or a drag anywhere moves the page — and it is what sits inside
+that is held to 600px and centred. The 16px side gutters moved from `#app` to `.screen`
+for the same reason: the scrolling element reaches the edge of the glass.
 
 ## 9. Answer matching
 

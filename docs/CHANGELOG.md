@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-28 — scrolling from anywhere, and a card that stays put
+
+Two things reported from a desktop and a phone.
+
+**The page would only scroll from the middle.** The game is a 600px column down the
+centre of the window, and that column was the scrolling element: on a desktop or an iPad
+everything either side of it was the body, which does not scroll, so the wheel did
+nothing there. The screen is now the full width of the window, and what sits inside it is
+what is held to 600px and centred. The side gutters moved from `#app` to `.screen` so the
+scrolling element reaches the edge of the glass. Nothing moved on a phone: the content is
+343px wide between 16px gutters, as before.
+
+**The drawing jumped when a word was typed.** In kelimeler gizli the answer card sized
+its preview against the window, which the keyboard does not change, so the card came out
+taller than the room it had and scrolled — and the browser bringing the focused field
+into view took the drawing up with it. The preview is sized from the space the keyboard
+leaves instead, and that height is remembered while the phone is held the same way round,
+so the second card onwards opens at the size it will keep. Measured with the keyboard
+faked at 340px: the card no longer overflows, and the drawing holds at 179px across the
+keyboard opening where it used to be resized and scrolled.
+
 ## 2026-09-28 — the round as a picture
 
 A round is twenty drawings and what everyone made of them, and until now the only way

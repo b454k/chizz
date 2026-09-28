@@ -77,12 +77,27 @@
     -webkit-text-size-adjust:100%;
   }
   #app{
-    max-width:600px; margin:0 auto; height:100%;
-    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    height:100%;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
     display:flex; flex-direction:column;
   }
-  .screen{display:none; flex:1; min-height:0; flex-direction:column;}
+  .screen{
+    display:none; flex:1; min-height:0; flex-direction:column;
+    padding-left:16px; padding-right:16px; box-sizing:border-box;
+  }
   .screen.on{display:flex;}
+
+  /* On a wide screen the game is a column down the middle, and it used to be that column
+     that scrolled: the wheel did nothing anywhere else, because everything either side of
+     it was the body, which does not scroll. So the scrolling element is the full width of
+     the window now -- a wheel or a drag anywhere in it moves the page -- and it is the
+     content inside that is held to a readable width and centred. Anything more specific
+     comes after this and still wins, which is how #home keeps its narrower column. */
+  .screen > *, .scroll > *{
+    width:100%; max-width:600px; margin-left:auto; margin-right:auto;
+  }
+  /* the scrolling one keeps the whole width; what is inside it is centred instead */
+  .screen > .scroll{max-width:none;}
   #home, #send, #result{overflow-y:auto; -webkit-overflow-scrolling:touch;}
 
   h1{font-size:34px; letter-spacing:-.02em; margin:24px 0 6px;}
@@ -424,8 +439,13 @@
     padding:18px 16px calc(18px + env(safe-area-inset-bottom));
     box-shadow:0 -14px 50px rgba(0,0,0,.45);
   }
+  /* Sized against the space the keyboard leaves -- --sheet -- rather than the window,
+     which the keyboard does not change. Sized against the window the card came out
+     taller than the room it had, so it scrolled, and the browser sliding the focused
+     box into view took the drawing up with it. */
   #modalPrev{
-    width:min(74vw, 38vh, 320px); height:min(74vw, 38vh, 320px); display:block; margin:0 auto 14px;
+    width:min(74vw, calc(var(--sheet, 100vh) * 0.38), 320px);
+    height:min(74vw, calc(var(--sheet, 100vh) * 0.38), 320px); display:block; margin:0 auto 14px;
     border:2px solid var(--line); border-radius:14px; background:var(--paper);
     flex:none;
   }
@@ -3017,7 +3037,7 @@ function openModal(pos){
   const inp = $("modalInput");
   inp.value = picks[pos] || "";
   $("modal").classList.add("on");
-  modalYerlestir();
+  modalYerlestir();              // sized for the keyboard before it is looked at
   // Focus must happen synchronously inside the tap handler for the keyboard to
   // open: setTimeout breaks the user-gesture chain and iOS ignores it.
   inp.focus();
@@ -3029,6 +3049,7 @@ function closeModal(){
   $("modal").classList.remove("on");
   $("modal").style.height = "";
   $("modal").style.top = "";
+  $("modal").style.removeProperty("--sheet");
 }
 
 // Every enlarged view of a drawing goes through here. The canvas keeps its fixed
@@ -3376,11 +3397,22 @@ $("zoom").onclick = function(e){ if (e.target === $("zoom")) closeZoom(); };
 document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeZoom(); });
 
 // Keep the sheet above the keyboard by sitting it on the visual viewport.
+/* How much room the keyboard left the last time it was up. Every card in a round opens
+   with the box already focused, so the keyboard is coming either way: remembering the
+   height means the second card onwards opens at the size it will keep, and only the
+   first one moves. Forgotten when the phone is turned, since the room is different. */
+let sheetSpace = 0, sheetAt = 0;
+
 function modalYerlestir(){
   const m = $("modal");
   if (!m.classList.contains("on") || !window.visualViewport) return;
-  m.style.height = window.visualViewport.height + "px";
+  const room = window.visualViewport.height;
+  m.style.height = room + "px";
   m.style.top = window.visualViewport.offsetTop + "px";
+  if (sheetAt !== window.innerWidth){ sheetAt = window.innerWidth; sheetSpace = 0; }
+  // A fifth of the window gone is a keyboard, not a toolbar sliding away.
+  if (room < window.innerHeight * 0.8) sheetSpace = room;
+  m.style.setProperty("--sheet", (sheetSpace || room) + "px");
 }
 if (window.visualViewport){
   window.visualViewport.addEventListener("resize", modalYerlestir);
