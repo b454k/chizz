@@ -606,6 +606,12 @@ there is no name yet and kaydet when there is.
 It sits outside the score board, so a round with no board of its own can still be
 named -- the name still decides what a shared link says.
 
+**The share screen asks too, and asks whenever there is no name yet** -- including for a
+round already saved. Guessing saves a round on its way in, under whatever name the device
+had, which is none for somebody who has never given one; going straight to the link then
+sent the round out with nobody's name on it and the question never asked. `sendGo` puts
+the name on the round already saved rather than saving a second copy.
+
 Changing it does three things: stores the new name, renames the round this device
 saved, and re-posts the score. **The board row moves rather than multiplying**: the
 score endpoint accepts the previous name along with a token it handed the writer when
@@ -616,6 +622,18 @@ position it earned.
 
 A field on the start screen was tried first and moved here; it asked for a name in the
 one place it was not needed.
+
+### Which round a name belongs to
+
+A name is read from the round on screen: the drawer's when guessing, the device's own
+otherwise. So the screen and the round must never disagree, and two things used to let
+them. A step through history closed four of the cards that sit on top of the game and
+left the rest standing, so the card asking for a name could end up over a different
+round; `closeOverlays()` now takes them all down. And back from the between screen --
+twenty drawings just finished, not yet sent or guessed -- stepped into the round the
+player had come from, swapping what they were holding for somebody else's round, name and
+link, one tap from a `paylaş` that would send that one. Back from there goes to the start
+screen instead, where arşiv has the drawings.
 
 ## 17. Link previews
 

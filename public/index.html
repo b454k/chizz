@@ -1729,11 +1729,22 @@ function goBack(fallback){
 }
 
 /* Put a history entry's screen back on, without adding another entry for it. */
+/* Everything that sits on top of the game. A step through history puts a different screen
+   underneath, so whatever was open belongs to a round that is no longer there. Four of
+   these were already closed here and the rest were not, which is how a card asking for a
+   name came to be left standing over somebody else's round. */
+function closeOverlays(){
+  ["confirm", "finishAsk", "timeAsk", "nameAsk", "fbAsk", "howAsk"].forEach(function(id){
+    const el = $(id);
+    if (el) el.classList.remove("on");
+  });
+  if (typeof closeSheet === "function") closeSheet();
+  if (typeof closeModal === "function") closeModal();
+  if (typeof closeZoom === "function") closeZoom();
+}
+
 function restoreEntry(st){
-  $("finishAsk").classList.remove("on");
-  $("timeAsk").classList.remove("on");
-  $("fbAsk").classList.remove("on");
-  $("howAsk").classList.remove("on");
+  closeOverlays();
   historyQuiet = true;
   const s = st && st.screen;
   if (s === "scores"){ openDayBoard(MODES.some(function(m){ return m.id === st.mode; }) ? st.mode : "typed"); return; }
@@ -1778,6 +1789,15 @@ window.addEventListener("popstate", function(e){
       history.pushState({ screen: "draw", code: "", depth: ((e.state && e.state.depth) || 0) + 1 }, "", location.pathname);
     } catch (err) {}
     askExit();
+    return;
+  }
+  // Twenty drawings have just happened, and the round they were started from is not a
+  // step back: going into it would swap what the player is holding for somebody else's
+  // round, name and link, one tap away from a paylaş that sends theirs. Back leaves for
+  // the start screen; the drawings are kept and arşiv has them.
+  if ($("between").classList.contains("on")){
+    closeOverlays();
+    show("home");
     return;
   }
   leavingRound = false;
@@ -4090,7 +4110,12 @@ function openShareScreen(from){
   $("sendName").value = myName || "";
   sendNameReady();
   sendFrom = from || "result";
-  if (lastCode){                     // already saved: show the same link, do not save twice
+  // Guessing saves the round on its way in, under whatever name the device had -- which
+  // is none, for somebody who has never given one. Going straight to the link then meant
+  // the round went out with nobody's name on it and the question never asked. The form
+  // comes first until there is a name; sendGo puts it on the round already saved rather
+  // than saving a second copy.
+  if (lastCode && myName){
     $("code").textContent = lastCode;
     $("link").textContent = gameLink(lastCode);
     sendShow("done");

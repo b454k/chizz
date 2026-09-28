@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-09-28 — a round that went out under somebody else's name
+
+Reported: a friend opened a shared link, played it, drew a round of his own and sent it
+back — and it arrived as the *link owner's* round, under her name. He was never asked
+for his.
+
+Reproduced end to end. He pressed `sen de çiz` from her result screen, drew his twenty,
+and the card asking for a name opened over the between screen. A back step from there —
+the phone's own button — did two things at once: the card stayed up, because history
+navigation closed four of the cards on top of the game and not that one, and the screen
+underneath went back into **her** round. `paylaş` on that screen sends the round on
+screen, so it sent hers, under her name, with her link.
+
+- **Everything on top of the game comes down with a step through history**
+  (`closeOverlays()`): the six cards, the word pool, the answer card and the zoom.
+- **Back from the between screen goes to the start screen**, not into the round the
+  player came from. Twenty drawings have happened since; stepping into the earlier round
+  swapped what they were holding for somebody else's. The drawings stay in arşiv,
+  labelled `çizdim — henüz kaydedilmedi`.
+- **Sharing asks who you are whenever the device has no name**, even for a round already
+  saved. Guessing saves a round on its way in under whatever name the device has — none,
+  for somebody who has never given one — and the share screen then handed over the link
+  without asking. The name goes onto the round already saved, not onto a second copy.
+
+Checked after the fix, on the same path: back lands on the start screen with the card
+closed and nothing of her round left in hand, his drawings are in arşiv, and sharing his
+round asks for his name and sends his own link under it. Her round is untouched. The
+board's rename protection was checked at the same time and is sound: the round endpoint
+takes an owner token, and a guesser never renames what they are guessing.
+
 ## 2026-09-28 — scrolling from anywhere, and a card that stays put
 
 Two things reported from a desktop and a phone.
