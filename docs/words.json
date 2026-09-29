@@ -41,7 +41,6 @@
         "arı kovanı",
         "asansör",
         "battaniye",
-        "bavul",
         "bilgisayar",
         "buzdolabı",
         "cüzdan",
@@ -328,7 +327,6 @@
       "words": [
         "abajur",
         "ahır",
-        "alev",
         "baklava",
         "börek",
         "brokoli",
@@ -836,5 +834,178 @@
         "zincir"
       ]
     }
-  ]
+  ],
+  "also": {
+    "akordeon": [
+      "akordiyon"
+    ],
+    "bilgisayar": [
+      "dizüstü bilgisayar",
+      "laptop"
+    ],
+    "bumerang": [
+      "boomerang"
+    ],
+    "buzdağı": [
+      "aysberg"
+    ],
+    "çim": [
+      "çimen",
+      "çimenlik"
+    ],
+    "çöp kutusu": [
+      "çöp kovası"
+    ],
+    "deniz simidi": [
+      "can simidi"
+    ],
+    "denizanası": [
+      "medüz"
+    ],
+    "ekran": [
+      "monitör"
+    ],
+    "eyfel kulesi": [
+      "eyfel"
+    ],
+    "fener": [
+      "el feneri"
+    ],
+    "fotoğraf makinesi": [
+      "kamera"
+    ],
+    "hamburger": [
+      "burger"
+    ],
+    "hap": [
+      "ilaç"
+    ],
+    "hula hoop": [
+      "hulahop"
+    ],
+    "kalorifer": [
+      "radyatör"
+    ],
+    "kaykay": [
+      "skateboard"
+    ],
+    "kesme tahtası": [
+      "doğrama tahtası"
+    ],
+    "klozet": [
+      "tuvalet",
+      "wc"
+    ],
+    "kredi kartı": [
+      "banka kartı"
+    ],
+    "kruvasan": [
+      "ay çöreği",
+      "croissant"
+    ],
+    "kumanda": [
+      "uzaktan kumanda"
+    ],
+    "kuyruklu yıldız": [
+      "komet"
+    ],
+    "mandal": [
+      "çamaşır mandalı"
+    ],
+    "market arabası": [
+      "alışveriş arabası"
+    ],
+    "meşe palamudu": [
+      "palamut"
+    ],
+    "mızıka": [
+      "armonika"
+    ],
+    "misket": [
+      "bilye"
+    ],
+    "nazar boncuğu": [
+      "nazar"
+    ],
+    "oklava": [
+      "merdane"
+    ],
+    "oyuncak ayı": [
+      "ayıcık",
+      "peluş ayı"
+    ],
+    "pamuk şeker": [
+      "pamuk helva"
+    ],
+    "patates kızartması": [
+      "fransız patatesi",
+      "parmak patates"
+    ],
+    "pil": [
+      "batarya"
+    ],
+    "pisa kulesi": [
+      "pisa"
+    ],
+    "posta kutusu": [
+      "mektup kutusu"
+    ],
+    "salyangoz": [
+      "sümüklü böcek"
+    ],
+    "sırt çantası": [
+      "okul çantası"
+    ],
+    "süzgeç": [
+      "kevgir"
+    ],
+    "şırınga": [
+      "enjektör"
+    ],
+    "şiş kebap": [
+      "kebap"
+    ],
+    "tişört": [
+      "t-shirt",
+      "tshirt"
+    ],
+    "törpü": [
+      "eğe"
+    ],
+    "tuvalet kağıdı": [
+      "tuvalet kağıdı rulosu"
+    ],
+    "ufo": [
+      "uçan daire"
+    ],
+    "usb bellek": [
+      "flash bellek",
+      "flaş bellek",
+      "usb"
+    ],
+    "ünlem işareti": [
+      "ünlem"
+    ],
+    "vantilatör": [
+      "fan"
+    ],
+    "varil": [
+      "fıçı"
+    ],
+    "yangın söndürücü": [
+      "yangın tüpü"
+    ],
+    "yara bandı": [
+      "plaster"
+    ],
+    "yazıcı": [
+      "printer"
+    ],
+    "yel değirmeni": [
+      "değirmen"
+    ],
+    "zımba": [
+      "zımba makinesi"
+    ]
+  }
 }

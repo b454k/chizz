@@ -243,7 +243,7 @@ than burning the current word.
 
 ## 7. Words
 
-Both games deal from one pool: 713 words in 15 **silhouette** families (`docs/words.json`,
+Both games deal from one pool: 711 words in 15 **silhouette** families (`docs/words.json`,
 copied into `public/index.html` as `DAILY_POOL`). Families are grouped by shape, not by
 category — an elephant and a sofa share a shape, which is the joke. A round is two
 families and ten words from each, never more than two birds. Family names are never shown. See `docs/WORDS.md`.
@@ -276,7 +276,7 @@ was put in front of it, in the daily game or here (`seen` in section 14), for 14
   same set does come up -- about once in a thousand rounds. The last word then gives way
   to the next one along, never a bird, so the two-bird cap holds.
 
-Measured by simulation over 90 days with 713 words, repeated words out of 20 (seen by
+Measured by simulation over 90 days with 711 words, repeated words out of 20 (seen by
 the device in the previous 14 days):
 
 | Play | in the daily game | per sınırsız round | first repeat |
@@ -372,8 +372,29 @@ Both the answer and the correct word are normalised before comparison:
 4. Punctuation replaced with spaces, runs of whitespace collapsed, ends trimmed
 
 A **single-character typo is forgiven** — Levenshtein distance ≤ 1 counts as correct,
-so `kanepa` matches `kanepe`. Without that tolerance the typed modes are unpleasant.
-Synonyms are not accepted. An empty answer is always wrong.
+so `koltok` matches `koltuk`. Without that tolerance the typed modes are unpleasant. An
+empty answer is always wrong.
+
+**The allowance is deliberately not wider than one.** Measured over the 711 words, one
+edit already lets **118 pairs of real pool words answer for each other** — `kale`, `kare`,
+`kase`, `kule`, `kalp` and `lale` are all within one edit of each other. Two edits takes
+that to **1,482 pairs**, and even the narrow tweaks misfire: allowing a two-letter tail
+makes `at` answer for `ateş` and `kaz` for `kazak`; ignoring doubled letters makes `saat`
+answer for `at`. Any two words can share a round, so every one of those pairs is a way to
+score without knowing which drawing is which.
+
+**Other names are listed instead** (`also` in `docs/words.json`, `ALSO` in the page): the
+loanword spelling somebody learned first, or the other name for the same thing —
+`boomerang` for `bumerang`, `çimen` for `çim`, `laptop` for `bilgisayar`, `bilye` for
+`misket`. Each is compared with the same one-edit allowance, so a slip in one of those is
+forgiven too. 63 answers are listed for 54 words.
+
+`tools/check-words.js` refuses a listed answer that is, or is within one edit of, **any
+other word in the pool** — which is what keeps the table from reopening the hole the
+allowance is kept narrow for. It refused `nal` for `at nalı` (too close to `dal` and
+`nar`), `saz` for `bağlama` (`saç`, `kaz`), `şiş` for `şiş kebap` (`diş`, `şişe`) and
+`sörf` for `sörf tahtası` (`şort`). Two words that are both in the pool are never listed
+for each other: `solucan` and `tırtıl` stay separate answers for that reason.
 
 The same matcher runs in pool mode, where it is simply an exact match.
 

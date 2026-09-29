@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-09-29 — other names count, and two words leave
+
+`bavul` went and `valiz` stayed; `alev` went and `ateş` stayed. Both pairs drew as the
+same thing, which only made a round harder to read. Days 21 and 22 were frozen first, so
+nothing already played moved. The pool is **711 words**.
+
+**A drawing is now judged by what it is, not by which of its names came to mind.**
+`docs/words.json` carries an `also` table, mirrored into the page: `boomerang` for
+`bumerang`, `çimen` for `çim`, `laptop` for `bilgisayar`, `bilye` for `misket`, `can
+simidi` for `deniz simidi`, and 58 more — 63 answers for 54 words. Each is compared with
+the same one-edit allowance as the word itself, so a slip in one of those is forgiven too.
+
+The typo allowance itself stays at one edit, and the measurement is why. Over the pool,
+one edit already lets **118 pairs of real words answer for each other** (`kale`, `kare`,
+`kase`, `kule`, `kalp`, `lale`). Two edits takes that to **1,482**. Allowing a two-letter
+tail makes `at` answer for `ateş` and `kaz` for `kazak`; ignoring doubled letters makes
+`saat` answer for `at`. Any two words can share a round, so each of those pairs is a way
+to score without knowing which drawing is which.
+
+- `tools/check-words.js` refuses a listed answer that is, or is within one edit of, any
+  other word in the pool. It refused `nal` for `at nalı` (`dal`, `nar`), `saz` for
+  `bağlama` (`saç`, `kaz`), `şiş` for `şiş kebap` (`diş`, `şişe`), `sörf` for `sörf
+  tahtası` (`şort`) and `petek` for `kalorifer` (`etek`). Planting a bad one fails the
+  check, which is how the rule was tested.
+- `solucan` and `tırtıl` stay separate answers, on the owner's word: both are in the pool
+  and in the same family, so listing either for the other would let one typed word score
+  on both drawings in a round holding them.
+- `kulübe` was dropped by hand for the same kind of reason -- it reads as either
+  `köpek kulübesi` or `telefon kulübesi`, and only the checker's spelling rule would have
+  let it through.
+
+Checked: days 1-22 unchanged, no word returns inside 14 days over 1,100 days, every word
+still dealt, and the judge itself asked eighteen questions -- `boomerang` and `boomerangg`
+in, `solucan` for `tırtıl` out, `at` for `ateş` out, `kale` for `kare` still in.
+
 ## 2026-09-28 — the speed is asked again before a replay
 
 `tekrar oyna` and `sen de çiz` started the next round at whatever the last one used,

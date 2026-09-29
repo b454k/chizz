@@ -1,8 +1,12 @@
 // node tools/check-words.js
 //
 // Words the owner has rejected must never come back, a word must never sit in two
-// silhouette families, and the two things that exist twice -- the pool and the bird
-// list -- must say the same in both places.
+// silhouette families, and the three things that exist twice -- the pool, the bird list
+// and the table of other answers that count -- must say the same in both places.
+//
+// The table is the one that can do real damage unseen: an answer listed for one drawing
+// must not be, or be within one edit of, any other word in the pool, or it would quietly
+// answer for a drawing it has nothing to do with.
 //
 // All of it was being kept in my head, which is how a word removed in September was
 // proposed again days later, and how a half-applied edit once left docs/words.json and
@@ -94,11 +98,62 @@ for (const b of pageBirds) {
   if (!seen.has(b)) fail("a bird that is in no family — " + b);
 }
 
+// 4. the other answers that count
+//
+// norm and withinOneEdit are read out of the page rather than written again here: the
+// question is what the game will accept, so it has to be the game's own judge.
+const judge = (function () {
+  const from = page.indexOf("const TURKISH_FOLD");
+  const to = page.indexOf("function isCorrect");
+  if (from < 0 || to < 0) return null;
+  try { return new Function(page.slice(from, to) + "; return { norm, withinOneEdit };")(); }
+  catch (e) { return null; }
+})();
+
+const also = pool.also || {};
+const pageAlso = (function () {
+  const at = page.indexOf("const ALSO = {");
+  if (at < 0) return null;
+  const end = page.indexOf("\n};", at);
+  const out = {};
+  for (const m of page.slice(at, end).matchAll(/"([^"]+)":\s*\[([^\]]*)\]/g)) {
+    out[m[1]] = [...m[2].matchAll(/"([^"]+)"/g)].map(x => x[1]);
+  }
+  return out;
+})();
+
+let alsoCount = 0;
+if (!judge) fail("could not read the page's own judge (norm/withinOneEdit)");
+if (!pageAlso) fail("the page has no ALSO table");
+for (const [word, answers] of Object.entries(also)) {
+  if (!seen.has(word)) fail("an answer listed for a word that is not in the pool — " + word);
+  for (const answer of answers) {
+    alsoCount++;
+    if (!judge) continue;
+    const a = judge.norm(answer);
+    if (!a) { fail("an empty answer listed for " + word); continue; }
+    if (judge.withinOneEdit(a, judge.norm(word))) {
+      fail('"' + answer + '" for ' + word + " is already accepted as a typo");
+    }
+    for (const other of seen.keys()) {
+      if (other === word) continue;
+      if (judge.withinOneEdit(a, judge.norm(other))) {
+        fail('"' + answer + '" for ' + word + " would also answer for " + other);
+      }
+    }
+  }
+}
+if (pageAlso) {
+  const mine = JSON.stringify(Object.keys(also).sort().map(w => [w, also[w].slice().sort()]));
+  const theirs = JSON.stringify(Object.keys(pageAlso).sort().map(w => [w, pageAlso[w].slice().sort()]));
+  if (mine !== theirs) fail("the table of other answers differs between docs/words.json and the page");
+}
 
 console.log("rejected words on record:  " + banned.size);
 console.log("daily pool:                " + seen.size + " words in " + pool.families.length + " families");
 console.log("birds:                     " + pageBirds.length + ", capped at " +
             ((pool.rules && pool.rules.birdsPerSet) || "?") + " a day");
+console.log("other answers that count:  " + alsoCount + " for " + Object.keys(also).length + " words");
 
 if (bad) {
   console.error("");
@@ -106,5 +161,5 @@ if (bad) {
   process.exit(1);
 }
 console.log("");
-console.log("nothing rejected is in play, no word is in two families, and the record and");
-console.log("the running copy agree.");
+console.log("nothing rejected is in play, no word is in two families, no listed answer");
+console.log("belongs to another drawing, and the record and the running copy agree.");

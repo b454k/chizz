@@ -77,6 +77,15 @@ koltuk değneği, kronometre, ksilofon, kürsü, makara, mala, matara, mercan,
 
 `matara` went and `termos` stayed; `yelken` went and `yelkenli` stayed.
 
+## Rejected 2026-09-29 — the second of two words for one drawing
+
+Each of these drew as the same thing as a word that stayed, so the pair only made a
+round harder to read.
+
+alev, bavul
+
+`bavul` went and `valiz` stayed; `alev` went and `ateş` stayed.
+
 ## Renamed, not banned
 
 These were kept under a clearer name, so the old spelling should not come back either:

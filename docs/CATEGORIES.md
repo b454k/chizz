@@ -1,6 +1,6 @@
 # Words by subject
 
-The same 713 words as [`words.json`](words.json), sorted by what they are rather
+The same 711 words as [`words.json`](words.json), sorted by what they are rather
 than by the shape they draw as. The game deals by silhouette family -- see
 [`WORDS.md`](WORDS.md) -- so this file is for reading, and for the day a player gets to
 pick a subject to draw from.
@@ -10,7 +10,7 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 
 | category | in Turkish | words |
 |---|---|---:|
-| Everyday Objects & Household Items | `ev eşyaları` | 145 |
+| Everyday Objects & Household Items | `ev eşyaları` | 144 |
 | Animals, Wildlife & Insects | `hayvanlar` | 102 |
 | Foods, Drinks & Ingredients | `yiyecek ve içecek` | 80 |
 | Sports, Fitness & Outdoor Activities | `spor ve açık hava` | 26 |
@@ -18,7 +18,7 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 | Places, Geography & Landmarks | `yerler ve coğrafya` | 21 |
 | Clothing, Footwear & Accessories | `giyim ve aksesuar` | 35 |
 | Common Actions & Verbs | `eylemler` | 0 |
-| Weather & Natural Phenomena | `hava ve doğa olayları` | 20 |
+| Weather & Natural Phenomena | `hava ve doğa olayları` | 19 |
 | Occupations, Professions & People | `meslekler ve insanlar` | 18 |
 | Hobby | `müzik ve hobi` | 27 |
 | Parts of the Body | `vücut` | 21 |
@@ -33,10 +33,10 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 
 ## Everyday Objects & Household Items
 
-`ev eşyaları` · 145 words
+`ev eşyaları` · 144 words
 
 abajur, akvaryum, ampul, anahtar, anahtarlık, anten, askılık, avize, ayna, bardak,
-baston, battaniye, bavul, bebek arabası, beşik, bıçak, biberon, buzdolabı, cezve, cımbız,
+baston, battaniye, bebek arabası, beşik, bıçak, biberon, buzdolabı, cezve, cımbız,
 çakmak, çamaşır ipi, çamaşır makinesi, çatal, çaydanlık, çekmece, çengelli iğne, çerçeve,
 çöp kutusu, demlik, diş fırçası, diş macunu, dolap, duş, emzik, fener, fırça, fırın,
 fincan, halı, hap, havlu, huni, ızgara, iğne, kadeh, kafes, kalorifer, kapı kolu, kasa,
@@ -123,10 +123,10 @@ The 67 verbs offered on 2026-09-26 and the 17 on 2026-09-27 were all left out.
 
 ## Weather & Natural Phenomena
 
-`hava ve doğa olayları` · 20 words
+`hava ve doğa olayları` · 19 words
 
-alev, ateş, ay, bulut, buzdağı, çakıl, dalga, damla, duman, dünya, gezegen, gökkuşağı,
-güneş, hortum, kar tanesi, kuyruklu yıldız, patlama, rüzgar gülü, şimşek, volkan
+ateş, ay, bulut, buzdağı, çakıl, dalga, damla, duman, dünya, gezegen, gökkuşağı, güneş,
+hortum, kar tanesi, kuyruklu yıldız, patlama, rüzgar gülü, şimşek, volkan
 
 ## Occupations, Professions & People
 
