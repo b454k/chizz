@@ -160,6 +160,14 @@ follows it, so back never leads into a round that has ended or been abandoned. A
 visit has no entry and starts at the start; a round link opened fresh starts in that
 round, and back from there leaves the site.
 
+The page comes on screen only once its script has filled it in. Every word, the day's
+leaf and the screen to show are put in by that script, at the end of the file, and a phone
+paints before it has run: a reload showed the start screen without its words for a moment,
+in the middle of a round as well, then jumped to the real page with the wordmark already
+drawing. `#app` is kept off screen while `<html>` carries `boot`, which the script takes off
+as its last step, putting `intro` on so the wordmark starts drawing as the page appears. If
+the script ever failed, the page would show after 2s anyway.
+
 ## 5. Modes and settings
 
 Two variables, set independently rather than bundled into fixed levels.
@@ -210,8 +218,10 @@ and it contradicted the recommended speed by calling it the hardest.
 device that has never chosen gets. Applied as `data-theme` on the root element; the light
 palette is the base and the dark one restates only the colours that differ, once for koyu
 and once for otomatik on a device asking for dark. The browser's own bar (`theme-color`) is
-set to the page colour of whichever theme is showing. A device that already had `dark` or
-`light` stored keeps it.
+set to the page colour of whichever theme is showing. Both are put on by a few lines in the
+head, before anything is painted, and again by `applyTheme()`: until then a reload showed
+the device's theme, so koyu on a light phone opened light for a moment. A device that
+already had `dark` or `light` stored keeps it.
 
 Seconds and theme are kept on the device; the mode is not, being asked every round. The
 drawing screen shows no duration at all: the gauge running down is the only clock in the

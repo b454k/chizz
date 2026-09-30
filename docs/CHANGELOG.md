@@ -11,7 +11,7 @@ the one thing on a screen that is meant to be pressed, and a teacher's red pen a
 tick for the marking. The drawing paper stays white paper in both themes.
 
 - **The wordmark is drawn, not set**: five pencil strokes and a dot, in the page, so it needs
-  no font. It draws itself on the first visit. **The icon** is a graphite `c` on pencil
+  no font. It draws itself when the page opens. **The icon** is a graphite `c` on pencil
   yellow with the pencil that is just finishing it, solid at tab sizes. **`og.png`** is a
   new 1200 × 630 card for the bare address, with four drawings from round 6G75.
   `tools/make-icons.js` draws all of them, and now writes `icon.svg` too.
@@ -49,6 +49,12 @@ tick for the marking. The drawing paper stays white paper in both themes.
 - Fixed while at it: on the question screens a paragraph rule outranked the name field's
   own label, hint and error, so `önce adını yaz.` was grey instead of red; in the light theme
   the zoom caption was dark text on the dark backdrop.
+- **A reload shows the page whole.** Everything on it is written in by the script at the end
+  of the file, and a phone painted before that had run: a reload showed the start screen
+  without its words, even in the middle of a round, then jumped into place with the wordmark
+  already drawing, and with koyu chosen on a light phone that moment was light. The page now
+  stays off screen until it is filled in, the wordmark starts drawing as it comes on, and the
+  theme is set before the first paint.
 
 Checked in both themes at phone and desktop widths: a sınırsız round from the start screen
 through the time question, countdown, drawing, kolay and zor guessing, the result, the board
@@ -56,7 +62,8 @@ with friends on it and one friend's answers; sending a round and its ticket; a f
 with and without a name on the device; a friend's daily link before drawing (`önce sen çiz`);
 the day's two boards; an expired code; the start screen before and after the day is played;
 feedback, leave, finish and time dialogs, the time sentence at every value; the saved picture;
-the result buttons from 320px to 600px wide. `check-words`, `check-categories` and
+the result buttons from 320px to 600px wide; reloads on the start screen and inside a round
+with the processor slowed four times, frame by frame, on a dark and a light phone. `check-words`, `check-categories` and
 `check-day-epoch` pass.
 
 ## 2026-09-29 — other names count, and two words leave

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr" class="intro">
+<html lang="tr" class="boot">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>chizz · çizim hafıza oyunu</title>
@@ -359,7 +359,8 @@
   .mark .sw{stroke:var(--hi); stroke-width:11;}
   .mark .dot{fill:var(--hi); stroke:var(--ink); stroke-width:4;}
   /* The wordmark draws itself once, on arrival: a pencil game should open with a pencil
-     moving. Only the first time -- the class comes off after it has played. */
+     moving. The class goes on as the page comes on screen (below) and comes off after it
+     has played, so a return to the start screen finds the wordmark simply there. */
   .intro .mark .s, .intro .mark .sw{stroke-dasharray:1 2; animation:ink .42s var(--ease) both;}
   .intro .mark .s1{animation-delay:.05s;} .intro .mark .s2{animation-delay:.32s; animation-duration:.26s;}
   .intro .mark .s3{animation-delay:.5s;} .intro .mark .s4{animation-delay:.78s; animation-duration:.2s;}
@@ -368,6 +369,14 @@
   .intro .mark .dot{transform-origin:131px 31px; animation:dotpop .42s var(--spring) 1.02s both;}
   @keyframes ink{0%{stroke-dashoffset:1; opacity:0} 1%{opacity:1} 100%{stroke-dashoffset:0; opacity:1}}
   @keyframes dotpop{0%{transform:scale(0)} 100%{transform:scale(1)}}
+  /* Every word on the page, the day's leaf and the screen to show are put in by the script
+     at the end of the file, and a phone paints before that script has run. A reload showed
+     the start screen with no words for a moment -- inside a round too -- then jumped into
+     place, with the wordmark already drawing over the jump. So the page stays off screen
+     until the script has filled it in, and the wordmark starts drawing as it comes on. Were
+     the script ever to fail, the page would show after 2s anyway, the wordmark just there. */
+  .boot #app{visibility:hidden; animation:unhold 0s 2s forwards;}
+  @keyframes unhold{to{visibility:visible}}
   .tagline{
     color:var(--muted); font:750 17px/1.4 var(--font); text-align:center;
     margin:2px 0 22px;
@@ -1164,6 +1173,18 @@
     .hl{animation-timing-function:steps(1, end);}
   }
 </style>
+<script>
+/* The theme this device chose, put on before anything is painted. The page itself waits for
+   its script (see .boot), but until that ran the page's colour, and the browser bar's, were
+   the device's: koyu on a light phone opened light for a moment on every reload.
+   applyTheme() does the same again once the page is running. */
+try {
+  const t = (JSON.parse(localStorage.getItem("chizz.v1") || "null") || {}).theme;
+  document.documentElement.dataset.theme = t === "light" || t === "dark" ? t : "auto";
+  document.querySelector('meta[name="theme-color"]').setAttribute("content",
+    getComputedStyle(document.documentElement).getPropertyValue("--bg").trim());
+} catch (e) {}
+</script>
 
 <div id="app" data-nosnippet>
 
@@ -5647,9 +5668,6 @@ if (typeof MutationObserver !== "undefined"){
 }
 window.addEventListener("resize", function(){ fitHeadWord(); fitScoreLine(); fitTimeLine(); });
 
-// The wordmark draws itself on the first arrival only; after that it is simply there.
-setTimeout(function(){ document.documentElement.classList.remove("intro"); }, 2400);
-
 myName = savedName();             // the device already knows who is playing
 loadSettings();
 applyTheme();
@@ -5677,5 +5695,10 @@ buildHome();
   try { history.replaceState({ screen: "home", code: "", depth: 0 }, "", location.pathname); } catch (e) {}
   maybeHowTo();             // the start screen is up without show() on a fresh visit
 })();
+
+// Filled in, so on screen (see .boot), and the wordmark draws itself as the page comes on.
+document.documentElement.classList.remove("boot");
+document.documentElement.classList.add("intro");
+setTimeout(function(){ document.documentElement.classList.remove("intro"); }, 2400);
 })();
 </script>

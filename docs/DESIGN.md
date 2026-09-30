@@ -129,7 +129,7 @@ dialogs). Outlines are 2–2.5px. Shadows are offset straight down, 2–8px, nev
 
 **Motion.** Short and purposeful: buttons press in 90ms; dialogs rise with a slight spring
 in 280ms; sheets slide in 220ms and slide back out rather than vanishing. Things that are
-drawn *draw themselves* — the wordmark on the first visit, the red circle round a score, the
+drawn *draw themselves* — the wordmark when the page opens, the red circle round a score, the
 tick after a round, every stroke of the how-to loop. With `prefers-reduced-motion`, the
 decoration goes and what carries meaning stays: the timer gauge, the countdown, fades.
 
