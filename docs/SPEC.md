@@ -27,7 +27,7 @@ score board for that round.
 
 ```
 public/index.html               the entire game: HTML + CSS + vanilla JS, no dependencies
-public/how-to-play.gif          the nasıl oynanır loop: once unasked, then on demand
+public/og.png                   the picture the bare address shows when it is pasted
 functions/api/save.js           POST /api/save             save a round, return a code
 functions/api/game/[code].js    GET  /api/game/:code       fetch a saved round
 functions/api/scores/[code].js  GET+POST /api/scores/:code score board for a round
@@ -38,9 +38,10 @@ wrangler.jsonc                  Cloudflare Pages config and the KV binding
 
 `public/index.html` has no external scripts, stylesheets, fonts or network
 dependencies. Opened directly from disk it plays solo; the API is only needed for
-the duel and score features. The one file it fetches from beside itself is
-`how-to-play.gif`, and only when the nasıl oynanır dialog opens (section 4). It does use `localStorage` — see
-[Section 14](#14-what-is-kept-on-the-device).
+the duel and score features. It fetches nothing from beside itself either: nasıl oynanır is
+drawn in the page (section 4), and so are the wordmark and every icon. It does use
+`localStorage` — see [Section 14](#14-what-is-kept-on-the-device). How it looks, and why, is
+in [DESIGN.md](DESIGN.md).
 
 ## 3. Screens
 
@@ -91,8 +92,11 @@ the result screen.
 
 The first time a device that has never played arrives, wherever it arrives, `nasıl
 oynanır?` opens over it: a nine-second loop of the three steps (her kelimeyi birkaç
-saniyede çiz · harf, rakam, kelime yazmak yok · sonra hangisi neydi, tahmin et), drawn from
-real drawings, and `anladım`. Tapping outside closes it too.
+saniyede çiz · harf, rakam, kelime yazmak yok · sonra hangisi neydi, tahmin et), and
+`anladım`. Tapping outside closes it too. The loop is drawn in the page with CSS and SVG --
+`mektup` and an envelope drawing itself against the clock, `valiz` written out and struck
+through, four look-alike drawings with the word dropped onto the right one -- so it follows
+the theme, is sharp at any size and costs about 5 KB. Its captions are in `TEXT`.
 
 Three places, all of them read before anything is played: the start screen, the kolay/zor
 question a friend's link lands on, and `önce sen çiz` for a friend's daily round. **A link
@@ -104,13 +108,11 @@ opens, before the link is read (`newHere`).
 "Never played" means the device keeps nothing from a round: no name, no word dealt to it,
 no day, no round drawn or guessed, no unsaved drawing. Everyone who played before this
 existed therefore never sees it unasked. Closing it is remembered (`howSeen`, section 14);
-a reload before closing shows it again. The GIF is 600px square, shown at 300, about 430 KB,
-and has no `src` until the dialog opens, so no other device downloads it.
+a reload before closing shows it again. It replaced a recorded GIF of about 430 KB.
 
 **`nasıl oynanır?`** at the top of the start screen, beside `sorun bildir`, opens the same
-dialog whenever anyone wants it, whatever the device has played. The `src` is set again on
-every open: a gif carries on where it left off otherwise, and the second viewing would
-start in the middle of the loop.
+dialog whenever anyone wants it, whatever the device has played. The loop only runs while
+the card is on screen, so every opening starts from the first scene.
 
 ### Duel, drawer's side
 
@@ -199,8 +201,12 @@ There is deliberately no difficulty grade. One existed briefly, read back from t
 two settings, but it was a label placed on top of choices the player had already made
 and it contradicted the recommended speed by calling it the hardest.
 
-**Theme** — dark (default) or light. Applied as `data-theme` on the root element;
-the dark palette is the base and the light one restates only the colours that differ.
+**Theme** — açık, koyu or otomatik, which follows the device's own setting and is what a
+device that has never chosen gets. Applied as `data-theme` on the root element; the light
+palette is the base and the dark one restates only the colours that differ, once for koyu
+and once for otomatik on a device asking for dark. The browser's own bar (`theme-color`) is
+set to the page colour of whichever theme is showing. A device that already had `dark` or
+`light` stored keeps it.
 
 Seconds and theme are kept on the device; the mode is not, being asked every round. The
 drawing screen shows the duration alone, since nothing about guessing has been chosen
@@ -225,6 +231,8 @@ on read — `easy`→pool/4s, `medium`→pool/2.5s, `hard`→typed/2.5s,
   the layer takes no taps. The word's own time starts as the fade begins, so the second
   spent reading is not taken out of the drawing.
 - The word is large at the top, a draining progress bar beneath it, `7 / 20` at the right.
+  A long word is set smaller until it fits rather than cut with an ellipsis, and the header
+  keeps one height whatever the word, so the paper never moves between words.
 - The canvas is square and sized to the largest square fitting the available area.
 - One pen. No undo, no eraser, no colours.
 - Time runs out → the next word appears automatically. No button, no confirmation.
@@ -331,7 +339,9 @@ drawing up with it — a small jump every time a word was typed. The height left
 keyboard is remembered for as long as the phone is held the same way round, so every card
 after the first opens at the size it will keep.
 
-Finishing is always enabled in both modes; anything left blank counts as wrong.
+Finishing is always enabled in both modes; anything left blank counts as wrong. The button is
+outlined until every drawing has an answer and only then turns yellow, and a bar beside the
+count shows how far along the grid is.
 
 Cells are repainted through a `ResizeObserver`, so drawings still render correctly if
 the grid is built before the page has been laid out.
@@ -404,9 +414,13 @@ Score is the number of positions where the answer matches the word behind that
 drawing. The heading reads `20'de 12` for your own round, or
 "in <drawer>'s drawings, 12/20" when guessing someone else's.
 
-Every cell is framed green or red. Wrong cells show the guess struck through with the
+A right cell is framed green with a tick in its corner; a wrong one keeps its plain frame
+and gets a red cross, so a bad round is not twenty red frames, and the marking does not
+depend on telling red from green. Wrong cells show the guess struck through with the
 correct word in green beneath it; a skipped answer shows `—`. Tapping any cell opens
 it full size in the middle of the screen with the same caption.
+
+The score heading is circled in red pen, and `paylaş` sits directly under it.
 
 The round is also timed: the clock runs from the recall grid first appearing to the
 finish button, survives a reload, and is shown beside the score and used to break
@@ -421,15 +435,17 @@ ties on the board.
 a canvas rather than screenshotted: the grid scrolls on a phone, so a screenshot gets a
 round in pieces and carries the browser along with it.
 
-- Four drawings across, five down, each on its paper square with the number the grid
-  showed. Under each: the answer given, struck through in red where it was wrong, then
-  the word in green. A right answer is the word alone.
-- The head carries what the result screen leads with — `chizz`, whose drawings, which
-  day, how it was played, how long it took, the score and the name — and the foot says
-  `chizz.party`.
+- Four drawings across, five down, on the same dot-grid page the game sits on, each on its
+  paper square lifted on a hard shadow, with the number the grid showed, and framed green
+  where it was right. Under each: the answer given, struck through in red where it was
+  wrong, then the word in green. A right answer is the word alone.
+- The head carries what the result screen leads with — the wordmark, drawn from the start
+  screen's own paths, whose drawings, which day, how it was played, how long it took, the
+  score circled in red and the name — and the foot says `chizz.party`.
 - Whichever theme is on is the theme of the picture: the colours are read from the CSS
   variables as it is drawn.
-- Drawn at twice the size: 2172 × 3760 for a full round, about 470 KB. Drawing costs
+- Drawn at twice the size: 2172 × 3776 for a full round, about 700 KB -- the dot grid is
+  most of the difference from the 470 KB it was on a flat background. Drawing costs
   2 ms and encoding the PNG about a second, long enough to look broken, so the button
   holds and says `hazırlanıyor…` until the file is handed over.
 - A long word is set smaller before it is cut with an ellipsis, so answers stay readable.
@@ -776,9 +792,14 @@ own title, description, og: tags and image, which the middleware rewrites in pla
 round rather than adding second copies.
 
 - **Icons are files**: `/favicon.ico` (16, 32, 48), `/apple-touch-icon.png`,
-  `/icon-512.png` (the address's og:image) and `/icon.svg`, all drawn by
-  `tools/make-icons.js` as geometry, so no font is involved. Search engines ask for
-  `/favicon.ico`, which used to answer with the page itself -- hence the globe.
+  `/icon-512.png` and `/icon.svg` -- a graphite `c` on pencil yellow, with the pencil that
+  is just finishing it, solid at tab sizes and outlined from 120px up -- plus `/og.png`,
+  the address's og:image: 1200 × 630, shown as a large card
+  (`twitter:card summary_large_image`), the wordmark and four drawings that are hard to
+  tell apart, with no words that could give anything away. All of them are drawn by
+  `tools/make-icons.js` as geometry, so no font or image library is involved, and it
+  writes `icon.svg` from the same numbers. Search engines ask for `/favicon.ico`, which
+  used to answer with the page itself -- hence the globe.
 - **The description names chizz** and the title is "chizz · çizim hafıza oyunu". A search
   for the name showed page text containing the word instead of a description that lacked
   it, and a one-word title was rewritten (as "Chizz"). The game's own markup carries

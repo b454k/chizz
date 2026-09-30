@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/chizz-showreel.gif" alt="A round of chizz: twenty words drawn against the clock, then matched back to the drawings" width="560">
+  <img src="docs/chizz-look.jpg" alt="Five screens of chizz: the start screen, a drawing against the clock, the word pool, a marked result and the score board in the dark theme" width="760">
 </p>
 
 <h1 align="center">chizz</h1>
@@ -66,7 +66,9 @@ Deploying needs a Cloudflare account and a KV namespace bound as `GAMES`:
 ## How it is built
 
 - **One file.** `public/index.html` is the whole game — HTML, CSS and plain JavaScript.
-  No framework, no build step, no dependencies, nothing from a CDN.
+  No framework, no build step, no dependencies, nothing from a CDN. The wordmark, the
+  icons, the illustrations and the how-to loop are drawn in the page too, so it loads no
+  font and no picture.
 - **Drawings are strokes, not images**: coordinate arrays normalised to 0–1, quantised
   to bytes for transport, so they redraw cleanly at any size — a grid cell, a zoom, or
   a downloaded picture.
@@ -81,5 +83,7 @@ Deploying needs a Cloudflare account and a KV namespace bound as `GAMES`:
 ## Docs
 
 - [docs/SPEC.md](docs/SPEC.md) — what the game does today, written from the code
+- [docs/DESIGN.md](docs/DESIGN.md) — how it looks and why: the sketchbook, its tokens and
+  the reasoning behind each screen
 - [docs/WORDS.md](docs/WORDS.md) and [docs/CATEGORIES.md](docs/CATEGORIES.md) — the pool
 - [docs/DEPLOY.md](docs/DEPLOY.md) · [docs/CHANGELOG.md](docs/CHANGELOG.md)

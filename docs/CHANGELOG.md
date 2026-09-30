@@ -1,5 +1,51 @@
 # Changelog
 
+## 2026-09-30 — a new look: the sketchbook
+
+Every screen is redrawn; nothing about how the game plays has changed — not a word, a
+timer, a screen, a question or the order they come in. The idea, the tokens and the reasons
+are in [DESIGN.md](DESIGN.md).
+
+The page is a sketchbook on a desk: dot-grid paper, graphite for the ink, pencil yellow for
+the one thing on a screen that is meant to be pressed, and a teacher's red pen and green
+tick for the marking. The drawing paper stays white paper in both themes.
+
+- **The wordmark is drawn, not set**: five pencil strokes and a dot, in the page, so it needs
+  no font. It draws itself on the first visit. **The icon** is a graphite `c` on pencil
+  yellow with the pencil that is just finishing it, solid at tab sizes. **`og.png`** is a
+  new 1200 × 630 card for the bare address. `tools/make-icons.js` draws all of them, and
+  now writes `icon.svg` too.
+- **One yellow per screen.** `başla` is outlined until the day's puzzle is played, then the
+  yellow moves to it from `çiz`. `bitir` turns yellow once every drawing has an answer.
+- **The day is a leaf off a wall calendar**, weekday, date and month, stamped once played.
+- **The score is circled in red pen**, with `paylaş` right under it. A right drawing is
+  framed green with a tick; a wrong one keeps a plain frame and gets a red cross, so a bad
+  round no longer reads as a telling-off, and the marking no longer depends on colour alone.
+- **The board** has medals for the first three, a chevron on every row that opens a
+  friend's answers, and a pulsing dot that says it is live.
+- **nasıl oynanır is drawn in the page** instead of being a 430 KB GIF: the same three steps,
+  sharp at any size, in either theme, about 5 KB. `public/how-to-play.gif` is gone.
+- **The theme follows the device** until one is chosen, with a third choice, `otomatik`.
+  A device that had `koyu` or `açık` stored keeps it.
+- **A long word in the drawing header is set smaller instead of cut** with an ellipsis, in a
+  header that keeps one height, so the paper never moves between words. The same fit keeps
+  a friend's name and score on one line over a result.
+- Illustrations where a moment needed a face: twenty pages done, a paper plane, a closed
+  eye for `önce sen çiz`, a scribble for loading, a snapped pencil for a code that is gone.
+- The saved picture is drawn on the same dot-grid page, with the wordmark, the score circled
+  and the right drawings framed green.
+- Fixed while at it: on the question screens a paragraph rule outranked the name field's
+  own label, hint and error, so `önce adını yaz.` was grey instead of red; in the light theme
+  the zoom caption was dark text on the dark backdrop.
+
+Checked in both themes at phone and desktop widths: a sınırsız round from the start screen
+through the time question, countdown, drawing, kolay and zor guessing, the result, the board
+with friends on it and one friend's answers; sending a round and its ticket; a friend's link
+with and without a name on the device; a friend's daily link before drawing (`önce sen çiz`);
+the day's two boards; an expired code; the start screen before and after the day is played;
+feedback, leave, finish and time dialogs; the saved picture. `check-words`, `check-categories`
+and `check-day-epoch` pass.
+
 ## 2026-09-29 — other names count, and two words leave
 
 `bavul` went and `valiz` stayed; `alev` went and `ateş` stayed. Both pairs drew as the
