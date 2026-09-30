@@ -13,18 +13,30 @@ tick for the marking. The drawing paper stays white paper in both themes.
 - **The wordmark is drawn, not set**: five pencil strokes and a dot, in the page, so it needs
   no font. It draws itself on the first visit. **The icon** is a graphite `c` on pencil
   yellow with the pencil that is just finishing it, solid at tab sizes. **`og.png`** is a
-  new 1200 × 630 card for the bare address. `tools/make-icons.js` draws all of them, and
-  now writes `icon.svg` too.
+  new 1200 × 630 card for the bare address, with four drawings from round 6G75.
+  `tools/make-icons.js` draws all of them, and now writes `icon.svg` too.
 - **One yellow per screen.** `başla` is outlined until the day's puzzle is played, then the
   yellow moves to it from `çiz`. `bitir` turns yellow once every drawing has an answer.
 - **The day is a leaf off a wall calendar**, weekday, date and month, stamped once played.
-- **The score is circled in red pen**, with `paylaş` right under it. A right drawing is
-  framed green with a tick; a wrong one keeps a plain frame and gets a red cross, so a bad
-  round no longer reads as a telling-off, and the marking no longer depends on colour alone.
+- **The score is circled in red pen.** A right drawing is framed green with a tick; a wrong
+  one keeps a plain frame and gets a red cross, so a bad round no longer reads as a
+  telling-off, and the marking no longer depends on colour alone. Under the drawings,
+  `paylaş` and `cevaplarımı kaydet` sit side by side, and `oyun kodu` over the board is
+  set large.
 - **The board** has medals for the first three, a chevron on every row that opens a
   friend's answers, and a pulsing dot that says it is live.
 - **nasıl oynanır is drawn in the page** instead of being a 430 KB GIF: the same three steps,
-  sharp at any size, in either theme, about 5 KB. `public/how-to-play.gif` is gone.
+  drawn with the strokes of a real round, 6G75 (`saat` stands for rakam yok, since it has
+  a 1 and a 2 in it), sharp at any size, in either theme, about 5 KB.
+  `public/how-to-play.gif` is gone.
+- **The drawing screen shows no seconds**: the gauge running down is the only clock.
+  `ekranı temizle` sits between the gauge and the paper, and the countdown is the number
+  alone.
+- **The time sentence keeps to one line**, sized for its widest value, so `2,5` no longer
+  breaks it in two under the slider.
+- **An answered drawing is marked three ways** on the guessing grid: a pencil badge, its
+  answer on a yellow label and a darker frame (yellow in the dark theme, where a frame
+  alone did not show).
 - **The theme follows the device** until one is chosen, with a third choice, `otomatik`.
   A device that had `koyu` or `açık` stored keeps it.
 - **A long word in the drawing header is set smaller instead of cut** with an ellipsis, in a
@@ -43,8 +55,9 @@ through the time question, countdown, drawing, kolay and zor guessing, the resul
 with friends on it and one friend's answers; sending a round and its ticket; a friend's link
 with and without a name on the device; a friend's daily link before drawing (`önce sen çiz`);
 the day's two boards; an expired code; the start screen before and after the day is played;
-feedback, leave, finish and time dialogs; the saved picture. `check-words`, `check-categories`
-and `check-day-epoch` pass.
+feedback, leave, finish and time dialogs, the time sentence at every value; the saved picture;
+the result buttons from 320px to 600px wide. `check-words`, `check-categories` and
+`check-day-epoch` pass.
 
 ## 2026-09-29 — other names count, and two words leave
 

@@ -200,9 +200,10 @@ function iconSvg(){
 
 /* ------------------------------------------------------ the link card --- */
 
-// The picture a pasted chizz.party shows: the wordmark on the sketchbook page, and four of
-// the drawings the game is about -- a fridge, a letter, a door and a suitcase, the shapes
-// that are hard to tell apart. No words on it; the preview's own title carries those.
+// The picture a pasted chizz.party shows: the wordmark on the sketchbook page, and four
+// drawings from a real round -- a door, a fridge, a phone and a suitcase, tall boxes that
+// are hard to tell apart, which is the game. No words on it; the preview's own title
+// carries those.
 const WORDMARK = [
   "M58 61 C52 52 41 49 32 53 C21 58 17 72 19 82 C22 96 35 102 46 101 C51 100.5 55 98 58 94",
   "M76 14 C76.4 42 75.8 72 76 100",
@@ -212,11 +213,12 @@ const WORDMARK = [
   "M201 57.5 C213 56 225 56 237 57 L203 99 C216 100.5 228 100.5 241 98.5"
 ];
 const SWOOSH = "M16 113 C80 106 165 107 246 110";
-const DOODLES = {
-  fridge:   "M31 10 C44 9.5 56 9.5 69 10 C69.5 37 69 64 69.5 90 C56 90.5 44 90.5 31 90 C30.5 64 31 37 31 10 Z M31.5 38 C44 37.5 56 38.5 69 38 M61 20 V29 M61 47 V62",
-  letter:   "M17 31 C38 29.5 62 30 83 30.5 C84 45 83.5 60 84 74 C62 75 39 74.5 17.5 75 C16.5 60 17 45 17 31 Z M18.5 33 C30 42 40 49.5 50 56 C60 49 71 41.5 82 32.5",
-  door:     "M33 10 C44 9.5 56 10 67 10 C67.5 37 67 64 67.5 90 C56 90.5 44 90 33 90.5 C32.5 64 33 37 33 10 Z",
-  suitcase: "M16 36 C38 35 62 35.5 84 35.5 C85 51 84.5 66 85 82 C62 83 38 82.5 16 83 C15.5 66 16 51 16 36 Z M40 35.5 V27 C40 24 42 23 45 23 H55 C58 23 60 24 60 27 V35.5 M34 36 V82 M66 36 V82"
+// Strokes from round 6G75, in the 0-255 space the game stores them in, lightly simplified.
+const DRAWINGS = {
+  "kapı": [[[115,63],[136,60],[180,47],[174,70],[173,129],[175,148],[177,153],[181,179],[170,180],[122,200],[104,205],[94,205],[93,198],[101,142],[101,65],[105,35],[108,40]],[[156,110],[159,115],[159,122]]],
+  "buzdolabı": [[[102,54],[136,45],[143,44],[152,45],[147,93],[147,133],[154,158],[155,176],[148,181],[139,185],[114,193],[98,196],[81,196],[77,193],[75,189],[75,166],[79,138],[84,116],[89,82],[90,56],[92,52]],[[82,98],[157,99]],[[135,78],[135.5,78]],[[141,108],[141.5,108]]],
+  "telefon": [[[95,57],[93,63],[95,57],[93,63],[92,78],[77,159],[75,190],[83,193],[133,202],[132,193],[135,178],[154,118],[167,67],[167,59],[166,57],[163,56],[112,56],[99,60],[95,68]],[[107,176],[106,185]]],
+  "valiz": [[[97,77],[85,140],[82,163],[82,174],[145,190],[145,161],[155,102],[155,80],[154,76],[148,70],[138,65],[132,64],[103,64],[94,66],[93,68]],[[108,63],[109,53],[118,35],[121,25],[121,31],[125,40],[130,43],[139,43],[141,44],[142,48],[135,66],[132,81]],[[96,188],[94,194],[94,204],[97,216]],[[128,190],[126,202]]]
 };
 
 function card(){
@@ -231,14 +233,14 @@ function card(){
   shapes.push(disc(ox + 131 * k, oy + 31 * k, 9 * k + 2 * k, INK));
   shapes.push(disc(ox + 131 * k, oy + 31 * k, 9 * k - 2 * k, YELLOW));
   // four drawings on paper tiles, tilted as if dropped on the page
-  const tiles = [["fridge", 760, 80, -5], ["letter", 960, 110, 4], ["door", 780, 330, 3], ["suitcase", 975, 345, -6]];
+  const tiles = [["kapı", 760, 80, -5], ["buzdolabı", 960, 110, 4], ["telefon", 780, 330, 3], ["valiz", 975, 345, -6]];
   tiles.forEach(t => {
     const S = 180, cx = t[1] + S / 2, cy = t[2] + S / 2;
     const sq = [[-S / 2, -S / 2], [S / 2, -S / 2], [S / 2, S / 2], [-S / 2, S / 2]];
     shapes.push(fill(transform(sq, cx, cy + 9, t[3]), INK));                    // the hard shadow
     shapes.push(fill(transform(sq, cx, cy, t[3]), PAPER));
     shapes.push(stroke([transform(sq.concat([sq[0]]), cx, cy, t[3])], 5, INK));
-    const lines = flatten(DOODLES[t[0]]).map(l => transform(l.map(p => [p[0] - 50, p[1] - 50]), cx, cy, t[3], S / 100 * 0.86));
+    const lines = DRAWINGS[t[0]].map(l => transform(l.map(p => [p[0] - 127.5, p[1] - 127.5]), cx, cy, t[3], S / 255 * 0.94));
     shapes.push(stroke(lines, 6, INK));
   });
   // the one that was right, marked

@@ -60,6 +60,7 @@
     --on-hi:#1D1B18;
     --hi-edge:#1D1B18;
     --hi-shadow:#1D1B18;
+    --done:#1D1B18;      /* the frame round a drawing that has an answer */
     --ok:#1C7D45;  --ok-soft:#DCEFE0;  --on-ok:#FFFFFF;
     --no:#C8322A;  --no-soft:#F9DDD7;  --on-no:#FFFFFF;
     --paper:#FFFFFF;
@@ -111,7 +112,7 @@
     --ink:#F5F0E6; --muted:#A7A197; --line:#2E2E34; --line2:#45454D;
     --edge:#3F3F47; --shadow:#08080A;
     --hi:#FFC940; --hi2:#FFD466; --hi-soft:rgba(255,201,64,.17); --on-hi:#1D1B18;
-    --hi-edge:#FFC940; --hi-shadow:#9A7213;
+    --hi-edge:#FFC940; --hi-shadow:#9A7213; --done:#FFC940;
     --ok:#5FD394; --ok-soft:rgba(95,211,148,.15); --on-ok:#0F2A1B;
     --no:#FF7A6B; --no-soft:rgba(255,122,107,.15); --on-no:#3A0F0A;
     --paper:#EFE9DD; --focus:#8AB0FF; --scrim:rgba(0,0,0,.66);
@@ -124,7 +125,7 @@
       --ink:#F5F0E6; --muted:#A7A197; --line:#2E2E34; --line2:#45454D;
       --edge:#3F3F47; --shadow:#08080A;
       --hi:#FFC940; --hi2:#FFD466; --hi-soft:rgba(255,201,64,.17); --on-hi:#1D1B18;
-      --hi-edge:#FFC940; --hi-shadow:#9A7213;
+      --hi-edge:#FFC940; --hi-shadow:#9A7213; --done:#FFC940;
       --ok:#5FD394; --ok-soft:rgba(95,211,148,.15); --on-ok:#0F2A1B;
       --no:#FF7A6B; --no-soft:rgba(255,122,107,.15); --on-no:#3A0F0A;
       --paper:#EFE9DD; --focus:#8AB0FF; --scrim:rgba(0,0,0,.66);
@@ -307,8 +308,9 @@
     -webkit-appearance:none; appearance:none; width:26px; height:42px; border-radius:11px;
     background:var(--panel);
     /* The yellow is the thumb's own shadow thrown off to the left, clipped by the pill:
-       a filled track with no script to keep it in step. */
-    box-shadow:-100vw 0 0 100vw var(--hi), inset 0 0 0 2px var(--edge);
+       a filled track with no script to keep it in step. It ends at the thumb's middle, so
+       none of it shows past the thumb's rounded right side. */
+    box-shadow:calc(-100vw - 13px) 0 0 100vw var(--hi), inset 0 0 0 2px var(--edge);
     background-image:linear-gradient(90deg, transparent 9px, var(--line2) 9px, var(--line2) 11px, transparent 11px, transparent 15px, var(--line2) 15px, var(--line2) 17px, transparent 17px);
     background-size:100% 14px; background-repeat:no-repeat; background-position:center;
   }
@@ -513,23 +515,11 @@
      number. It is as wide as the screen now, like every other child of a screen, so the
      number is centred in it rather than by it. */
   #cdNum{
-    position:relative; z-index:0;
     font:900 min(30vh, 54vw)/1 var(--font); letter-spacing:-.05em; text-align:center;
     font-variant-numeric:tabular-nums;
   }
-  /* a ring round the number that fills in the second it stands for */
-  @property --sweep{syntax:"<angle>"; inherits:false; initial-value:360deg;}
-  #cdNum::before{
-    content:""; position:absolute; z-index:-1; left:50%; top:50%;
-    width:1.32em; height:1.32em; margin:-.64em 0 0 -.66em; border-radius:50%;
-    background:conic-gradient(var(--hi) var(--sweep, 360deg), var(--line) 0);
-    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - .085em), #000 calc(100% - .08em));
-    mask:radial-gradient(farthest-side, transparent calc(100% - .085em), #000 calc(100% - .08em));
-  }
   #cdNum.pop{animation:pop .34s var(--spring);}
-  #cdNum.pop::before{animation:sweep 1s linear both;}
   @keyframes pop{from{transform:scale(.55); opacity:.1} to{transform:scale(1); opacity:1}}
-  @keyframes sweep{from{--sweep:0deg} to{--sweep:360deg}}
 
   /* ================================================================= draw === */
   #draw{padding-top:12px;}
@@ -554,9 +544,12 @@
     border:2px solid var(--edge); border-radius:99px; background:var(--sunk);
   }
   #bar{height:100%; background:var(--hi); transform-origin:left center; transform:scaleX(1);}
-  #clearPad{align-self:center; width:auto; margin:0 auto 4px;}
+  #clearPad{align-self:center; width:auto; margin:0 auto 14px;}
   #clearPad.ic::before{width:19px; height:19px;}
-  #stage{flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:6px 0 20px;}
+  /* No padding: sizePad takes the square from the stage's client size, which counts padding,
+     so any would make the paper bigger than its room and push it up over the eraser. The
+     space for the shadow is a margin instead. */
+  #stage{flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:0; margin-bottom:20px;}
   #pad{
     background:var(--paper); border:2.5px solid var(--edge); border-radius:22px;
     box-shadow:0 6px 0 var(--shadow); touch-action:none; display:block;
@@ -600,7 +593,9 @@
   .art .p{fill:var(--paper); stroke:var(--edge); stroke-width:3.5; stroke-linejoin:round;}
   .art .y{fill:var(--hi); stroke:var(--edge); stroke-width:3.5; stroke-linejoin:round;}
   .art .m{fill:none; stroke:var(--muted); stroke-width:3; stroke-linecap:round; stroke-dasharray:2 7;}
-  .art .draw{stroke-dasharray:1 2; animation:ink .5s var(--ease) .25s both;}
+  .art .tick-edge{fill:none; stroke:var(--edge); stroke-width:15; stroke-linecap:round; stroke-linejoin:round;}
+  .art .tick{fill:none; stroke:var(--hi); stroke-width:9; stroke-linecap:round; stroke-linejoin:round;}
+  .art .draw{stroke-dasharray:1 2; animation:ink .55s var(--ease) .3s both;}
   #between.on .art .fan1{animation:fan1 .5s var(--spring) both;}
   #between.on .art .fan2{animation:fan2 .5s var(--spring) .06s both;}
   @keyframes fan1{from{transform:rotate(0)} to{transform:rotate(-9deg)}}
@@ -735,7 +730,18 @@
     border-color:var(--ink); transform:translateY(-3px);
     box-shadow:0 0 0 4px var(--hi), 0 5px 0 4px var(--hi);
   }
-  .cell.done .box{border-color:var(--ink); box-shadow:0 3px 0 var(--ink);}
+  /* An answered drawing says so three ways, because in the dark theme a light frame round
+     light paper was all but invisible: a pencil badge in its corner, its word on a solid
+     yellow label, and a frame in --done, graphite by day and yellow at night. */
+  .cell.done .box{border-color:var(--done); box-shadow:0 3px 0 var(--done);}
+  .cell.done .box::before{
+    content:""; position:absolute; z-index:1; top:4px; right:4px; width:20px; height:20px;
+    border-radius:50%; background:var(--hi); box-shadow:0 0 0 2px var(--paper);
+  }
+  .cell.done .box::after{
+    content:""; position:absolute; z-index:2; top:4px; right:4px; width:20px; height:20px; background:var(--on-hi);
+    -webkit-mask:var(--i-pencil) center/12px no-repeat; mask:var(--i-pencil) center/12px no-repeat;
+  }
   /* A right answer is framed green. A wrong one keeps a plain frame and says so with its
      cross and its struck-out word: a bad round framed in red twenty times over read as
      being told off, in a game that is meant to be laughed at. */
@@ -763,10 +769,10 @@
   .cap{font:700 12.5px/1.25 var(--font); margin-top:6px; min-height:16px; word-break:break-word;}
   .cap .bad{color:var(--no); text-decoration:line-through; text-decoration-thickness:1.5px;}
   .cap .good{color:var(--ok); font-weight:850;}
-  /* what was picked, run over with a highlighter */
+  /* what was picked, on a label: solid, so it reads on either theme */
   .cap .pick{
-    font-weight:850; padding:0 4px; border-radius:5px;
-    background:linear-gradient(transparent 10%, var(--hi-soft) 10%, var(--hi-soft) 92%, transparent 92%);
+    display:inline-block; font-weight:850; padding:2px 7px 3px; border-radius:7px;
+    background:var(--hi); color:var(--on-hi);
     -webkit-box-decoration-break:clone; box-decoration-break:clone;
   }
 
@@ -875,7 +881,6 @@
   .ring{position:absolute; left:-10px; top:-17px; width:calc(100% + 20px); height:calc(100% + 32px); overflow:visible;}
   .ring path{fill:none; stroke:var(--no); stroke-width:3.6; stroke-linecap:round; stroke-dasharray:1 2;}
   #result.on .ring path{animation:ink .75s var(--ease) .2s both;}
-  #share{margin-top:6px;}
   #copyNote{color:var(--ok); font:750 14px var(--font); text-align:center; min-height:20px; margin-top:8px; margin-bottom:4px;}
   #fallback{
     width:100%; margin-top:6px; margin-bottom:10px; border:2px solid var(--line2); border-radius:14px; padding:12px;
@@ -883,7 +888,18 @@
   }
   #switchRound, #reviewGuess{margin-top:0; margin-bottom:14px;}
   #result > .scroll{margin-top:6px;}
-  #saveShot{margin-top:2px; margin-bottom:4px;}
+  /* the two ways to take the round away, side by side under the drawings they take */
+  /* On a phone the pair is measured to fit one line each: paylaş takes what its word needs,
+     the long cevaplarımı kaydet takes the rest, both a little tighter than elsewhere. From
+     480px there is room for two equal halves; under 360px they stack. */
+  .keep{display:flex; gap:8px; align-items:stretch; margin-top:2px;}
+  .keep > *{width:auto; margin:0; min-width:0;}
+  .keep #share{flex:0 0 auto; gap:8px; padding-left:12px; padding-right:12px;}
+  .keep #share.ic::before{width:20px; height:20px;}
+  .keep #saveShot{flex:1 1 auto; gap:7px; padding-left:10px; padding-right:10px; font-size:clamp(14px, 4.1vw, 16.5px);}
+  .keep #saveShot.ic::before{width:18px; height:18px;}
+  @media (min-width:480px){ .keep #share, .keep #saveShot{flex:1 1 0;} }
+  @media (max-width:359px){ .keep{flex-direction:column;} }
   .btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:16px 0 4px;}
   #resultReport{margin:10px auto 18px;}
 
@@ -984,8 +1000,8 @@
   @keyframes live{0%,100%{box-shadow:0 0 0 0 var(--ok-soft); opacity:1} 50%{box-shadow:0 0 0 6px transparent; opacity:.55}}
   /* the round's own code, above its table */
   .bcode{
-    display:flex; align-items:center; gap:8px; margin-top:22px; margin-bottom:10px;
-    color:var(--muted); font:800 13px/1 var(--mono); letter-spacing:.12em;
+    display:flex; align-items:center; gap:12px; margin-top:26px; margin-bottom:14px;
+    color:var(--ink); font:800 20px/1 var(--mono); letter-spacing:.08em; white-space:nowrap;
   }
   .bcode::before{content:""; flex:1; height:2px; background:repeating-linear-gradient(90deg, var(--line2) 0 6px, transparent 6px 11px);}
   .bcode::after{content:""; flex:1; height:2px; background:repeating-linear-gradient(90deg, var(--line2) 0 6px, transparent 6px 11px);}
@@ -1017,6 +1033,9 @@
   .dicon.ic::before{width:30px; height:30px;}
   .stack > .dicon{margin-bottom:16px;}
   /* değiştir opens this inside the same card, so the answer is given where it was asked */
+  /* The sentence follows the slider, and 2,5 is wider than 3: it keeps to one line at one
+     size, set by fitTimeLine for the widest thing it can say. */
+  #timeAskText{white-space:nowrap;}
   #timeAskEdit{margin:14px 0 0; padding:14px; text-align:left; border-radius:18px; background:var(--panel2);}
   #timeAskEdit input[type="range"]{background:var(--panel);}
   /* geri bildirim */
@@ -1059,13 +1078,27 @@
     display:flex; align-items:center; justify-content:center; overflow:hidden;
   }
   .hpaper svg{position:absolute; inset:0; width:100%; height:100%;}
-  .hd{fill:none; stroke:var(--pen); stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round;}
-  .hs1 .hd{stroke-dasharray:1 2; animation:d1 9s infinite;}
-  .hs1 .hd2{animation-name:d1b;}
-  @keyframes d1{0%,4%{stroke-dashoffset:1; opacity:0} 4.5%{opacity:1} 19%,34%{stroke-dashoffset:0; opacity:1} 35%,100%{stroke-dashoffset:1; opacity:0}}
-  @keyframes d1b{0%,19%{stroke-dashoffset:1; opacity:0} 19.5%{opacity:1} 27%,34%{stroke-dashoffset:0; opacity:1} 35%,100%{stroke-dashoffset:1; opacity:0}}
-  .hwrite{font:500 44px/1 var(--font); color:var(--pen); letter-spacing:.01em; animation:w2 9s infinite;}
-  @keyframes w2{0%,37%{clip-path:inset(0 100% 0 0); opacity:1} 46%,54%{clip-path:inset(0 0 0 0); opacity:1} 58%,100%{clip-path:inset(0 0 0 0); opacity:.35}}
+  /* The drawings are a real round's, 6G75, in the 0-255 space strokes are stored in. Each
+     stroke has its own keyframes, so it draws in the order and at the pace it was drawn. */
+  .hd{fill:none; stroke:var(--pen); stroke-width:6; stroke-linecap:round; stroke-linejoin:round;}
+  .hs1 .hd, .hs2 .hd{stroke-dasharray:1 2;}
+  @keyframes hA0{0%,4%{stroke-dashoffset:1; opacity:0} 4.1%{opacity:1} 19.44%,34%{stroke-dashoffset:0; opacity:1} 35%,100%{stroke-dashoffset:1; opacity:0}}
+  .hA0{animation:hA0 9s linear infinite;}
+  @keyframes hA1{0%,20.34%{stroke-dashoffset:1; opacity:0} 20.44%{opacity:1} 23.16%,34%{stroke-dashoffset:0; opacity:1} 35%,100%{stroke-dashoffset:1; opacity:0}}
+  .hA1{animation:hA1 9s linear infinite;}
+  @keyframes hA2{0%,24.06%{stroke-dashoffset:1; opacity:0} 24.16%{opacity:1} 24.08%,34%{stroke-dashoffset:0; opacity:1} 35%,100%{stroke-dashoffset:1; opacity:0}}
+  .hA2{animation:hA2 9s linear infinite;}
+  @keyframes hA3{0%,24.98%{stroke-dashoffset:1; opacity:0} 25.08%{opacity:1} 25%,34%{stroke-dashoffset:0; opacity:1} 35%,100%{stroke-dashoffset:1; opacity:0}}
+  .hA3{animation:hA3 9s linear infinite;}
+  @keyframes hB0{0%,36%{stroke-dashoffset:1; opacity:0} 36.1%{opacity:1} 43.3%,100%{stroke-dashoffset:0; opacity:1}}
+  .hB0{animation:hB0 9s linear infinite;}
+  @keyframes hB1{0%,44.2%{stroke-dashoffset:1; opacity:0} 44.3%{opacity:1} 44.51%,100%{stroke-dashoffset:0; opacity:1}}
+  .hB1{animation:hB1 9s linear infinite;}
+  @keyframes hB2{0%,45.41%{stroke-dashoffset:1; opacity:0} 45.51%{opacity:1} 46.5%,100%{stroke-dashoffset:0; opacity:1}}
+  .hB2{animation:hB2 9s linear infinite;}
+  /* numbers written into the clock: struck out, then left there faded */
+  .hclock{animation:dim 9s infinite;}
+  @keyframes dim{0%,56%{opacity:1} 60%,100%{opacity:.35}}
   .hno circle, .hno path{fill:none; stroke:var(--no); stroke-width:6; stroke-linecap:round; stroke-dasharray:1 2; animation:n2 9s infinite;}
   .hno path{animation-name:n2b;}
   @keyframes n2{0%,48%{stroke-dashoffset:1; opacity:0} 48.5%{opacity:1} 55%,100%{stroke-dashoffset:0; opacity:1}}
@@ -1079,7 +1112,7 @@
     border:2px solid var(--line2); border-radius:14px; box-shadow:0 3px 0 var(--line2);
   }
   .ht svg{position:absolute; inset:6%; width:88%; height:88%;}
-  .ht .hd{stroke-width:4.2;}
+  .ht .hd{stroke-width:10;}
   .ht-ok{animation:okb 9s infinite;}
   @keyframes okb{0%,82%{border-color:var(--line2); box-shadow:0 3px 0 var(--line2)} 84%,100%{border-color:var(--ok); box-shadow:0 3px 0 var(--ok)}}
   .ht-ok::after{
@@ -1307,7 +1340,8 @@
       <div id="word"></div>
       <div class="drawmeta">
         <div id="counter">1 / 20</div>
-        <p class="lvl" id="drawLevel"></p>
+        <!-- Written by the game, never shown: the clock is the gauge, not a number. -->
+        <p class="lvl" id="drawLevel" hidden></p>
       </div>
     </div>
     <div id="track"><div id="bar"></div></div>
@@ -1323,8 +1357,9 @@
       <rect class="p fan1" x="58" y="22" width="84" height="104" rx="10"/>
       <rect class="p fan2" x="58" y="22" width="84" height="104" rx="10"/>
       <rect class="p" x="58" y="22" width="84" height="104" rx="10"/>
-      <circle class="y" cx="100" cy="72" r="27"/>
-      <path class="k draw" pathLength="1" d="M87 73 L96 82 L114 62"/>
+      <!-- a yellow tick in a pencil outline, drawn as the screen arrives -->
+      <path class="tick-edge draw" pathLength="1" d="M78 73 L94 89 L122 55"/>
+      <path class="tick draw" pathLength="1" d="M78 73 L94 89 L122 55"/>
       <path class="k" d="M72 112 H100 M72 38 H86" style="stroke:var(--line2); stroke-width:3.5"/>
     </svg>
     <h2 data-t="drawingsDone"></h2>
@@ -1467,16 +1502,17 @@
         <div id="score"></div>
       </div>
     </div>
-    <!-- One way to hand the round on, first: the moment a score arrives is the moment it
-         gets sent. -->
-    <button class="primary ic i-share" id="share" data-t="share"></button>
-    <p id="copyNote"></p>
-    <textarea id="fallback" rows="7" readonly></textarea>
     <button class="ghost ic i-eye" id="switchRound" hidden></button>
     <button class="ghost ic i-eye" id="reviewGuess" hidden data-t="guessMineToo"></button>
     <div class="scroll"><div class="grid" id="resultGrid"></div></div>
-    <!-- Under the drawings it is about: every answer, and the word each one was. -->
-    <button class="ghost ic i-download" id="saveShot" data-t="saveImage"></button>
+    <!-- Under the drawings they are about, together: the message with the score and the link,
+         and the picture of every answer and the word each one was. -->
+    <div class="keep">
+      <button class="primary ic i-share" id="share" data-t="share"></button>
+      <button class="ghost ic i-download" id="saveShot" data-t="saveImage"></button>
+    </div>
+    <p id="copyNote"></p>
+    <textarea id="fallback" rows="7" readonly></textarea>
     <!-- Outside the board, so the name can be set even on a round that has no score
          table: it still decides what a shared link says. -->
     <div id="nameBlock">
@@ -1588,10 +1624,7 @@
         <div class="hhead"><span class="hw" data-t="howWordA"></span><span class="hc">1 / 20</span></div>
         <div class="htrack"><i></i></div>
         <div class="hpaper">
-          <svg viewBox="0 0 100 100">
-            <path class="hd" pathLength="1" d="M17 31 C38 29.5 62 30 83 30.5 C84 45 83.5 60 84 74 C62 75 39 74.5 17.5 75 C16.5 60 17 45 17 31 Z"/>
-            <path class="hd hd2" pathLength="1" d="M18.5 33 C30 42 40 49.5 50 56 C60 49 71 41.5 82 32.5"/>
-          </svg>
+          <svg viewBox="0 0 255 255"><path class="hd hA0" pathLength="1" d="M102 54 L136 45 L143 44 L152 45 L147 93 L147 133 L154 158 L155 176 L148 181 L139 185 L114 193 L98 196 L81 196 L77 193 L75 189 L75 166 L79 138 L84 116 L89 82 L90 56 L92 52"/><path class="hd hA1" pathLength="1" d="M82 98 L157 99"/><path class="hd hA2" pathLength="1" d="M135 78 L135.5 78"/><path class="hd hA3" pathLength="1" d="M141 108 L141.5 108"/></svg>
         </div>
         <p class="hcap" data-t="howStep1"></p>
       </div>
@@ -1599,7 +1632,7 @@
         <div class="hhead"><span class="hw" data-t="howWordB"></span><span class="hc">2 / 20</span></div>
         <div class="htrack"><i></i></div>
         <div class="hpaper">
-          <span class="hwrite" data-t="howWordB"></span>
+          <svg class="hclock" viewBox="0 0 255 255"><path class="hd hB0" pathLength="1" d="M123 55 L115 51 L108 51 L101 57 L85 78 L73 98 L64 120 L63 141 L68 147 L80 155 L102 166 L113 169 L134 169 L144 164 L159 151 L172 130 L178 112 L179 78 L174 71 L157 54 L144 46 L132 43 L123 43 L119 45 L107 61"/><path class="hd hB1" pathLength="1" d="M129 68 L127 85"/><path class="hd hB2" pathLength="1" d="M153 98 L157 94 L164 92 L165 94 L164 105 L153 122 L160 120 L166 121"/></svg>
           <svg class="hno" viewBox="0 0 100 100">
             <circle pathLength="1" cx="50" cy="50" r="33" transform="rotate(-120 50 50)"/>
             <path pathLength="1" d="M27 27 L73 73"/>
@@ -1610,12 +1643,12 @@
       <div class="hs hs3">
         <div class="hq" data-t="whichWasWhich"></div>
         <div class="hgrid">
-          <div class="ht"><svg viewBox="0 0 100 100"><path class="hd" d="M31 10 C44 9.5 56 9.5 69 10 C69.5 37 69 64 69.5 90 C56 90.5 44 90.5 31 90 C30.5 64 31 37 31 10 Z M31.5 38 C44 37.5 56 38.5 69 38 M61 20 V29 M61 47 V62"/></svg></div>
-          <div class="ht ht-ok"><svg viewBox="0 0 100 100"><path class="hd" d="M17 31 C38 29.5 62 30 83 30.5 C84 45 83.5 60 84 74 C62 75 39 74.5 17.5 75 C16.5 60 17 45 17 31 Z M18.5 33 C30 42 40 49.5 50 56 C60 49 71 41.5 82 32.5"/></svg><span class="hl" data-t="howWordA"></span><span class="hk"></span></div>
-          <div class="ht"><svg viewBox="0 0 100 100"><path class="hd" d="M33 10 C44 9.5 56 10 67 10 C67.5 37 67 64 67.5 90 C56 90.5 44 90 33 90.5 C32.5 64 33 37 33 10 Z M58 51 h.5"/></svg></div>
-          <div class="ht"><svg viewBox="0 0 100 100"><path class="hd" d="M16 36 C38 35 62 35.5 84 35.5 C85 51 84.5 66 85 82 C62 83 38 82.5 16 83 C15.5 66 16 51 16 36 Z M40 35.5 V27 C40 24 42 23 45 23 H55 C58 23 60 24 60 27 V35.5 M34 36 V82 M66 36 V82"/></svg></div>
+          <div class="ht"><svg viewBox="0 0 255 255"><path class="hd" d="M115 63 L136 60 L180 47 L174 70 L173 129 L175 148 L177 153 L181 179 L170 180 L122 200 L104 205 L94 205 L93 198 L101 142 L101 65 L105 35 L108 40"/><path class="hd" d="M156 110 L159 115 L159 122"/></svg></div>
+          <div class="ht ht-ok"><svg viewBox="0 0 255 255"><path class="hd" d="M102 54 L136 45 L143 44 L152 45 L147 93 L147 133 L154 158 L155 176 L148 181 L139 185 L114 193 L98 196 L81 196 L77 193 L75 189 L75 166 L79 138 L84 116 L89 82 L90 56 L92 52"/><path class="hd" d="M82 98 L157 99"/><path class="hd" d="M135 78 L135.5 78"/><path class="hd" d="M141 108 L141.5 108"/></svg><span class="hl" data-t="howWordA"></span><span class="hk"></span></div>
+          <div class="ht"><svg viewBox="0 0 255 255"><path class="hd" d="M95 57 L93 63 L95 57 L93 63 L92 78 L77 159 L75 190 L83 193 L133 202 L132 193 L135 178 L154 118 L167 67 L167 59 L166 57 L163 56 L112 56 L99 60 L95 68"/><path class="hd" d="M107 176 L106 185"/></svg></div>
+          <div class="ht"><svg viewBox="0 0 255 255"><path class="hd" d="M97 77 L85 140 L82 163 L82 174 L145 190 L145 161 L155 102 L155 80 L154 76 L148 70 L138 65 L132 64 L103 64 L94 66 L93 68"/><path class="hd" d="M108 63 L109 53 L118 35 L121 25 L121 31 L125 40 L130 43 L139 43 L141 44 L142 48 L135 66 L132 81"/><path class="hd" d="M96 188 L94 194 L94 204 L97 216"/><path class="hd" d="M128 190 L126 202"/></svg></div>
         </div>
-        <div class="hchips"><span class="hm" data-t="howWordA"></span><span data-t="howWordC"></span><span data-t="howWordD"></span><span data-t="howWordB"></span></div>
+        <div class="hchips"><span class="hm" data-t="howWordA"></span><span data-t="howWordC"></span><span data-t="howWordE"></span><span data-t="howWordD"></span></div>
         <p class="hcap" data-t="howStep3"></p>
       </div>
       <div class="hdots"><i></i><i></i><i></i></div>
@@ -2045,10 +2078,11 @@ const TEXT = {
   howStep2a:        "harf, rakam, kelime",
   howStep2b:        "yazmak yok",
   howStep3:         "sonra hangisi neydi, tahmin et",
-  howWordA:         "mektup",
-  howWordB:         "valiz",
-  howWordC:         "buzdolabı",
-  howWordD:         "kapı",
+  howWordA:         "buzdolabı",
+  howWordB:         "saat",
+  howWordC:         "kapı",
+  howWordD:         "valiz",
+  howWordE:         "telefon",
 
   modeOpen:         "kelimeler açık",
   modeOpenDesc:     "kelimelerle çizimleri eşleştir",
@@ -5592,7 +5626,26 @@ if (typeof MutationObserver !== "undefined"){
   new MutationObserver(fitHeadWord).observe($("word"), { childList: true, characterData: true, subtree: true });
   new MutationObserver(fitScoreLine).observe($("score"), { childList: true, characterData: true, subtree: true });
 }
-window.addEventListener("resize", function(){ fitHeadWord(); fitScoreLine(); });
+/* The time question's sentence changes as the slider moves, and "2,5" is wider than "3", so
+   it went from one line to two and back under the thumb. It is sized once for the widest
+   value it can say -- measured, since widths differ from font to font -- and then keeps
+   that size on one line for every value. */
+function fitTimeLine(){
+  const el = $("timeAskText");
+  if (!el.clientWidth) return;
+  const cs = getComputedStyle(el);
+  const c = (fitTimeLine.cv || (fitTimeLine.cv = document.createElement("canvas"))).getContext("2d");
+  c.font = cs.fontWeight + " 22px " + cs.fontFamily;
+  let widest = 0;
+  for (let v = SECS_MIN; v <= SECS_MAX; v += 0.5){
+    widest = Math.max(widest, c.measureText(TEXT.timeNotice.replace("{n}", String(v).replace(".", ","))).width);
+  }
+  el.style.fontSize = Math.max(14, Math.min(22, Math.floor(220 * el.clientWidth / widest) / 10)) + "px";
+}
+if (typeof MutationObserver !== "undefined"){
+  new MutationObserver(fitTimeLine).observe($("timeAskText"), { childList: true, characterData: true, subtree: true });
+}
+window.addEventListener("resize", function(){ fitHeadWord(); fitScoreLine(); fitTimeLine(); });
 
 // The wordmark draws itself on the first arrival only; after that it is simply there.
 setTimeout(function(){ document.documentElement.classList.remove("intro"); }, 2400);

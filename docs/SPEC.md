@@ -93,10 +93,12 @@ the result screen.
 The first time a device that has never played arrives, wherever it arrives, `nasıl
 oynanır?` opens over it: a nine-second loop of the three steps (her kelimeyi birkaç
 saniyede çiz · harf, rakam, kelime yazmak yok · sonra hangisi neydi, tahmin et), and
-`anladım`. Tapping outside closes it too. The loop is drawn in the page with CSS and SVG --
-`mektup` and an envelope drawing itself against the clock, `valiz` written out and struck
-through, four look-alike drawings with the word dropped onto the right one -- so it follows
-the theme, is sharp at any size and costs about 5 KB. Its captions are in `TEXT`.
+`anladım`. Tapping outside closes it too. The loop is drawn in the page with CSS and SVG,
+from the drawings of a real round, 6G75: `buzdolabı` drawing itself against the clock,
+stroke by stroke in the order it was drawn; `saat`, which has a 1 and a 2 written into it,
+struck through for rakam yazmak yok; and that round's four tall boxes (`kapı`, `buzdolabı`,
+`telefon`, `valiz`) with the word dropped onto the right one. It follows the theme, is
+sharp at any size and costs about 5 KB. Its captions and words are in `TEXT`.
 
 Three places, all of them read before anything is played: the start screen, the kolay/zor
 question a friend's link lands on, and `önce sen çiz` for a friend's daily round. **A link
@@ -194,7 +196,9 @@ screen the slider is a screen away.
 
 `değiştir` opens the slider inside the same card rather than sending anyone back to the
 start screen for it, and the sentence above it follows the slider as it moves, so what is
-chosen is read in the words it will be played under. `başla` then begins the round at that
+chosen is read in the words it will be played under. The sentence keeps to one line at one
+size, set for the widest value it can say (`2,5` is wider than `3`), so it no longer jumps
+to two lines under the thumb. `başla` then begins the round at that
 setting, keeps it on the device and moves the start screen's own slider to match.
 
 There is deliberately no difficulty grade. One existed briefly, read back from these
@@ -209,8 +213,8 @@ set to the page colour of whichever theme is showing. A device that already had 
 `light` stored keeps it.
 
 Seconds and theme are kept on the device; the mode is not, being asked every round. The
-drawing screen shows the duration alone, since nothing about guessing has been chosen
-yet; the recall and result screens and the share text show both (`kelimeler açık · 3 sn`).
+drawing screen shows no duration at all: the gauge running down is the only clock in the
+round. The recall and result screens and the share text show both (`kelimeler açık · 3 sn`).
 
 This replaced four fixed difficulties (`easy`, `medium`, `hard`, `impossible`), which
 conflated the two variables: `medium` and `hard` differed only in answer method while
@@ -343,6 +347,10 @@ Finishing is always enabled in both modes; anything left blank counts as wrong. 
 outlined until every drawing has an answer and only then turns yellow, and a bar beside the
 count shows how far along the grid is.
 
+An answered drawing is marked three ways, because in the dark theme a frame alone did not
+show against the paper: a pencil badge in its corner, its answer on a solid yellow label
+under it, and a frame that is graphite in the light theme and yellow in the dark one.
+
 Cells are repainted through a `ResizeObserver`, so drawings still render correctly if
 the grid is built before the page has been laid out.
 
@@ -420,7 +428,9 @@ depend on telling red from green. Wrong cells show the guess struck through with
 correct word in green beneath it; a skipped answer shows `—`. Tapping any cell opens
 it full size in the middle of the screen with the same caption.
 
-The score heading is circled in red pen, and `paylaş` sits directly under it.
+The score heading is circled in red pen. Under the drawings, `paylaş` and `cevaplarımı
+kaydet` sit side by side, the two ways to take the round away kept together; below 360px
+they stack. `oyun kodu`, the round's code over its board, is set at 20px.
 
 The round is also timed: the clock runs from the recall grid first appearing to the
 finish button, survives a reload, and is shown beside the score and used to break
@@ -430,7 +440,7 @@ ties on the board.
 
 ### The picture
 
-`görseli kaydet` on the result screen saves the whole round as one PNG, and
+`cevaplarımı kaydet` on the result screen saves the whole round as one PNG, and
 `bu çizimi kaydet` in the zoom saves a single drawing with its answer. Both are drawn on
 a canvas rather than screenshotted: the grid scrolls on a phone, so a screenshot gets a
 round in pieces and carries the browser along with it.
@@ -795,8 +805,8 @@ round rather than adding second copies.
   `/icon-512.png` and `/icon.svg` -- a graphite `c` on pencil yellow, with the pencil that
   is just finishing it, solid at tab sizes and outlined from 120px up -- plus `/og.png`,
   the address's og:image: 1200 × 630, shown as a large card
-  (`twitter:card summary_large_image`), the wordmark and four drawings that are hard to
-  tell apart, with no words that could give anything away. All of them are drawn by
+  (`twitter:card summary_large_image`), the wordmark and four drawings from round 6G75,
+  hard to tell apart, with no words that could give anything away. All of them are drawn by
   `tools/make-icons.js` as geometry, so no font or image library is involved, and it
   writes `icon.svg` from the same numbers. Search engines ask for `/favicon.ico`, which
   used to answer with the page itself -- hence the globe.
