@@ -1,6 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="chizz">
-  <!-- The "c" is an arc, not a letter, so it needs no font. tools/make-icons.js draws the
-       same shape into the PNG and ICO files; change both together. -->
-  <rect width="64" height="64" rx="14" fill="#131418"/>
-  <path d="M41.49 23.51A12 12 0 1 0 41.49 40.49" fill="none" stroke="#ff5c3d" stroke-width="8" stroke-linecap="round"/>
+  <!-- Written by tools/make-icons.js from the geometry that draws the PNG and ICO files. -->
+  <defs><clipPath id="t"><rect width="64" height="64" rx="14"/></clipPath></defs>
+  <g clip-path="url(#t)">
+    <rect width="64" height="64" fill="#FFC53D"/>
+    <path d="M43 20.5 C38 14.5 29 14 22.5 18 C14.5 23 12.5 35 16 42.5 C19.5 50 28.5 52.5 35.5 50 C38.5 49 40.5 47.5 42.5 45.5" fill="none" stroke="#1D1B18" stroke-width="8.5" stroke-linecap="round"/>
+    <g transform="translate(42.5 45.5) rotate(-45)" stroke="#1D1B18" stroke-linejoin="round">
+      <polygon points="12,-7 56,-7 56,7 12,7" fill="#FFC53D" stroke-width="2.4"/>
+      <polygon points="4.8,-2.4 12,-7 12,7 4.8,2.4" fill="#FFF3DC" stroke-width="2.4"/>
+      <polygon points="0,0 4.8,-2.4 4.8,2.4" fill="#1D1B18" stroke="none"/>
+      <path d="M12 -2.3 H56 M12 2.3 H56" stroke-width="1.4"/>
+    </g>
+  </g>
 </svg>
