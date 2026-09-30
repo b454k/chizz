@@ -27,7 +27,7 @@ tick for the marking. The drawing paper stays white paper in both themes.
   friend's answers, and a pulsing dot that says it is live.
 - **nasıl oynanır is drawn in the page** instead of being a 430 KB GIF: the same three steps,
   drawn with the strokes of a real round, 6G75 (`saat` stands for rakam yok, since it has
-  a 1 and a 2 in it), sharp at any size, in either theme, about 5 KB.
+  a 1 and a 2 in it), sharp at any size, in either theme, about 3 KB compressed.
   `public/how-to-play.gif` is gone.
 - **The drawing screen shows no seconds**: the gauge running down is the only clock.
   `ekranı temizle` sits between the gauge and the paper, and the countdown is the number

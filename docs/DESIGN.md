@@ -164,8 +164,9 @@ page with CSS and SVG, and every drawing in it is a real one, from round 6G75: `
 drawing itself against the clock, stroke by stroke in the order it was drawn; `saat`, whose
 drawer wrote a 1 and a 2 into the clock, struck through for *rakam yazmak yok*; then the
 round's four tall boxes -- `kapı`, `buzdolabı`, `telefon`, `valiz` -- with the word dropped
-onto the right one. It is sharp at any size, follows the theme, costs about 5KB, and starts
-from the first scene whenever it opens, because it only runs while visible.
+onto the right one. It is sharp at any size, follows the theme, costs about 11KB (3KB
+compressed), and starts from the first scene whenever it opens, because it only runs while
+visible.
 
 ## Screen by screen
 
@@ -229,5 +230,5 @@ Found while redesigning, and fixed because they were visual:
 - On a short window the paper was sized from room that counted the stage's padding, so it
   grew into the eraser above it.
 - The how-to GIF was the heaviest thing a first visit downloaded; the page is now lighter on
-  a first visit by about 370KB, although the page file itself grew by about 59KB of styles
+  a first visit by about 370KB, although the page file itself grew by about 64KB of styles
   and drawings.

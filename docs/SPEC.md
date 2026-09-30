@@ -98,7 +98,8 @@ from the drawings of a real round, 6G75: `buzdolabı` drawing itself against the
 stroke by stroke in the order it was drawn; `saat`, which has a 1 and a 2 written into it,
 struck through for rakam yazmak yok; and that round's four tall boxes (`kapı`, `buzdolabı`,
 `telefon`, `valiz`) with the word dropped onto the right one. It follows the theme, is
-sharp at any size and costs about 5 KB. Its captions and words are in `TEXT`.
+sharp at any size and costs about 11 KB, 3 KB compressed. Its captions and words are in
+`TEXT`.
 
 Three places, all of them read before anything is played: the start screen, the kolay/zor
 question a friend's link lands on, and `önce sen çiz` for a friend's daily round. **A link
