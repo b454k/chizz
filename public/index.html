@@ -352,6 +352,20 @@
      clipped with no way to scroll to it. */
   #home{justify-content:center; justify-content:safe center;}
   .hwrap{width:100%; max-width:440px; margin:0 auto; padding:14px 0 30px; flex:none;}
+  /* The first screen holds the wordmark and the day's game and nothing more: the page used
+     to open on everything at once, which was a lot to take in. The wordmark and its line sit
+     in the middle of the screen with the day's card whole beneath them, and sınırsız and the
+     rest are a scroll away. The pills above and the card below each take half of what the
+     wordmark leaves, which centres it; neither half shrinks below what it holds, so on a
+     short screen the wordmark moves up rather than the card being cut off. The height is
+     the screen's, less the column's top padding and the phone's safe areas. */
+  .hhero{
+    display:flex; flex-direction:column; padding-bottom:22px;
+    min-height:calc(100vh - 14px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    min-height:calc(100svh - 14px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+  .hhero > .htop, .hhero > .hlow{flex:1 1 0;}
+  .hhero > .htop{align-items:flex-start;}
   .htop{display:flex; justify-content:space-between; gap:10px; margin:0 0 6px;}
   .brand{display:flex; justify-content:center; margin:6px 0 0;}
   .mark{display:block; width:min(236px, 64vw); height:auto; overflow:visible;}
@@ -1199,39 +1213,44 @@ try {
       <svg viewBox="0 0 100 100" style="right:5%; top:78%; transform:rotate(4deg)"><path d="M20 84 V46 L50 20 L80 46 V84 Z"/><path d="M42 84 V62 H58 V84"/></svg>
     </div>
     <div class="hwrap">
-      <!-- At the top, where every visit sees it without scrolling; small, so it does not
-           compete with the day's game. -->
-      <div class="htop">
-        <button class="pill ic i-help" id="howOpen" data-t="howOpen"></button>
-        <button class="pill ic i-flag" id="fbOpen" data-t="fbOpen"></button>
-      </div>
-      <!-- The wordmark is drawn, not set: five pencil strokes and a dot, so it needs no
-           font. The saved picture draws the same paths from here. -->
-      <h1 class="brand">
-        <svg class="mark" id="logo" viewBox="0 0 260 124" role="img" aria-label="chizz">
-          <path class="sw" pathLength="1" d="M16 113 C80 106 165 107 246 110"/>
-          <path class="s s1" pathLength="1" d="M58 61 C52 52 41 49 32 53 C21 58 17 72 19 82 C22 96 35 102 46 101 C51 100.5 55 98 58 94"/>
-          <path class="s s2" pathLength="1" d="M76 14 C76.4 42 75.8 72 76 100"/>
-          <path class="s s3" pathLength="1" d="M76.5 74 C80 60 89 52 99 52 C108.5 52 112 60 112 71 L112 100"/>
-          <path class="s s4" pathLength="1" d="M131 57 L131 100"/>
-          <path class="s s5" pathLength="1" d="M148 57.5 C160 56 172 56 184 57 L150 99 C163 100.5 175 100.5 187 99"/>
-          <path class="s s6" pathLength="1" d="M201 57.5 C213 56 225 56 237 57 L203 99 C216 100.5 228 100.5 241 98.5"/>
-          <circle class="dot" cx="131" cy="31" r="9"/>
-        </svg>
-      </h1>
-      <p class="tagline" data-t="tagline"></p>
+      <!-- The first screen: the wordmark in the middle, the day's game under it. -->
+      <div class="hhero">
+        <!-- At the top, where every visit sees it without scrolling; small, so it does not
+             compete with the day's game. -->
+        <div class="htop">
+          <button class="pill ic i-help" id="howOpen" data-t="howOpen"></button>
+          <button class="pill ic i-flag" id="fbOpen" data-t="fbOpen"></button>
+        </div>
+        <!-- The wordmark is drawn, not set: five pencil strokes and a dot, so it needs no
+             font. The saved picture draws the same paths from here. -->
+        <h1 class="brand">
+          <svg class="mark" id="logo" viewBox="0 0 260 124" role="img" aria-label="chizz">
+            <path class="sw" pathLength="1" d="M16 113 C80 106 165 107 246 110"/>
+            <path class="s s1" pathLength="1" d="M58 61 C52 52 41 49 32 53 C21 58 17 72 19 82 C22 96 35 102 46 101 C51 100.5 55 98 58 94"/>
+            <path class="s s2" pathLength="1" d="M76 14 C76.4 42 75.8 72 76 100"/>
+            <path class="s s3" pathLength="1" d="M76.5 74 C80 60 89 52 99 52 C108.5 52 112 60 112 71 L112 100"/>
+            <path class="s s4" pathLength="1" d="M131 57 L131 100"/>
+            <path class="s s5" pathLength="1" d="M148 57.5 C160 56 172 56 184 57 L150 99 C163 100.5 175 100.5 187 99"/>
+            <path class="s s6" pathLength="1" d="M201 57.5 C213 56 225 56 237 57 L203 99 C216 100.5 228 100.5 241 98.5"/>
+            <circle class="dot" cx="131" cy="31" r="9"/>
+          </svg>
+        </h1>
+        <p class="tagline" data-t="tagline"></p>
 
-      <div class="hsec card daily">
-        <div id="dailyRow">
-          <div class="leaf" aria-hidden="true"><span id="leafDay"></span><b id="leafNum"></b><span id="leafMon"></span></div>
-          <div class="dtext">
-            <h2 class="dtitle" data-t="dailyTitle"></h2>
-            <b class="sr" id="dailyDate"></b>
-            <span id="dailyState"></span>
+        <div class="hlow">
+          <div class="hsec card daily">
+            <div id="dailyRow">
+              <div class="leaf" aria-hidden="true"><span id="leafDay"></span><b id="leafNum"></b><span id="leafMon"></span></div>
+              <div class="dtext">
+                <h2 class="dtitle" data-t="dailyTitle"></h2>
+                <b class="sr" id="dailyDate"></b>
+                <span id="dailyState"></span>
+              </div>
+            </div>
+            <button class="primary ic i-pencil" id="dailyGo"></button>
+            <button class="linkbtn ic i-trophy" id="dailyBoard" data-t="dailyScores"></button>
           </div>
         </div>
-        <button class="primary ic i-pencil" id="dailyGo"></button>
-        <button class="linkbtn ic i-trophy" id="dailyBoard" data-t="dailyScores"></button>
       </div>
 
       <div class="hsec card">
