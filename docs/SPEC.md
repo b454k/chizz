@@ -49,7 +49,7 @@ Screens are `<section class="screen">` elements; exactly one carries `.on` at a 
 
 | id | Purpose |
 |---|---|
-| `home` | Title, then two sections with a heading each: the day's puzzle with a way into its board, and `sınırsız` -- a settings panel, a start button, and a 4-character code field with a join button. A `sorun bildir` button sits above the title. The first screen is the title, centred, and the day's puzzle whole beneath it; `sınırsız` and the rest start below the fold |
+| `home` | Title, then two sections with a heading each: the day's puzzle with a way into its board, and `sınırsız` -- a settings panel, a start button, and a 4-character code field with a join button. A `sorun bildir` button sits above the title. The first screen is the title, centred, and the day's puzzle whole beneath it; `sınırsız` and the rest start below the fold, with the top 24px of the `sınırsız` card showing so it is plain there is more |
 | `countdown` | Full-screen 3 → 2 → 1, one second each |
 | `draw` | The drawing phase |
 | `between` | After 20 drawings: send to a friend, or guess them yourself |

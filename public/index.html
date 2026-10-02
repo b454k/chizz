@@ -355,17 +355,21 @@
   /* The first screen holds the wordmark and the day's game and nothing more: the page used
      to open on everything at once, which was a lot to take in. The wordmark and its line sit
      in the middle of the screen with the day's card whole beneath them, and sınırsız and the
-     rest are a scroll away. The pills above and the card below each take half of what the
-     wordmark leaves, which centres it; neither half shrinks below what it holds, so on a
-     short screen the wordmark moves up rather than the card being cut off. The height is
-     the screen's, less the column's top padding and the phone's safe areas. */
+     rest are a scroll away -- but the top 24px of the sınırsız card is left showing at the
+     bottom, its corners and edge and none of its words, so it is plain there is more and
+     what it is takes a scroll to find out. The pills above and the card below share what the
+     wordmark leaves, four parts to five, which sets it a little above the middle: a mark at
+     the exact centre, with a heavy card under it, looks as if it sits low. Neither part
+     shrinks below what it holds, so on a short screen the wordmark moves up rather than the
+     card being cut off. The height is the screen's, less the column's 14px top padding,
+     those 24px and the phone's safe areas. */
   .hhero{
     display:flex; flex-direction:column; padding-bottom:22px;
-    min-height:calc(100vh - 14px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-    min-height:calc(100svh - 14px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    min-height:calc(100vh - 38px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    min-height:calc(100svh - 38px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   }
-  .hhero > .htop, .hhero > .hlow{flex:1 1 0;}
-  .hhero > .htop{align-items:flex-start;}
+  .hhero > .htop{flex:4 1 0; align-items:flex-start;}
+  .hhero > .hlow{flex:5 1 0;}
   .htop{display:flex; justify-content:space-between; gap:10px; margin:0 0 6px;}
   .brand{display:flex; justify-content:center; margin:6px 0 0;}
   .mark{display:block; width:min(236px, 64vw); height:auto; overflow:visible;}

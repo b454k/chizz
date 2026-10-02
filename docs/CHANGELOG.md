@@ -3,13 +3,15 @@
 ## 2026-10-02 — the start screen opens on the wordmark
 
 The start screen opened on everything at once: the day, sınırsız, the code field and
-more, which was a lot to take in on arrival. Its first screen is now the wordmark, in the
-middle, and the day's card whole beneath it; sınırsız and the rest start below the fold.
-The space above the wordmark and the space below it share what is left of the screen, so
-on a short phone the wordmark moves up rather than the card being cut off.
+more, which was a lot to take in on arrival. Its first screen is now the wordmark, a little
+above the middle, and the day's card whole beneath it; sınırsız and the rest start below the fold,
+with the top 24px of the sınırsız card showing at the bottom -- its edge, none of its
+words -- so it is plain there is more to scroll to.
+The space above the wordmark and the space below it share what is left of the screen, four
+parts to five, so on a short phone the wordmark moves up rather than the card being cut off.
 
 Checked at 390×844, 412×780, 360×740, 390×664, 375×667, 375×600, 375×548 and 1280×800:
-the card is whole on every one and sınırsız starts exactly at the bottom edge.
+the card is whole on every one and the edge of sınırsız shows beneath it.
 
 ## 2026-09-30 — a new look: the sketchbook
 

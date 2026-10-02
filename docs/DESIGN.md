@@ -170,15 +170,18 @@ visible.
 
 ## Screen by screen
 
-**Start.** The first screen is the wordmark, in the middle, and the day's puzzle whole
-beneath it; sınırsız and the rest are a scroll away, because opening on everything at once
-was a lot to take in. On a screen too short for both, the wordmark moves up and the card
-stays whole. The day's card: a calendar leaf (weekday, date, month, in Turkey's time)
-beside `günlük oyun` and `3 sn`, with `çiz` in yellow and the day's board as a text link. Played, the leaf gets a green stamp, the line turns to `✓
-bugünü oynadın 14/20` and the yellow moves to `başla` below. sınırsız is its own card: the
-speed pill, `başla`, and under a dashed line the code field, set in monospace like a ticket
-number. The theme is a three-way switch at the foot — açık, koyu, otomatik — defaulting to
-the device. On a wide screen the empty margins get a few faint pencil doodles.
+**Start.** The first screen is the wordmark, a little above the middle where a mark looks
+centred, and the day's puzzle whole beneath it; sınırsız and the rest are a scroll away,
+because opening on everything at once was a lot to take in. The top edge of the sınırsız
+card shows at the bottom, no words of it, so the screen does not look finished where it is
+not. On a screen too short for both, the wordmark moves up and the card stays whole. The
+day's card: a calendar leaf (weekday, date, month, in Turkey's time) beside `günlük oyun`
+and `3 sn`, with `çiz` in yellow and the day's board as a text link. Played, the leaf gets
+a green stamp, the line turns to `✓ bugünü oynadın 14/20` and the yellow moves to `başla`
+below. sınırsız is its own card: the speed pill, `başla`, and under a dashed line the code
+field, set in monospace like a ticket number. The theme is a three-way switch at the foot
+— açık, koyu, otomatik — defaulting to the device. On a wide screen the empty margins get
+a few faint pencil doodles.
 
 **Countdown.** The number alone, large, popping in on each second.
 
