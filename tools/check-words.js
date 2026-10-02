@@ -149,11 +149,75 @@ if (pageAlso) {
   if (mine !== theirs) fail("the table of other answers differs between docs/words.json and the page");
 }
 
+// 5. the English names
+//
+// Every word needs one, no English name may belong to two words -- the pool would show
+// two chips the same, and an answer could not be marked -- and none may be a Turkish name
+// of another word, since an answer is judged in both languages. The record and the page
+// must agree, as the pool does.
+const en = pool.en || {};
+const pageEn = (function () {
+  const at = page.indexOf("const WORDS_EN = {");
+  if (at < 0) return null;
+  const end = page.indexOf("\n};", at);
+  const out = {};
+  for (const m of page.slice(at, end).matchAll(/"([^"]+)":\s*\[([^\]]*)\]/g)) {
+    out[m[1]] = [...m[2].matchAll(/"([^"]+)"/g)].map(x => x[1]);
+  }
+  return out;
+})();
+// A word on the noEnglish list has no English name on purpose, and is never dealt to an
+// English game; every other word must have one.
+const noEnglish = pool.noEnglish || [];
+const pageNoEnglish = readPageList("NO_ENGLISH");
+if (!pageNoEnglish) fail("the page has no NO_ENGLISH list");
+else if (pageNoEnglish.slice().sort().join("|") !== noEnglish.slice().sort().join("|")) {
+  fail("the words with no English name differ between docs/words.json and the page");
+}
+let enCount = 0;
+if (!pageEn) fail("the page has no WORDS_EN table");
+for (const word of noEnglish) {
+  if (!seen.has(word)) fail("a word with no English name that is not in the pool — " + word);
+  if (en[word]) fail(word + " is listed as having no English name, but has one");
+}
+for (const word of seen.keys()) {
+  if (noEnglish.includes(word)) continue;
+  if (!Array.isArray(en[word]) || !en[word].length) fail("no English name for " + word);
+}
+for (const word of Object.keys(en)) {
+  if (!seen.has(word)) fail("an English name for a word that is not in the pool — " + word);
+}
+if (judge) {
+  const turkish = new Map();
+  for (const word of seen.keys()) {
+    turkish.set(judge.norm(word), word);
+    for (const a of also[word] || []) turkish.set(judge.norm(a), word);
+  }
+  const owner = new Map();
+  for (const [word, names] of Object.entries(en)) {
+    for (const name of names) {
+      enCount++;
+      const n = judge.norm(name);
+      if (!n) { fail("an empty English name for " + word); continue; }
+      if (owner.has(n) && owner.get(n) !== word) fail('"' + name + '" is English for both ' + owner.get(n) + " and " + word);
+      owner.set(n, word);
+      if (turkish.has(n) && turkish.get(n) !== word) fail('"' + name + '" for ' + word + " is the Turkish for " + turkish.get(n));
+    }
+  }
+}
+if (pageEn) {
+  const mine = JSON.stringify(Object.keys(en).sort().map(w => [w, en[w]]));
+  const theirs = JSON.stringify(Object.keys(pageEn).sort().map(w => [w, pageEn[w]]));
+  if (mine !== theirs) fail("the English names differ between docs/words.json and the page");
+}
+
 console.log("rejected words on record:  " + banned.size);
 console.log("daily pool:                " + seen.size + " words in " + pool.families.length + " families");
 console.log("birds:                     " + pageBirds.length + ", capped at " +
             ((pool.rules && pool.rules.birdsPerSet) || "?") + " a day");
 console.log("other answers that count:  " + alsoCount + " for " + Object.keys(also).length + " words");
+console.log("english names:             " + enCount + " for " + Object.keys(en).length + " words, " +
+            noEnglish.length + " kept out of English");
 
 if (bad) {
   console.error("");

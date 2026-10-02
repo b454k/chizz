@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-10-02 — english
+
+The game can be played in English. `dil` sits under `tema` at the foot of the start screen,
+with each language in its own words, `türkçe` and `english`. A device that has played before
+keeps Turkish; a new one follows its browser, Turkish if that is what it asks for first and
+English otherwise, and the choice is kept.
+
+- **Every word has an English name**, in `WORDS_EN` beside the pool and in `docs/words.json`
+  as `en`: the first is the one shown, the rest also count, the way `ALSO` does.
+  `tools/check-words.js` fails if a word has none, if one English name belongs to two words,
+  if an English name is the Turkish for another word, or if the page and the record differ.
+- **A round is still the Turkish words underneath.** That is what is saved, dealt and
+  replayed into the daily schedule, so a day, a link and a board are one game whichever
+  language each player has on. A Turkish drawer and an English guesser play the same round.
+- **An answer counts in either language**, so a board marks a row the same for everybody
+  reading it. One rule is new, for English only: an answer that is itself an English name
+  in the pool counts only for its own drawing and gets no typo allowance towards another.
+  English names are short and close together, and without it `hat` answered for the cat.
+- **A link preview speaks the round's language**: a round saved in English says so
+  (`lang: "en"`), and its preview reads `Alex's drawings · chizz`. Every other round,
+  including all saved before this, previews in Turkish as before.
+- **`çengel` is gone**, in both languages: in English it was a second hook beside `kanca`,
+  which stays. It is in `docs/BANNED-WORDS.md`. Days 23 to 25 went into `DAILY_PLAYED`
+  first, so nothing already dealt changed; the pool is 710 words.
+- **Six words have no English name of their own** — `bağlama`, `börek`, `cezve`,
+  `lahmacun`, `pide`, `zurna` — and are kept out of English: `NO_ENGLISH` in the page,
+  `noEnglish` in `docs/words.json`. Turkish sınırsız still deals them; English sınırsız
+  never does, and neither does the day, which is the same for everyone. A Turkish friend's
+  round can still bring one to an English player, and then it shows in Turkish.
+- Dates in English name the month (`2 october 2026`), since `02/10` is February to half
+  the English-speaking world; the saved picture's file name keeps the numbers.
+
 ## 2026-10-02 — the start screen opens on the wordmark
 
 The start screen opened on everything at once: the day, sınırsız, the code field and

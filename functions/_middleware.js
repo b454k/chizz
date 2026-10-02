@@ -10,12 +10,17 @@
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
 
 const TITLE_SUFFIX = "chizz";
-const DESCRIPTION = "20 çizim, 20 kelime. hangisi neydi?";
-const DRAWINGS_OF = "{whose} çizimleri";
-const DAILY = "günlük";
+// In the language the round was drawn in: a round saved with lang "en" previews in
+// English, and every other round, including all those saved before there was a choice,
+// in Turkish. The page's own text is in public/index.html; keep the two in step.
+const WORDING = {
+  tr: { description: "20 çizim, 20 kelime. hangisi neydi?", drawingsOf: "{whose} çizimleri", daily: "günlük" },
+  en: { description: "20 drawings, 20 words. which was which?", drawingsOf: "{whose} drawings", daily: "daily" }
+};
 
 // Same rule as whose() in public/index.html; keep the two identical.
-function whose(name){
+function whose(name, lang){
+  if (lang === "en") return name + (/s$/i.test(name) ? "'" : "'s");
   const letters = String(name).replace(/I/g, "ı").replace(/İ/g, "i").toLowerCase()
     .replace(/[^a-zçğıöşüâîû]/g, "");
   const vowels = letters.match(/[aeıioöuüâîû]/g);
@@ -47,6 +52,7 @@ export async function onRequest(context) {
   // and the picture endpoint answers 404 on its own if the code is dead.
   let name = "";
   let day = 0;
+  let lang = "tr";
   try {
     if (env.GAMES) {
       const record = await env.GAMES.get(code, { type: "json" });
@@ -54,14 +60,17 @@ export async function onRequest(context) {
         name = typeof record.name === "string" ? record.name
              : typeof record.takmaAd === "string" ? record.takmaAd : "";
         day = Number(record.day) > 0 ? Number(record.day) : 0;
+        if (record.lang === "en") lang = "en";
       }
     }
   } catch (e) { /* a preview without a name is still a preview */ }
+  const say = WORDING[lang];
+  const DESCRIPTION = say.description;
 
   // günlük · ayşe'nin çizimleri · chizz, with either middle part left out when it
   // does not apply.
-  const title = (day ? DAILY + " · " : "")
-              + (name ? DRAWINGS_OF.replace("{whose}", whose(name)) + " · " : "")
+  const title = (day ? say.daily + " · " : "")
+              + (name ? say.drawingsOf.replace("{whose}", whose(name, lang)) + " · " : "")
               + TITLE_SUFFIX;
   const page = url.origin + "/?o=" + code;
   const image = url.origin + "/api/card/" + code + ".png";

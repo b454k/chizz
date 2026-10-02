@@ -1,6 +1,6 @@
 # Words by subject
 
-The same 711 words as [`words.json`](words.json), sorted by what they are rather
+The same 710 words as [`words.json`](words.json), sorted by what they are rather
 than by the shape they draw as. The game deals by silhouette family -- see
 [`WORDS.md`](WORDS.md) -- so this file is for reading, and for the day a player gets to
 pick a subject to draw from.
@@ -26,7 +26,7 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 | Myths, Fairy Tales & Fantasy | `masal ve fantastik` | 23 |
 | School & Office Supplies | `okul ve ofis` | 40 |
 | Buildings & Architecture | `binalar` | 27 |
-| Tools & Hardware | `aletler` | 32 |
+| Tools & Hardware | `aletler` | 31 |
 | Plants, Flowers & Trees | `bitkiler` | 22 |
 | Toys & Playground Equipment | `oyuncaklar ve oyun alanı` | 17 |
 | Shapes, Symbols & Geometry | `şekiller ve simgeler` | 18 |
@@ -184,11 +184,11 @@ parmaklık, pencere, tuğla, tünel, yel değirmeni
 
 ## Tools & Hardware
 
-`aletler` · 32 words
+`aletler` · 31 words
 
-balta, büyüteç, çapa, çekiç, çengel, çivi, dişli, el arabası, halat, ip, kablo, kanca,
-kazma, kelepçe, kürek, levye, matkap, megafon, merdiven, mezura, mıknatıs, pense, sopa,
-terazi, testere, tırmık, tornavida, törpü, varil, vida, yangın söndürücü, zincir
+balta, büyüteç, çapa, çekiç, çivi, dişli, el arabası, halat, ip, kablo, kanca, kazma,
+kelepçe, kürek, levye, matkap, megafon, merdiven, mezura, mıknatıs, pense, sopa, terazi,
+testere, tırmık, tornavida, törpü, varil, vida, yangın söndürücü, zincir
 
 ## Plants, Flowers & Trees
 

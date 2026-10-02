@@ -86,6 +86,14 @@ alev, bavul
 
 `bavul` went and `valiz` stayed; `alev` went and `ateş` stayed.
 
+## Rejected 2026-10-02 — the second of two words for one drawing
+
+Turned down when the game went into English, where both are a hook.
+
+çengel
+
+`çengel` went and `kanca` stayed, in both languages.
+
 ## Renamed, not banned
 
 These were kept under a clearer name, so the old spelling should not come back either:

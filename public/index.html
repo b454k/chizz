@@ -518,6 +518,7 @@
      foot of the screen rather than among the settings for a game. */
   #themeSec{margin-top:28px; padding-top:18px; border-top:2px dashed var(--line2);}
   #themeSec .lbl{display:block; color:var(--muted); font:750 14px/1 var(--font); margin:0 0 10px;}
+  #themeSec .seg + .lbl{margin-top:18px;}
   .seg{display:flex; gap:4px; padding:4px; border-radius:16px; background:var(--panel2); box-shadow:inset 0 0 0 2px var(--line);}
   .seg button{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
@@ -1284,11 +1285,13 @@ try {
         <button class="ghost" id="archiveOpen" hidden data-t="archiveMore"></button>
       </div>
 
-      <!-- Theme belongs to the app, not to the round about to be played, so it sits at
-           the foot of the screen rather than among the settings for a game. -->
+      <!-- Theme and language belong to the app, not to the round about to be played, so
+           they sit at the foot of the screen rather than among the settings for a game. -->
       <div id="themeSec">
         <span class="lbl" data-t="theme"></span>
         <div class="seg" id="themes"></div>
+        <span class="lbl" data-t="language"></span>
+        <div class="seg" id="langs"></div>
       </div>
     </div>
   </section>
@@ -1780,7 +1783,7 @@ const LEGACY_DIFFS = {
    ========================================================================= */
 const DAILY_POOL = {
   boxy: ["akvaryum","arı kovanı","asansör","battaniye","bilgisayar","buzdolabı","cüzdan","çakmak","çamaşır makinesi","çanta","çekmece","çerçeve","çöp kutusu","daktilo","defter","dolap","domino","dosya","ekran","ev","fabrika","fırın","fotoğraf makinesi","gazete","halı","harita","havlu","havuz","hediye","hesap makinesi","hoparlör","iskambil","kale","kalemtıraş","kapı","kara tahta","kare","kasa","kaset","kep","kesme tahtası","kitap","klima","klozet","köpek kulübesi","kredi kartı","kumanda","kumbara","kutu","mangal","mektup","mendil","mezar taşı","mızıka","önlük","peçete","pencere","pil","posta kutusu","priz","pul","radyo","sandık","silgi","soba","sünger","şömine","tablet","tablo","tavla","teleferik","telefon","telefon kulübesi","televizyon","telsiz","tepsi","tuğla","usb bellek","valiz","yara bandı","yastık","yazıcı","zar","zarf"],
-  curved: ["ataş","ayak","ayak izi","ayakkabı","bacak","bağlama","beyin","bıyık","boynuz","bulut","bumerang","burun","çengel","çizme","çorap","dalga","damla","denizatı","dil","dudak","duman","düğüm","el","fiyonk","gitar","hortum","ip","kablo","kalp","kanca","karınca","kaş","kedi","keman","kırkayak","kol","kruvasan","kulak","kurdele","kuyruk","lale","makarna","nehir","parmak izi","paten","pipo","saç","sakal","saksafon","salyangoz","sarmaşık","solucan","soru işareti","spiral","steteskop","şimşek","tırtıl","topuklu ayakkabı","tüy","virgül","yaprak","yılan"],
+  curved: ["ataş","ayak","ayak izi","ayakkabı","bacak","bağlama","beyin","bıyık","boynuz","bulut","bumerang","burun","çizme","çorap","dalga","damla","denizatı","dil","dudak","duman","düğüm","el","fiyonk","gitar","hortum","ip","kablo","kalp","kanca","karınca","kaş","kedi","keman","kırkayak","kol","kruvasan","kulak","kurdele","kuyruk","lale","makarna","nehir","parmak izi","paten","pipo","saç","sakal","saksafon","salyangoz","sarmaşık","solucan","soru işareti","spiral","steteskop","şimşek","tırtıl","topuklu ayakkabı","tüy","virgül","yaprak","yılan"],
   domed: ["askılık","at nalı","atlıkarınca","bere","beşik","boks eldiveni","cami","deniz kabuğu","denizanası","ekmek","emzik","gökkuşağı","hamak","hamburger","hilal","iglo","kalkan","kaplumbağa","kar küresi","kase","kask","köprü","kubbe","kurbağa","kuş yuvası","kuyu","kül tablası","küvet","lavabo","mağara","mantar","mıknatıs","midye","paraşüt","sıcak hava balonu","şemsiye","turta","tümsek","tünel","ufo","yay"],
   figure: ["asker","astronot","aşçı","balerin","bebek","cadı","cüce","çoban","dalgıç","damat","deniz kızı","dev","doktor","gelin","hayalet","heykel","insan","iskelet","itfaiyeci","kardan adam","korsan","kovboy","kral","kukla","kurabiye adam","madenci","mağara adamı","mumya","ninja","oyuncak ayı","oyuncak bebek","palyaço","polis","robot","sihirbaz","şövalye","uzaylı","vampir","zombi"],
   handled: ["ayna","balta","bardak","bebek arabası","büyüteç","cezve","çapa","çaydanlık","çekiç","demlik","diş fırçası","el arabası","fırça","fincan","kadeh","kapı kolu","kavanoz","kazma","kepçe","kilit","kova","kupa","kürek","lolipop","market arabası","maşa","mikrofon","mikser","poşet","raket","rende","sepet","sırt çantası","spatula","su tabancası","süpürge","sürahi","süzgeç","tava","tencere","termos","tırmık","tirbuşon","vazo","zımba"],
@@ -1795,6 +1798,12 @@ const DAILY_POOL = {
   vertical: ["ağaç","ampul","anten","asa","baca","bambu","baston","biberon","çeşme","darbuka","deney tüpü","deniz feneri","direk","döner","duş","elektrik direği","fener","gökdelen","kaktüs","kanguru","kolon","kule","lamba","mısır","mikroskop","minare","mum","musluk","nargile","pırasa","pisa kulesi","saksı","sandalye","sprey","şelale","şişe","tabure","teleskop","termometre","trafik lambası","tuzluk","tüp","varil","vinç","yangın söndürücü","yapıştırıcı","zürafa"],
   winged: ["ağaçkakan","arı","balık","baykuş","can yeleği","ceket","civciv","çekirge","devekuşu","ejderha","flamingo","gemi","gömlek","güve","güvercin","helikopter","hindi","horoz","kanat","karides","kartal","kaz","kazak","kelebek","kuğu","kulaklık","kuş","leylek","martı","melek","ördek","pantolon","penguen","peri","salatalık","salıncak","serçe","sinek","sivrisinek","sosisli","şezlong","şort","tavuk","tavus kuşu","tişört","uçak","uğur böceği","uydu","yarasa","yusufçuk"]
 };
+
+/* Words with no English name that is truly theirs. They stay in the Turkish game, but they
+   are never dealt to an English one: not in its sınırsız, and not in the day, which is the
+   same twenty for everybody and so leaves them out for everybody. A friend's round can
+   still bring one to an English player, and then it is shown as it is. */
+const NO_ENGLISH = ["bağlama","börek","cezve","lahmacun","pide","zurna"];
 
 const DAILY_FAMILIES = Object.keys(DAILY_POOL).sort();
 const DAILY_WINDOW = 14;   // a word may return on the 14th day, not before
@@ -1837,7 +1846,10 @@ const DAILY_PLAYED = [
   ["misket","küre","ay","mandalina","balkabağı","zil","ceviz","güneş","soğan","elma","dağ","peynir","roket","huni","yelkenli","dondurma","tepe","taç","elmas","buzdağı"],
   ["kamyon","araba","denizaltı","köpekbalığı","inek","minibüs","zebra","karavan","tren","kaplan","tarak","şiş kebap","çivi","flüt","tebeşir","diş fırçası","iğne","cetvel","kibrit","sigara"],
   ["melek","ejderha","güvercin","kazak","can yeleği","kaz","uçak","tişört","uydu","ceket","düğme","gezegen","üzüm","lahmacun","nazar boncuğu","krep","yoyo","domates","davul","saat"],
-  ["simit","mezura","tekerlekli sandalye","plak","dürbün","bant","anahtarlık","tuvalet kağıdı","balon balığı","kelepçe","kuyu","mıknatıs","midye","boks eldiveni","kalkan","kurbağa","kuş yuvası","deniz kabuğu","kaplumbağa","hamak"]
+  ["simit","mezura","tekerlekli sandalye","plak","dürbün","bant","anahtarlık","tuvalet kağıdı","balon balığı","kelepçe","kuyu","mıknatıs","midye","boks eldiveni","kalkan","kurbağa","kuş yuvası","deniz kabuğu","kaplumbağa","hamak"],
+  ["pergel","etek","brokoli","topaç","ahır","terazi","baklava","kum saati","üçgen","trafik konisi","kar küresi","hilal","mantar","emzik","ufo","yay","paraşüt","iglo","sıcak hava balonu","cami"],
+  ["gökkuşağı","at nalı","atlıkarınca","şemsiye","tünel","köprü","kül tablası","kase","lavabo","turta","çekirge","leylek","hindi","salıncak","uğur böceği","gömlek","pantolon","kelebek","yusufçuk","kulaklık"],
+  ["kardan adam","çoban","zombi","kukla","gelin","bebek","mumya","aşçı","madenci","dalgıç","parmaklık","örgü","piyano","korkuluk","gramofon","satranç tahtası","çikolata","ray","yaya geçidi","takvim"]
 ];
 // Midnight in Turkey on 8 Sep 2026, written in UTC. Turkey has no daylight saving.
 const DAILY_EPOCH = Date.UTC(2026, 8, 7, 21, 0, 0);
@@ -1847,9 +1859,12 @@ function dailyDayNumber(at){
   return Math.floor(((at === undefined ? Date.now() : at) - DAILY_EPOCH) / DAY_MS) + 1;
 }
 
-function dailyDateLabel(day){
+// 02/10/2026 reads as the tenth of February to half the English-speaking world, so English
+// names the month. A file name keeps the numbers, in either language.
+function dailyDateLabel(day, asFile){
   const d = new Date(DAILY_EPOCH + (day - 1) * DAY_MS + DAY_MS / 2);
   const p = function (n){ return n < 10 ? "0" + n : String(n); };
+  if (lang === "en" && !asFile) return d.getUTCDate() + " " + TEXT.months.split(" ")[d.getUTCMonth()] + " " + d.getUTCFullYear();
   return p(d.getUTCDate()) + "/" + p(d.getUTCMonth() + 1) + "/" + d.getUTCFullYear();
 }
 
@@ -1925,6 +1940,7 @@ function dailyDays(from, to){
     const rnd = dailyRandom(d);
     const freeIn = function(f){
       return DAILY_POOL[f].filter(function(w){
+        if (NO_ENGLISH.indexOf(w) >= 0) return false;
         return lastUsed[w] === undefined || d - lastUsed[w] >= DAILY_WINDOW;
       });
     };
@@ -1992,6 +2008,7 @@ function freshWords(){
   const order = function(x){ return x.d >= 1 ? x.d + x.r * SEEN_SPREAD : x.d + x.r; };
   const families = DAILY_FAMILIES.map(function(f){
     const line = DAILY_POOL[f]
+      .filter(function(w){ return lang !== "en" || NO_ENGLISH.indexOf(w) < 0; })
       .map(function(w){ return { w: w, d: level(w), r: Math.random() }; })
       .sort(function(a, b){ return order(a) - order(b); })
       .map(function(x){ return x.w; });
@@ -2052,14 +2069,19 @@ function rememberSeen(list, daily){
 }
 
 /* =========================================================================
-   GAME TEXT — Turkish.
+   GAME TEXT — Turkish, then English.
    The only Turkish in the codebase, alongside the word sets above. Every
    string the player sees lives here; nothing else in the file is localised.
    Markup carries keys instead of text: data-t (textContent),
    data-tph (placeholder), data-tal (aria-label). {name} and {n} are slots.
-   Translating the interface means replacing this table and the word sets.
+   TEXT is whichever of the two tables the chosen language uses (applyLang),
+   and the words are shown through say(). A key added to one table goes in
+   the other too.
    ========================================================================= */
-const TEXT = {
+const TEXT_TR = {
+  pageTitle:        "chizz · çizim hafıza oyunu",
+  language:         "dil",
+  secUnit:          "sn",
   start:            "başla",
   join:             "katıl",
   codePlaceholder:  "kod",
@@ -2233,6 +2255,199 @@ const TEXT = {
   inviteBlurb:      "20 çizim, 20 kelime. hangisi neydi?"
 };
 
+const TEXT_EN = {
+  pageTitle:        "chizz · a drawing memory game",
+  language:         "language",
+  secUnit:          "sec",
+  start:            "start",
+  join:             "join",
+  codePlaceholder:  "code",
+  namePlaceholder:  "your name",
+  continue:         "continue",
+  clearPad:         "clear the page",
+  enterName:        "type your name first.",
+  askNameLabel:     "what's your name?",
+  askNameWhy:       "you'll appear on the score board under this name.",
+  joinBoard:        "join",
+  saveName:         "save",
+  perWord:          "time per word",
+  theme:            "theme",
+  yourName:         "your name",
+  fbOpen:           "report a problem",
+  fbTitle:          "report a problem",
+  fbBug:            "report a bug",
+  fbIdea:           "suggestion",
+  fbHint:           "what happened, or what would you like to see?",
+  fbDevice:         "screen and device details are added automatically",
+  fbSend:           "send",
+  fbNeedKind:       "first choose: a bug or a suggestion.",
+  fbTooShort:       "write a little more, at least 10 characters.",
+  fbThanks:         "thanks, your message got through.",
+  fbFailed:         "couldn't send it. check your connection and try again.",
+  fbWait:           "you just sent one, try again in a minute.",
+  reportProblem:    "something wrong? report it",
+  chooseTitle:      "how do you want to guess?",
+  tapForAnswers:    "tap a name to see your friends' answers",
+  answersOf:        "{whose} answers",
+  loadingAnswers:   "loading answers…",
+  noAnswers:        "these answers weren't saved.",
+  changeName:       "want to change your name?",
+  noStore:          "this device can't remember the game. don't lose the link: it's the only way back to your drawings.",
+
+  archiveUnsaved:   "not saved yet",
+  nameHint:         "type your name",
+  nameSaved:        "saved ✓",
+  themeDark:        "dark",
+  themeLight:       "light",
+  themeAuto:        "auto",
+  weekdays:         "sunday monday tuesday wednesday thursday friday saturday",
+  months:           "january february march april may june july august september october november december",
+  tagline:          "what did you chizz?",
+  unlimited:        "unlimited",
+  archive:          "archive",
+  archiveEmpty:     "the games you finish collect here.",
+  archiveHint:      "what you drew in the last 30 days",
+  archiveMore:      "show more",
+  archiveMine:      "i drew",
+  archiveTheirs:    "i guessed",
+  archiveDaily:     "daily",
+  change:           "change",
+  timeNotice:       "you get {n} sec for each word",
+  howOpen:          "how to play",
+  howTitle:         "how to play",
+  howGo:            "got it",
+  howAlt:           "draw each word in a few seconds. no letters, numbers or words. then guess which drawing was which.",
+  howStep1:         "draw each word in a few seconds",
+  howStep2a:        "letters, numbers, words",
+  howStep2b:        "not allowed",
+  howStep3:         "then guess which was which",
+  howWordA:         "fridge",
+  howWordB:         "clock",
+  howWordC:         "door",
+  howWordD:         "suitcase",
+  howWordE:         "phone",
+
+  modeOpen:         "words shown",
+  modeOpenDesc:     "match the words to the drawings",
+  modeEasy:         "easy",
+  dayPickBody:      "which board do you want to see?",
+  modeHidden:       "words hidden",
+  modeHiddenDesc:   "type what each drawing is yourself",
+  modeHard:         "hard",
+  recommended:      "recommended: 3 sec",
+  totalTime:        "total",
+  enterCode:        "enter the 4-character code.",
+
+  backToMenu:       "back to the menu",
+  back:             "back",
+  home:             "home",
+  backHome:         "back to home",
+
+  drawingsDone:     "20 drawings done.",
+  whatNow:          "what now?",
+  sendToFriend:     "send to a friend",
+  guessMyself:      "i'll guess them myself",
+  guessMineToo:     "i'll guess them too",
+
+  sendIntro:        "let them guess your drawings. the round deletes itself after 30 days.",
+  send:             "send",
+  cancel:           "cancel",
+  sending:          "sending…",
+  ready:            "ready.",
+  shareCodeOrLink:  "send the code or the link to your friend.",
+  copyLink:         "copy link",
+  toDrawings:       "go to the drawings",
+  backToDrawings:   "back to your drawings",
+  linkCopied:       "link copied ✓",
+  linkCopyFailed:   "couldn't copy it, select the link by hand.",
+  sendFailed:       "couldn't send it, try again.",
+
+  loadingDrawings:  "loading drawings…",
+  codeInvalid:      "this code is wrong or has expired",
+  fetchFailed:      "couldn't load the drawings",
+  checkConnection:  "check your internet connection.",
+
+  whichWasWhich:    "which was which?",
+  whatDidDraw:      "what did {name} draw?",
+  whatWasDrawn:     "what was drawn?",
+  hintTyped:        "tap a drawing and type what it is.",
+  hintPool:         "tap a drawing and pick its word. tap it again to undo.",
+  pickWord:         "pick a word",
+  whatIsThis:       "what is this?",
+  save:             "save",
+  leaveBlank:       "leave it blank",
+  finish:           "finish",
+
+  leaveTitle:       "leave the game?",
+  leaveBody:        "your drawings and answers will be lost.",
+  leaveBodyGuess:   "your answers are kept. open the link again to carry on where you left off.",
+  finishTitle:      "all done?",
+  finishBody:       "just making sure you didn't tap it by accident",
+  keepGuessing:     "keep guessing",
+  stay:             "back to the game",
+  leave:            "leave",
+
+  outOf:            "{score} out of {n}",
+  inDrawingsOf:     "{whose} drawings: ",
+  inTheseDrawings:  "these drawings: ",
+  drawingsOf:       "{whose} drawings",
+  theseDrawings:    "these drawings",
+  scores:           "scores",
+  gameCode:         "game code {code}",
+  colName:          "name",
+  colTime:          "time",
+  colScore:         "score",
+  scoresSuffix:     " · scores",
+  scoresNoteResult: "your friends appear here as they finish.",
+  nobodyFinished:   "nobody has finished yet.",
+  firstToPlay:      "nobody has guessed yet.",
+
+  share:            "share",
+  saveImage:        "save my answers",
+  preparing:        "preparing…",
+  saveDrawing:      "save this drawing",
+  copied:           "copied to the clipboard ✓",
+  copyFailedSelect: "couldn't copy it — select the text below:",
+  playAgain:        "play again",
+  youDrawToo:       "your turn to draw",
+  close:            "close",
+
+  dailyTitle:       "daily game",
+  draw:             "draw",
+  dailyPlayed:      "played today",
+  dailyScores:      "today's scores",
+  dailyBoardTitle:  "daily scores · {date}",
+  dailyTime:        "3 sec",
+  gateTitle:        "draw first",
+  gateBody:         "everyone draws the same words today. look at your friend's drawings now and you'll see today's words before you draw them. draw first, then guess.",
+  pickTitle:        "what now?",
+  guessMineFirst:   "guess my own drawings first",
+  guessTheirsFirst: "see what {name} drew first",
+  nowGuessMine:     "now guess my own drawings",
+  nowGuessTheirs:   "now see what {name} drew",
+  dailyShare:       "daily · {date}",
+  guessTooInvite:   "your turn to guess:",
+  inviteBlurb:      "20 drawings, 20 words. which was which?"
+};
+
+let lang = "tr";              // "tr" | "en"; set by loadSettings
+let TEXT = TEXT_TR;
+
+// A word as this player reads it. The round itself always holds the Turkish.
+function say(w){
+  return lang === "en" && WORDS_EN[w] ? WORDS_EN[w][0] : w;
+}
+
+// 2,5 in Turkish, 2.5 in English.
+function numText(v){ return lang === "en" ? String(v) : String(v).replace(".", ","); }
+
+function applyLang(){
+  TEXT = lang === "en" ? TEXT_EN : TEXT_TR;
+  document.documentElement.lang = lang;
+  document.title = TEXT.pageTitle;
+  applyText();
+}
+
 // Fill every element that carries a text key.
 function applyText(){
   document.querySelectorAll("[data-t]").forEach(function(el){
@@ -2260,8 +2475,9 @@ function roundLabel(){
    buffer n first. So Ayşe'nin, Mert'in, Çağla'nın, Oğuz'un, Ümmü'nün -- a fixed 'ın
    was only right for names like Başak. Names are typed freely, so the dotted and
    dotless capitals are folded by hand before looking at them, and a name with no
-   vowels at all falls back to 'in. */
+   vowels at all falls back to 'in. In English it is 's, or a bare ' after an s. */
 function whose(name){
+  if (lang === "en") return name + (/s$/i.test(name) ? "'" : "'s");
   const letters = String(name).replace(/I/g, "ı").replace(/İ/g, "i").toLowerCase()
     .replace(/[^a-zçğıöşüâîû]/g, "");
   const vowels = letters.match(/[aeıioöuüâîû]/g);
@@ -2320,7 +2536,7 @@ function clampSecs(v){
   return Math.min(SECS_MAX, Math.max(SECS_MIN, n));
 }
 
-function secsText(v){ return String(v).replace(".", ",") + " sn"; }
+function secsText(v){ return numText(v) + " " + TEXT.secUnit; }
 
 function applyTheme(){
   document.documentElement.dataset.theme = theme;
@@ -2430,13 +2646,23 @@ function rememberSettings(){
   const store = loadStore();
   store.secs  = secs;
   store.theme = theme;
+  store.lang  = lang;
   saveStore(store);
 }
 
+/* With no language chosen yet, a device that has played already keeps the Turkish it has
+   always had, and a new one follows its browser: Turkish if that is the language it asks
+   for first, English for everybody else. The guess is written down at once, or a newcomer
+   playing in English would look like an old player on the next visit and get Turkish. */
 function loadSettings(){
   const store = loadStore();
   if (store.secs !== undefined) secs = clampSecs(store.secs);
   if (store.theme === "light" || store.theme === "dark" || store.theme === "auto") theme = store.theme;
+  if (store.lang === "tr" || store.lang === "en"){ lang = store.lang; return; }
+  const asks = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+  lang = hasPlayed(store) || /^tr\b/i.test(asks) ? "tr" : "en";
+  store.lang = lang;
+  saveStore(store);
 }
 
 function rememberName(n){
@@ -2869,13 +3095,268 @@ const ALSO = {
   "zımba": ["zımba makinesi"]
 };
 
+/* The words in English. A round is always the Turkish words underneath -- that is what is
+   saved, dealt, kept as seen and replayed into the daily schedule -- so a link, a day and a
+   board are the same game whichever language each player has on. Only what is shown and
+   what counts as an answer changes. The first name is the one shown; any after it count
+   too, the way ALSO does for the Turkish. */
+const WORDS_EN = {
+  "akvaryum":["aquarium","fish tank"], "arı kovanı":["beehive","hive"], "asansör":["elevator","lift"],
+  "battaniye":["blanket"], "bilgisayar":["computer","laptop"], "buzdolabı":["fridge","refrigerator"],
+  "cüzdan":["wallet"], "çakmak":["lighter"], "çamaşır makinesi":["washing machine","washer"],
+  "çanta":["handbag","bag","purse"], "çekmece":["drawer"], "çerçeve":["picture frame","frame"],
+  "çöp kutusu":["trash can","bin","rubbish bin","garbage can","trash bin","dustbin"],
+  "daktilo":["typewriter"], "defter":["notebook"], "dolap":["wardrobe","closet","cupboard"],
+  "domino":["domino","dominoes"], "dosya":["folder"], "ekran":["screen","monitor"], "ev":["house","home"],
+  "fabrika":["factory"], "fırın":["oven"], "fotoğraf makinesi":["camera"], "gazete":["newspaper"],
+  "halı":["rug","carpet"], "harita":["map"], "havlu":["towel"], "havuz":["swimming pool","pool"],
+  "hediye":["gift","present"], "hesap makinesi":["calculator"], "hoparlör":["speaker","loudspeaker"],
+  "iskambil":["playing card","card","cards"], "kale":["castle"],
+  "kalemtıraş":["pencil sharpener","sharpener"], "kapı":["door"], "kara tahta":["blackboard","chalkboard"],
+  "kare":["square"], "kasa":["safe"], "kaset":["cassette","cassette tape"],
+  "kep":["graduation cap","mortarboard"], "kesme tahtası":["cutting board","chopping board"],
+  "kitap":["book"], "klima":["air conditioner","air conditioning","ac"], "klozet":["toilet"],
+  "köpek kulübesi":["doghouse","kennel"], "kredi kartı":["credit card","bank card"],
+  "kumanda":["remote","remote control"], "kumbara":["piggy bank","money box"], "kutu":["box"],
+  "mangal":["barbecue","bbq"], "mektup":["letter"], "mendil":["handkerchief","hankie","tissue"],
+  "mezar taşı":["gravestone","tombstone","headstone","grave"], "mızıka":["harmonica","mouth organ"],
+  "önlük":["apron"], "peçete":["napkin","serviette"], "pencere":["window"], "pil":["battery"],
+  "posta kutusu":["mailbox","letterbox","postbox"], "priz":["socket","power socket","outlet","plug socket"],
+  "pul":["stamp","postage stamp"], "radyo":["radio"], "sandık":["chest","treasure chest"],
+  "silgi":["eraser","rubber"], "soba":["stove","wood stove"], "sünger":["sponge"], "şömine":["fireplace"],
+  "tablet":["tablet"], "tablo":["painting","picture"], "tavla":["backgammon"],
+  "teleferik":["cable car","gondola"],
+  "telefon":["phone","telephone","mobile phone","cell phone","smartphone"],
+  "telefon kulübesi":["phone booth","telephone box","phone box","telephone booth"],
+  "televizyon":["television","tv"], "telsiz":["walkie-talkie","walkie talkie"], "tepsi":["tray"],
+  "tuğla":["brick"], "usb bellek":["usb stick","usb","flash drive","memory stick","usb drive"],
+  "valiz":["suitcase","luggage"], "yara bandı":["band-aid","bandaid","plaster","bandage"],
+  "yastık":["pillow","cushion"], "yazıcı":["printer"], "zar":["dice","die"], "zarf":["envelope"],
+  "ataş":["paper clip","paperclip"], "ayak":["foot"], "ayak izi":["footprint"], "ayakkabı":["shoe","shoes"],
+  "bacak":["leg"], "beyin":["brain"], "bıyık":["moustache","mustache"],
+  "boynuz":["horn","antler"], "bulut":["cloud"], "bumerang":["boomerang"], "burun":["nose"],
+  "çizme":["boot","boots"], "çorap":["sock","socks"], "dalga":["wave"],
+  "damla":["drop","water drop","droplet","raindrop"], "denizatı":["seahorse"], "dil":["tongue"],
+  "dudak":["lips","lip","mouth"], "duman":["smoke"], "düğüm":["knot"], "el":["hand"],
+  "fiyonk":["bow tie","ribbon bow"], "gitar":["guitar"], "hortum":["hose","garden hose"], "ip":["string"],
+  "kablo":["cable","cord","wire"], "kalp":["heart"], "kanca":["hook"], "karınca":["ant"], "kaş":["eyebrow"],
+  "kedi":["cat","kitten"], "keman":["violin","fiddle"], "kırkayak":["centipede"], "kol":["arm"],
+  "kruvasan":["croissant"], "kulak":["ear"], "kurdele":["ribbon"], "kuyruk":["tail"], "lale":["tulip"],
+  "makarna":["macaroni","noodle","noodles"], "nehir":["river"], "parmak izi":["fingerprint"],
+  "paten":["roller skate","roller skates","skate","ice skate"], "pipo":["pipe","tobacco pipe"],
+  "saç":["hair"], "sakal":["beard"], "saksafon":["saxophone","sax"], "salyangoz":["snail","slug"],
+  "sarmaşık":["ivy","vine"], "solucan":["worm","earthworm"], "soru işareti":["question mark"],
+  "spiral":["spiral"], "steteskop":["stethoscope"], "şimşek":["lightning","lightning bolt","thunderbolt"],
+  "tırtıl":["caterpillar"], "topuklu ayakkabı":["high heel","high heels","heels","stiletto"],
+  "tüy":["feather"], "virgül":["comma"], "yaprak":["leaf"], "yılan":["snake"],
+  "askılık":["hanger","coat hanger","clothes hanger"], "at nalı":["horseshoe"],
+  "atlıkarınca":["carousel","merry-go-round"], "bere":["beanie","woolly hat","knit hat"],
+  "beşik":["cradle","crib"], "boks eldiveni":["boxing glove"], "cami":["mosque"],
+  "deniz kabuğu":["seashell","shell"], "denizanası":["jellyfish"], "ekmek":["bread","loaf"],
+  "emzik":["pacifier","dummy"], "gökkuşağı":["rainbow"], "hamak":["hammock"],
+  "hamburger":["hamburger","burger"], "hilal":["crescent","crescent moon"], "iglo":["igloo"],
+  "kalkan":["shield"], "kaplumbağa":["turtle","tortoise"], "kar küresi":["snow globe","snowglobe"],
+  "kase":["bowl"], "kask":["helmet"], "köprü":["bridge"], "kubbe":["dome"], "kurbağa":["frog","toad"],
+  "kuş yuvası":["nest","bird's nest","bird nest"], "kuyu":["well","wishing well"], "kül tablası":["ashtray"],
+  "küvet":["bathtub","bath","tub"], "lavabo":["sink","washbasin"], "mağara":["cave"], "mantar":["mushroom"],
+  "mıknatıs":["magnet"], "midye":["mussel"], "paraşüt":["parachute"], "sıcak hava balonu":["hot air balloon"],
+  "şemsiye":["umbrella"], "turta":["pie"], "tümsek":["bump","mound","hump"], "tünel":["tunnel"],
+  "ufo":["ufo","flying saucer"], "yay":["bow","archery bow","bow and arrow"],
+  "asker":["soldier"], "astronot":["astronaut"], "aşçı":["chef","cook"],
+  "balerin":["ballerina","ballet dancer"], "bebek":["baby"], "cadı":["witch"], "cüce":["dwarf"],
+  "çoban":["shepherd"], "dalgıç":["diver","scuba diver"], "damat":["groom","bridegroom"],
+  "deniz kızı":["mermaid"], "dev":["giant"], "doktor":["doctor"], "gelin":["bride"], "hayalet":["ghost"],
+  "heykel":["statue"], "insan":["person","human","man","woman"], "iskelet":["skeleton"],
+  "itfaiyeci":["firefighter","fireman"], "kardan adam":["snowman"], "korsan":["pirate"], "kovboy":["cowboy"],
+  "kral":["king"], "kukla":["puppet","marionette"], "kurabiye adam":["gingerbread man"], "madenci":["miner"],
+  "mağara adamı":["caveman"], "mumya":["mummy"], "ninja":["ninja"], "oyuncak ayı":["teddy bear","teddy"],
+  "oyuncak bebek":["doll"], "palyaço":["clown"], "polis":["police officer","policeman","police","cop"],
+  "robot":["robot"], "sihirbaz":["wizard","magician"], "şövalye":["knight"], "uzaylı":["alien"],
+  "vampir":["vampire"], "zombi":["zombie"],
+  "ayna":["mirror","hand mirror"], "balta":["axe","ax"], "bardak":["glass","drinking glass"],
+  "bebek arabası":["stroller","pram","pushchair","baby carriage"], "büyüteç":["magnifying glass","magnifier"],
+  "çapa":["hoe"], "çaydanlık":["kettle"],
+  "çekiç":["hammer"], "demlik":["teapot"], "diş fırçası":["toothbrush"], "el arabası":["wheelbarrow"],
+  "fırça":["brush","paintbrush"], "fincan":["cup","teacup","coffee cup"], "kadeh":["wine glass","goblet"],
+  "kapı kolu":["door handle","doorknob","door knob"], "kavanoz":["jar"],
+  "kazma":["pickaxe","pick","pick axe"], "kepçe":["ladle"], "kilit":["padlock","lock"],
+  "kova":["bucket","pail"], "kupa":["mug","trophy"], "kürek":["shovel","spade","oar","paddle"],
+  "lolipop":["lollipop","lolly"], "market arabası":["shopping cart","shopping trolley","trolley","cart"],
+  "maşa":["tongs"], "mikrofon":["microphone","mic"], "mikser":["mixer","hand mixer"],
+  "poşet":["plastic bag","carrier bag","shopping bag"], "raket":["racket","racquet","tennis racket"],
+  "rende":["grater"], "sepet":["basket"], "sırt çantası":["backpack","rucksack","schoolbag"],
+  "spatula":["spatula"], "su tabancası":["water gun","water pistol","squirt gun"], "süpürge":["broom"],
+  "sürahi":["jug","pitcher"], "süzgeç":["strainer","colander","sieve"], "tava":["frying pan","pan"],
+  "tencere":["pot","saucepan","cooking pot"], "termos":["thermos","flask"], "tırmık":["rake"],
+  "tirbuşon":["corkscrew"], "vazo":["vase"], "zımba":["stapler"],
+  "akrep":["scorpion"], "ambulans":["ambulance"], "araba":["car"], "aslan":["lion"], "at":["horse","pony"],
+  "ayı":["bear"], "balina":["whale"], "bank":["bench","park bench"], "boğa":["bull"],
+  "bukalemun":["chameleon"], "denizaltı":["submarine"], "deve":["camel"], "dinozor":["dinosaur"],
+  "domuz":["pig"], "eşek":["donkey"], "fare":["mouse","rat"], "fil":["elephant"], "fok":["seal"],
+  "gergedan":["rhino","rhinoceros"], "geyik":["deer"], "goril":["gorilla"], "hamster":["hamster"],
+  "hipopotam":["hippo","hippopotamus"], "inek":["cow"], "itfaiye aracı":["fire truck","fire engine"],
+  "kamyon":["truck","lorry"], "kaplan":["tiger"], "karavan":["caravan","camper","camper van","rv"],
+  "kayık":["rowboat","rowing boat","canoe"], "kaykay":["skateboard"], "keçi":["goat"],
+  "kertenkele":["lizard"], "kızak":["sled","sledge","sleigh"], "koala":["koala"],
+  "koltuk":["sofa","couch","armchair"], "koyun":["sheep"], "köpek":["dog","puppy"], "köpekbalığı":["shark"],
+  "köstebek":["mole"], "kunduz":["beaver"], "kurt":["wolf"], "kütük":["log"], "lama":["llama"],
+  "masa":["table","desk"], "maymun":["monkey"], "minibüs":["minibus","van"],
+  "motosiklet":["motorcycle","motorbike"], "otobüs":["bus"], "panda":["panda"], "sedye":["stretcher"],
+  "sehpa":["coffee table"], "sincap":["squirrel"], "sörf tahtası":["surfboard"], "tahterevalli":["seesaw"],
+  "tank":["tank"], "tavşan":["rabbit","bunny","hare"], "tekne":["boat"], "tilki":["fox"],
+  "timsah":["crocodile","alligator","croc"], "traktör":["tractor"], "tren":["train"], "unicorn":["unicorn"],
+  "uyku tulumu":["sleeping bag"], "ütü masası":["ironing board"], "vagon":["wagon","train car","carriage"],
+  "yatak":["bed"], "yunus":["dolphin"], "zebra":["zebra"],
+  "ananas":["pineapple"], "armut":["pear"], "avokado":["avocado"], "badem":["almond"], "bamya":["okra"],
+  "çakıl":["pebble","stone","rock"], "çekirdek":["sunflower seed"], "dut":["mulberry"], "düdük":["whistle"],
+  "fasulye":["bean","beans"], "fıstık":["peanut","pistachio"], "gözyaşı":["tear","teardrop"],
+  "hap":["pill","medicine"], "hindistan cevizi":["coconut"], "incir":["fig"],
+  "kabak":["zucchini","courgette","squash"], "kivi":["kiwi"], "kozalak":["pine cone","pinecone"],
+  "limon":["lemon"], "mango":["mango"], "maske":["mask"], "mercimek":["lentil","lentils"],
+  "meşe palamudu":["acorn"], "palet":["palette","paint palette"], "pancar":["beetroot","beet"],
+  "parfüm":["perfume","perfume bottle"], "patates":["potato"], "patlıcan":["eggplant","aubergine"],
+  "sabun":["soap","bar of soap"], "sarımsak":["garlic"],
+  "şeker":["candy","sweet","sweets"], "tespih":["prayer beads","worry beads","rosary","beads"],
+  "tohum":["seed"], "turp":["radish"], "yumurta":["egg"], "zeytin":["olive"],
+  "abajur":["lampshade","lamp shade"], "ahır":["barn","stable"], "baklava":["baklava"],
+  "brokoli":["broccoli"], "buzdağı":["iceberg"], "çadır":["tent"],
+  "çam":["pine tree","pine","fir tree","christmas tree"], "çatı":["roof"], "dağ":["mountain"],
+  "diş":["tooth"], "dondurma":["ice cream","ice cream cone"], "elbise":["dress"], "elmas":["diamond"],
+  "etek":["skirt"], "eyfel kulesi":["eiffel tower"], "fes":["fez"], "huni":["funnel"], "kaydırak":["slide"],
+  "kilise":["church"], "kravat":["tie","necktie"], "kum saati":["hourglass","sand timer"],
+  "kuş evi":["birdhouse","bird house"], "külah":["cone","party hat","paper cone"],
+  "megafon":["megaphone","bullhorn"], "ok":["arrow"], "pasta":["cake","birthday cake"],
+  "pelerin":["cape","cloak"], "pergel":["drawing compass","compasses","pair of compasses"],
+  "peynir":["cheese"], "piramit":["pyramid"], "pizza":["pizza","pizza slice"],
+  "raptiye":["thumbtack","drawing pin","pushpin","tack"], "roket":["rocket"], "sandviç":["sandwich"],
+  "şapka":["hat"], "taç":["crown"], "tepe":["hill"], "terazi":["scales","scale","balance"],
+  "topaç":["spinning top"], "tost":["toasted sandwich","toastie","toast","grilled cheese"],
+  "trafik konisi":["traffic cone"], "trompet":["trumpet"], "uçurtma":["kite"], "üçgen":["triangle"],
+  "volkan":["volcano"], "yelkenli":["sailboat","sailing boat","yacht"],
+  "ahtapot":["octopus"], "ateş":["fire","campfire"], "atom":["atom"], "avize":["chandelier"],
+  "ayçiçeği":["sunflower"], "buket":["bouquet"], "çiçek":["flower"], "deniz kestanesi":["sea urchin"],
+  "denizyıldızı":["starfish"], "direksiyon":["steering wheel"], "dişli":["gear","cog"],
+  "dönme dolap":["ferris wheel"], "drone":["drone"], "eldiven":["glove","gloves"], "fıskiye":["fountain"],
+  "gül":["rose"], "güneş":["sun"], "havai fişek":["fireworks","firework"],
+  "hedef tahtası":["dartboard","target"], "kar tanesi":["snowflake"], "kestane":["chestnut"],
+  "kirpi":["hedgehog"], "kuyruklu yıldız":["comet"], "maytap":["sparkler"], "örümcek":["spider"],
+  "örümcek ağı":["spider web","cobweb","web"], "palmiye":["palm tree","palm"],
+  "pamuk şeker":["cotton candy","candy floss","candyfloss"], "papatya":["daisy"],
+  "patlama":["explosion","blast","boom"], "pervane":["propeller"], "pusula":["compass"],
+  "rüzgar gülü":["pinwheel"], "vantilatör":["fan","electric fan"], "yel değirmeni":["windmill"],
+  "yelpaze":["hand fan","folding fan"], "yengeç":["crab"], "yıldız":["star"],
+  "yonca":["clover","four-leaf clover","shamrock"],
+  "anahtarlık":["keyring","key ring","keychain"], "balon balığı":["pufferfish","puffer fish","blowfish"],
+  "bant":["tape","sticky tape","duct tape","tape roll"],
+  "basketbol potası":["basketball hoop","basketball net"], "bilezik":["bracelet","bangle"],
+  "bisiklet":["bicycle","bike"], "çelenk":["wreath"], "çengelli iğne":["safety pin"], "daire":["circle"],
+  "deniz simidi":["swim ring","rubber ring","life ring","lifebuoy","inflatable ring"],
+  "donut":["donut","doughnut"], "dürbün":["binoculars"], "halat":["rope"], "halka":["hoop"],
+  "hula hoop":["hula hoop"], "kelepçe":["handcuffs","cuffs"], "kemer":["belt"], "kolye":["necklace"],
+  "kulp":["handle"], "küpe":["earring","earrings"], "lastik":["tire","tyre"],
+  "mezura":["tape measure","measuring tape"], "paket lastiği":["rubber band","elastic band"],
+  "plak":["record","vinyl","vinyl record"], "simit":["bagel","simit"], "tasma":["collar","dog collar"],
+  "tef":["tambourine"], "tekerlek":["wheel"], "tekerlekli sandalye":["wheelchair"],
+  "tuvalet kağıdı":["toilet paper","toilet roll"], "yüzük":["ring"], "zincir":["chain"],
+  "ay":["moon","full moon"], "balkabağı":["pumpkin"], "balon":["balloon"], "bezelye":["pea","peas"],
+  "ceviz":["walnut"], "çilek":["strawberry"], "davul":["drum"], "domates":["tomato"], "düğme":["button"],
+  "dünya":["earth","world","globe"], "elma":["apple"], "fındık":["hazelnut"], "gezegen":["planet"],
+  "göz":["eye"], "karpuz":["watermelon"], "kavun":["melon"], "kayısı":["apricot"],
+  "kiraz":["cherry","cherries"], "köfte":["meatball","meatballs"], "krep":["pancake","crepe"],
+  "kurabiye":["cookie","biscuit"], "küre":["sphere","orb"],
+  "madalya":["medal"], "mandalina":["tangerine","mandarin","clementine"], "marul":["lettuce"],
+  "misket":["marble","marbles"], "nar":["pomegranate"], "nazar boncuğu":["evil eye","evil eye bead","nazar"],
+  "para":["coin","money"], "portakal":["orange"], "saat":["clock","watch"], "soğan":["onion"],
+  "şeftali":["peach"], "tabak":["plate"], "top":["ball"], "üzüm":["grapes","grape"], "yoyo":["yo-yo","yoyo"],
+  "zil":["bell"],
+  "anahtar":["key"], "bıçak":["knife"], "biber":["pepper","chili","chilli","chili pepper"],
+  "cetvel":["ruler"], "cımbız":["tweezers"], "çatal":["fork"], "çivi":["nail"], "dal":["branch","twig"],
+  "dambıl":["dumbbell"], "diş macunu":["toothpaste"], "flüt":["flute"], "havuç":["carrot"], "iğne":["needle"],
+  "kalem":["pencil","pen"], "kaşık":["spoon"], "kayak":["ski","skis"], "kemik":["bone"], "kılıç":["sword"],
+  "kibrit":["match","matchstick"], "kürdan":["toothpick"], "levye":["crowbar"], "makas":["scissors"],
+  "mandal":["clothespin","clothes peg","peg"], "matkap":["drill"], "muz":["banana"],
+  "ney":["reed flute","ney"], "oklava":["rolling pin"], "olta":["fishing rod","fishing pole"],
+  "pense":["pliers"], "pipet":["straw","drinking straw"], "ruj":["lipstick"], "sigara":["cigarette"],
+  "sihirli değnek":["magic wand","wand"], "sopa":["stick","club"], "sosis":["sausage"], "şırınga":["syringe"],
+  "şiş kebap":["kebab","shish kebab","skewer"], "tebeşir":["chalk"], "testere":["saw"],
+  "tornavida":["screwdriver"], "törpü":["nail file","rasp"],
+  "ünlem işareti":["exclamation mark","exclamation point"], "vida":["screw"],
+  "abaküs":["abacus"], "ağ":["net"], "akordeon":["accordion"], "atkı":["scarf"], "barkod":["barcode"],
+  "bayrak":["flag"], "çamaşır ipi":["clothesline","washing line"], "çikolata":["chocolate bar","chocolate"],
+  "çim":["grass","lawn"], "çit":["fence"], "fermuar":["zipper","zip"],
+  "file":["mesh bag","net bag","string bag"], "gofret":["wafer"],
+  "gözlük":["glasses","spectacles","eyeglasses"], "gramofon":["gramophone","phonograph"],
+  "ızgara":["grill","grate"], "kafes":["cage","birdcage"], "kalorifer":["radiator","heater"],
+  "klavye":["keyboard"], "korkuluk":["railing","handrail","guardrail"],
+  "merdiven":["ladder","stairs","staircase"], "nota":["music note","musical note","note"],
+  "örgü":["knitting"], "parmaklık":["bars","prison bars","iron bars"],
+  "patates kızartması":["fries","french fries","chips"], "perde":["curtain","curtains"], "piyano":["piano"],
+  "raf":["shelf","shelves","bookshelf"],
+  "ray":["railway","railway track","train track","train tracks","railroad"],
+  "satranç tahtası":["chessboard","chess"], "tabela":["sign","signboard","signpost"], "takvim":["calendar"],
+  "tarak":["comb"], "ütü":["iron"], "waffle":["waffle"], "yapboz":["jigsaw puzzle","jigsaw","puzzle"],
+  "yaya geçidi":["crosswalk","zebra crossing","pedestrian crossing"],
+  "ağaç":["tree"], "ampul":["light bulb","lightbulb","bulb"], "anten":["antenna","aerial"],
+  "asa":["staff","sceptre","scepter"], "baca":["chimney"], "bambu":["bamboo"],
+  "baston":["walking stick","cane"], "biberon":["baby bottle","feeding bottle"],
+  "çeşme":["drinking fountain"], "darbuka":["goblet drum","darbuka"], "deney tüpü":["test tube"],
+  "deniz feneri":["lighthouse"], "direk":["pole","post"], "döner":["doner kebab","doner","gyro","shawarma"],
+  "duş":["shower"], "elektrik direği":["utility pole","power pole","electricity pole","telephone pole"],
+  "fener":["lantern","flashlight","torch"], "gökdelen":["skyscraper"], "kaktüs":["cactus"],
+  "kanguru":["kangaroo"], "kolon":["column","pillar"], "kule":["tower"], "lamba":["lamp"],
+  "mısır":["corn","corn on the cob","maize"], "mikroskop":["microscope"], "minare":["minaret"],
+  "mum":["candle"], "musluk":["tap","faucet"], "nargile":["hookah","shisha","water pipe"], "pırasa":["leek"],
+  "pisa kulesi":["leaning tower of pisa","tower of pisa","pisa"],
+  "saksı":["flowerpot","flower pot","plant pot"], "sandalye":["chair"],
+  "sprey":["spray can","spray","spray bottle","aerosol"], "şelale":["waterfall"], "şişe":["bottle"],
+  "tabure":["stool"], "teleskop":["telescope"], "termometre":["thermometer"],
+  "trafik lambası":["traffic light","traffic lights","stoplight"],
+  "tuzluk":["salt shaker","saltshaker","salt cellar"], "tüp":["gas cylinder","gas bottle","gas tank"],
+  "varil":["barrel","cask","oil drum"], "vinç":["crane"],
+  "yangın söndürücü":["fire extinguisher","extinguisher"], "yapıştırıcı":["glue","glue stick","glue bottle"],
+  "zürafa":["giraffe"],
+  "ağaçkakan":["woodpecker"], "arı":["bee"], "balık":["fish"], "baykuş":["owl"],
+  "can yeleği":["life jacket","life vest"], "ceket":["jacket","coat"], "civciv":["chick"],
+  "çekirge":["grasshopper"], "devekuşu":["ostrich"], "ejderha":["dragon"], "flamingo":["flamingo"],
+  "gemi":["ship"], "gömlek":["shirt"], "güve":["moth"], "güvercin":["pigeon","dove"],
+  "helikopter":["helicopter"], "hindi":["turkey"], "horoz":["rooster","cockerel"], "kanat":["wing","wings"],
+  "karides":["shrimp","prawn"], "kartal":["eagle"], "kaz":["goose"], "kazak":["sweater","jumper","pullover"],
+  "kelebek":["butterfly"], "kuğu":["swan"], "kulaklık":["headphones","earphones","headset"], "kuş":["bird"],
+  "leylek":["stork"], "martı":["seagull","gull"], "melek":["angel"], "ördek":["duck"],
+  "pantolon":["trousers","pants","jeans"], "penguen":["penguin"], "peri":["fairy"], "salatalık":["cucumber"],
+  "salıncak":["swing"], "serçe":["sparrow"], "sinek":["fly","housefly"], "sivrisinek":["mosquito"],
+  "sosisli":["hot dog","hotdog"], "şezlong":["deck chair","deckchair","sun lounger","lounger"],
+  "şort":["shorts"], "tavuk":["chicken","hen"], "tavus kuşu":["peacock"], "tişört":["t-shirt","tshirt","tee"],
+  "uçak":["airplane","plane","aeroplane","aircraft"], "uğur böceği":["ladybug","ladybird"],
+  "uydu":["satellite"], "yarasa":["bat"], "yusufçuk":["dragonfly"]
+};
+
+/* Every English name in the pool, normalised. English names are short and close together --
+   cat, hat, bat, car, jar and ear are all drawings -- so an answer that is itself one of them
+   is taken as meant: it counts for its own drawing and is not a typo for another. Without
+   this, hat answered for the cat. */
+let enForms = null;
+function isEnglishForm(a){
+  if (!enForms){
+    enForms = {};
+    Object.keys(WORDS_EN).forEach(function(w){
+      WORDS_EN[w].forEach(function(f){ enForms[norm(f)] = true; });
+    });
+  }
+  return !!enForms[a];
+}
+
+/* An answer is judged against the word in both languages, so a board marks a row the same
+   for everyone reading it, whichever language each of them plays in. */
 function isCorrect(cevap, kelime){
   const a = norm(cevap);
   if (!a) return false;                 // a blank answer is always wrong
-  if (withinOneEdit(a, norm(kelime))) return true;
-  const others = ALSO[kelime];
-  if (!others) return false;
-  for (let i = 0; i < others.length; i++) if (withinOneEdit(a, norm(others[i]))) return true;
+  const names = [kelime].concat(ALSO[kelime] || [], WORDS_EN[kelime] || []);
+  const exact = isEnglishForm(a);
+  for (let i = 0; i < names.length; i++){
+    const n = norm(names[i]);
+    if (a === n || (!exact && withinOneEdit(a, n))) return true;
+  }
   return false;
 }
 
@@ -2949,6 +3430,17 @@ function buildHome(){
     b.onclick = function(){ theme = pair[0]; applyTheme(); rememberSettings(); buildHome(); };
     seg.appendChild(b);
   });
+  // Each language in its own words, so whoever is looking for theirs can read it.
+  const langs = $("langs");
+  langs.innerHTML = "";
+  [["tr", "türkçe"], ["en", "english"]].forEach(function(pair){
+    const b = document.createElement("button");
+    b.className = pair[0] === lang ? "sel" : "";
+    b.lang = pair[0];
+    b.textContent = pair[1];
+    b.onclick = function(){ lang = pair[0]; applyLang(); rememberSettings(); buildHome(); };
+    langs.appendChild(b);
+  });
 
   $("secs").value = secs;
   $("secsOut").textContent = secsText(secs);
@@ -3011,6 +3503,7 @@ function paintThumb(cv){
 function archiveWhen(at){
   const d = new Date(at || Date.now());
   const p = function(n){ return n < 10 ? "0" + n : String(n); };
+  if (lang === "en") return d.getDate() + " " + TEXT.months.split(" ")[d.getMonth()];
   return p(d.getDate()) + "/" + p(d.getMonth() + 1);
 }
 
@@ -3583,7 +4076,7 @@ function revealThenDraw(i){
   revealing = true;
   const el = $("revealWord");
   const rv = $("reveal");
-  el.textContent = words[i];
+  el.textContent = say(words[i]);
   el.style.transition = "none";
   el.style.opacity = "1";
   rv.classList.add("on");
@@ -3597,7 +4090,7 @@ function revealThenDraw(i){
   rv.style.height = Math.round(pad.height) + "px";
   fitWord(el, Math.round(pad.width) - REVEAL_EDGE * 2, Math.round(pad.height) - REVEAL_EDGE * 2);
   // Equal air above and below the letters themselves.
-  el.style.transform = "translateY(" + (-Math.round(inkNudge(el, words[i]))) + "px)";
+  el.style.transform = "translateY(" + (-Math.round(inkNudge(el, say(words[i])))) + "px)";
 
   void el.offsetWidth;                     // let that state land before the fade
 
@@ -3637,7 +4130,7 @@ function startWord(i){
   // Nothing about guessing has been chosen yet at this point, so the header carries the
   // one setting the drawing does have.
   $("drawLevel").textContent = secsText(secs);
-  $("word").textContent = words[i];
+  $("word").textContent = say(words[i]);
   $("counter").textContent = (i + 1) + " / " + N;
   $("bar").style.transform = "scaleX(1)";
   revealThenDraw(i);
@@ -3851,7 +4344,7 @@ function elapsedMs(){
 function timeLabel(ms){
   if (!ms) return "\u2013";
   const s = ms / 1000;
-  if (s < 60) return (s < 10 ? s.toFixed(1) : Math.round(s)) + " sn";
+  if (s < 60) return (s < 10 ? s.toFixed(1) : Math.round(s)) + " " + TEXT.secUnit;
   const m = Math.floor(s / 60);
   return m + ":" + String(Math.round(s - m * 60)).padStart(2, "0");
 }
@@ -3891,9 +4384,12 @@ function refreshRecall(){
 function openSheet(pos){
   const used = {};
   picks.forEach(function(w){ if (w) used[w] = true; });
-  const pool = words.filter(function(w){ return !used[w]; })
-                    .sort(function(a, b){ return a.localeCompare(b, "tr"); });
-  $("sheetTitle").textContent = "bu ne?";
+  // A pick is the name as it was shown, so a word is used under either of its names: a
+  // round begun in one language may be finished in the other.
+  const pool = words.filter(function(w){ return !used[w] && !used[say(w)]; })
+                    .map(say)
+                    .sort(function(a, b){ return a.localeCompare(b, lang); });
+  $("sheetTitle").textContent = TEXT.whatIsThis;
   const box = $("chips");
   box.innerHTML = "";
   pool.forEach(function(w){
@@ -4301,7 +4797,7 @@ function shotBoard(){
       shotCap(ctx, said, cx, line, CELL, 21, t.no, true);
       line += 29;
     }
-    shotCap(ctx, words[di], cx, line, CELL, 23, t.ok, false);
+    shotCap(ctx, say(words[di]), cx, line, CELL, 23, t.ok, false);
   });
   shotFoot(ctx, t, W, H - 30);
   return c.cv;
@@ -4327,14 +4823,14 @@ function shotOne(pos){
     shotCap(ctx, said, W / 2, line, TILE, 30, t.no, true);
     line += 44;
   }
-  if (lines) shotCap(ctx, words[di], W / 2, line, TILE, 36, t.ok, false);
+  if (lines) shotCap(ctx, say(words[di]), W / 2, line, TILE, 36, t.ok, false);
   shotFoot(ctx, t, W, H - 30);
   return c.cv;
 }
 
 // Named after the round it came from, in characters every phone can keep.
 function shotName(suffix){
-  const what = isDaily && dailyDay ? dailyDateLabel(dailyDay).replace(/\//g, "-")
+  const what = isDaily && dailyDay ? dailyDateLabel(dailyDay, true).replace(/\//g, "-")
              : (lastCode || "cizim");
   return "chizz-" + what + (suffix || "") + ".png";
 }
@@ -4437,7 +4933,7 @@ function openZoom(pos){
     }
     const good = document.createElement("span");
     good.className = "good";
-    good.textContent = words[di];
+    good.textContent = say(words[di]);
     cap.appendChild(good);
   }
   $("zoom").classList.add("on");
@@ -4551,7 +5047,7 @@ function markCell(cell, answer, word){
   }
   const good = document.createElement("span");
   good.className = "good";
-  good.textContent = word;
+  good.textContent = say(word);
   cap.appendChild(good);
   return ok;
 }
@@ -5220,6 +5716,7 @@ function postRound(name){
       seconds: secs,
       day: isDaily ? dailyDay : 0,
       name: name || "",
+      lang: lang,                   // what the link preview is written in
       words: words,
       drawings: encodeDrawings(drawings)
     })
@@ -5519,7 +6016,7 @@ function askTime(){
 }
 
 function timeSays(v){
-  $("timeAskText").textContent = TEXT.timeNotice.replace("{n}", String(v).replace(".", ","));
+  $("timeAskText").textContent = TEXT.timeNotice.replace("{n}", numText(v));
 }
 
 $("start").onclick = function(){     // the countdown wakes the audio itself
@@ -5682,7 +6179,7 @@ function fitTimeLine(){
   c.font = cs.fontWeight + " 22px " + cs.fontFamily;
   let widest = 0;
   for (let v = SECS_MIN; v <= SECS_MAX; v += 0.5){
-    widest = Math.max(widest, c.measureText(TEXT.timeNotice.replace("{n}", String(v).replace(".", ","))).width);
+    widest = Math.max(widest, c.measureText(TEXT.timeNotice.replace("{n}", numText(v))).width);
   }
   el.style.fontSize = Math.max(14, Math.min(22, Math.floor(220 * el.clientWidth / widest) / 10)) + "px";
 }
@@ -5694,7 +6191,7 @@ window.addEventListener("resize", function(){ fitHeadWord(); fitScoreLine(); fit
 myName = savedName();             // the device already knows who is playing
 loadSettings();
 applyTheme();
-applyText();
+applyLang();
 buildHome();
 
 /* Where to start.

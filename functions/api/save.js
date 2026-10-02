@@ -100,6 +100,9 @@ export async function onRequestPost({ request, env }) {
     seconds,
     owner,
     name,                    // optional, may be empty; no personal data is stored
+    // The language it was drawn in, for the link preview. Absent means Turkish, which is
+    // what every round saved before there was a choice was.
+    lang: d.lang === "en" ? "en" : undefined,
     words: d.words,
     drawings: d.drawings
   });
