@@ -222,7 +222,6 @@
         "duman",
         "düğüm",
         "el",
-        "fiyonk",
         "gitar",
         "hortum",
         "ip",
@@ -817,7 +816,6 @@
         "mezura",
         "paket lastiği",
         "plak",
-        "simit",
         "tasma",
         "tef",
         "tekerlek",
@@ -1402,10 +1400,6 @@
     ],
     "el": [
       "hand"
-    ],
-    "fiyonk": [
-      "bow tie",
-      "ribbon bow"
     ],
     "gitar": [
       "guitar"
@@ -2743,10 +2737,6 @@
       "record",
       "vinyl",
       "vinyl record"
-    ],
-    "simit": [
-      "bagel",
-      "simit"
     ],
     "tasma": [
       "collar",

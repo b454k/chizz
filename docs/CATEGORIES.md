@@ -1,6 +1,6 @@
 # Words by subject
 
-The same 704 words as [`words.json`](words.json), sorted by what they are rather
+The same 702 words as [`words.json`](words.json), sorted by what they are rather
 than by the shape they draw as. The game deals by silhouette family -- see
 [`WORDS.md`](WORDS.md) -- so this file is for reading, and for the day a player gets to
 pick a subject to draw from.
@@ -12,11 +12,11 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 |---|---|---:|
 | Everyday Objects & Household Items | `ev eşyaları` | 143 |
 | Animals, Wildlife & Insects | `hayvanlar` | 102 |
-| Foods, Drinks & Ingredients | `yiyecek ve içecek` | 77 |
+| Foods, Drinks & Ingredients | `yiyecek ve içecek` | 76 |
 | Sports, Fitness & Outdoor Activities | `spor ve açık hava` | 26 |
 | Vehicles & Transportation | `araçlar` | 31 |
 | Places, Geography & Landmarks | `yerler ve coğrafya` | 21 |
-| Clothing, Footwear & Accessories | `giyim ve aksesuar` | 35 |
+| Clothing, Footwear & Accessories | `giyim ve aksesuar` | 34 |
 | Common Actions & Verbs | `eylemler` | 0 |
 | Weather & Natural Phenomena | `hava ve doğa olayları` | 19 |
 | Occupations, Professions & People | `meslekler ve insanlar` | 18 |
@@ -30,7 +30,7 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 | Plants, Flowers & Trees | `bitkiler` | 22 |
 | Toys & Playground Equipment | `oyuncaklar ve oyun alanı` | 17 |
 | Shapes, Symbols & Geometry | `şekiller ve simgeler` | 18 |
-| Turkish | `türkçe` | 6 |
+| Turkish | `türkçe` | 8 |
 
 ## Everyday Objects & Household Items
 
@@ -69,7 +69,7 @@ yusufçuk, zebra, zürafa
 
 ## Foods, Drinks & Ingredients
 
-`yiyecek ve içecek` · 77 words
+`yiyecek ve içecek` · 76 words
 
 ananas, armut, avokado, badem, baklava, bamya, bezelye, biber, brokoli, ceviz, çekirdek,
 çikolata, çilek, domates, dondurma, donut, döner, dut, ekmek, elma, fasulye, fındık,
@@ -77,8 +77,8 @@ fıstık, gofret, hamburger, havuç, hindistan cevizi, incir, kabak, karpuz, kav
 kestane, kiraz, kivi, köfte, krep, kruvasan, kurabiye, külah, limon, lolipop, makarna,
 mandalina, mango, marul, mercimek, mısır, muz, nar, pamuk şeker, pancar, pasta, patates,
 patates kızartması, patlıcan, peynir, pırasa, pizza, portakal, salatalık, sandviç,
-sarımsak, simit, soğan, sosis, sosisli, şeftali, şeker, şiş kebap, tost, turp, turta,
-üzüm, waffle, yumurta, zeytin
+sarımsak, soğan, sosis, sosisli, şeftali, şeker, şiş kebap, tost, turp, turta, üzüm,
+waffle, yumurta, zeytin
 
 ## Sports, Fitness & Outdoor Activities
 
@@ -107,11 +107,11 @@ trafik lambası, tümsek, yaya geçidi
 
 ## Clothing, Footwear & Accessories
 
-`giyim ve aksesuar` · 35 words
+`giyim ve aksesuar` · 34 words
 
 atkı, ayakkabı, bere, bilezik, ceket, cüzdan, çanta, çizme, çorap, düğme, elbise,
-eldiven, etek, fermuar, fes, fiyonk, gömlek, gözlük, kazak, kemer, kolye, kravat, küpe,
-maske, önlük, pantolon, pelerin, sırt çantası, şapka, şemsiye, şort, taç, tişört,
+eldiven, etek, fermuar, fes, gömlek, gözlük, kazak, kemer, kolye, kravat, küpe, maske,
+önlük, pantolon, pelerin, sırt çantası, şapka, şemsiye, şort, taç, tişört,
 topuklu ayakkabı, yüzük
 
 ## Common Actions & Verbs
@@ -214,8 +214,8 @@ soru işareti, spiral, tabela, üçgen, ünlem işareti, virgül, yıldız
 
 ## Turkish
 
-`türkçe` · 6 words
+`türkçe` · 8 words
 
-**Not in the pool, never dealt.** Turkish things with no English name of their own, taken out of the pool on 2026-10-07 so that every word in play has one. Kept for a Turkish subject when categories become a choice; they are in no silhouette family and are never dealt.
+**Not in the pool, never dealt.** Turkish things with no English name truly their own, taken out of the pool so that every word in play has one: six on 2026-10-07, simit and fiyonk after them. Kept for a Turkish subject when categories become a choice; they are in no silhouette family and are never dealt.
 
-bağlama, börek, cezve, lahmacun, pide, zurna
+bağlama, börek, cezve, fiyonk, lahmacun, pide, simit, zurna

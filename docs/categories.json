@@ -329,7 +329,6 @@
         "salatalık",
         "sandviç",
         "sarımsak",
-        "simit",
         "soğan",
         "sosis",
         "sosisli",
@@ -464,7 +463,6 @@
         "etek",
         "fermuar",
         "fes",
-        "fiyonk",
         "gömlek",
         "gözlük",
         "kazak",
@@ -850,14 +848,16 @@
       "en": "Turkish",
       "tr": "türkçe",
       "outOfPool": true,
-      "note": "Turkish things with no English name of their own, taken out of the pool on 2026-10-07 so that every word in play has one. Kept for a Turkish subject when categories become a choice; they are in no silhouette family and are never dealt.",
+      "note": "Turkish things with no English name truly their own, taken out of the pool so that every word in play has one: six on 2026-10-07, simit and fiyonk after them. Kept for a Turkish subject when categories become a choice; they are in no silhouette family and are never dealt.",
       "words": [
         "bağlama",
         "börek",
         "cezve",
         "lahmacun",
         "pide",
-        "zurna"
+        "zurna",
+        "simit",
+        "fiyonk"
       ]
     }
   ]

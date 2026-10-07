@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-10-07 — doodles on the phone too
+
+The six doodles behind the start screen were only drawn on a desk at least 980 × 620. A
+phone has them now, smaller (58px) and fainter, gathered where the paper is open: between
+the buttons at the top and the wordmark, and either side of the wordmark, rather than in
+the wide screen's margins, where on a phone most of them fell behind the day's card. The
+cards slide over them as the page scrolls. The wide screen is as it was. Checked at
+375 × 667, 375 × 812 and 390 × 844, light and dark: none touches a button, the wordmark or
+the line under it.
+
+## 2026-10-07 — simit and fiyonk join the turkish category
+
+`simit` and `fiyonk` are out of the pool too: in English they were a bagel and a bow tie,
+near things rather than their own names. They wait in the `turkish` category of
+`docs/categories.json` with the other six. Days 1 to 30 were already in `DAILY_PLAYED`
+and are unchanged; from day 31 the schedule is dealt from the smaller pool. The pool is
+702 words.
+
 ## 2026-10-07 — a link opens in the drawer's language
 
 - **Turkish is the default again**, for every new device whatever its browser asks for.
