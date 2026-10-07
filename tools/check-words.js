@@ -166,22 +166,12 @@ const pageEn = (function () {
   }
   return out;
 })();
-// A word on the noEnglish list has no English name on purpose, and is never dealt to an
-// English game; every other word must have one.
-const noEnglish = pool.noEnglish || [];
-const pageNoEnglish = readPageList("NO_ENGLISH");
-if (!pageNoEnglish) fail("the page has no NO_ENGLISH list");
-else if (pageNoEnglish.slice().sort().join("|") !== noEnglish.slice().sort().join("|")) {
-  fail("the words with no English name differ between docs/words.json and the page");
-}
+// A word with no English name of its own does not go in the pool at all: a round has to be
+// playable in either language. Such words wait in the turkish category of
+// docs/categories.json instead.
 let enCount = 0;
 if (!pageEn) fail("the page has no WORDS_EN table");
-for (const word of noEnglish) {
-  if (!seen.has(word)) fail("a word with no English name that is not in the pool — " + word);
-  if (en[word]) fail(word + " is listed as having no English name, but has one");
-}
 for (const word of seen.keys()) {
-  if (noEnglish.includes(word)) continue;
   if (!Array.isArray(en[word]) || !en[word].length) fail("no English name for " + word);
 }
 for (const word of Object.keys(en)) {
@@ -216,8 +206,7 @@ console.log("daily pool:                " + seen.size + " words in " + pool.fami
 console.log("birds:                     " + pageBirds.length + ", capped at " +
             ((pool.rules && pool.rules.birdsPerSet) || "?") + " a day");
 console.log("other answers that count:  " + alsoCount + " for " + Object.keys(also).length + " words");
-console.log("english names:             " + enCount + " for " + Object.keys(en).length + " words, " +
-            noEnglish.length + " kept out of English");
+console.log("english names:             " + enCount + " for " + Object.keys(en).length + " words");
 
 if (bad) {
   console.error("");

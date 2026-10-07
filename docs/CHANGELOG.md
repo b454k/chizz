@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-10-07 — a link opens in the drawer's language
+
+- **Turkish is the default again**, for every new device whatever its browser asks for.
+  The language is the device's own once somebody picks it, under `tema` or with a flag,
+  and is kept as `language`. The `lang` the first English build wrote for everyone is no
+  longer read: it was a guess from the browser, and it is why a Turkish drawer's link
+  opened in English.
+- **A friend's round opens in the language it was drawn in.** A device that has never
+  picked a language keeps that one; a device that has gets its own back on the start
+  screen.
+- **Two small flags on the kolay/zor screen**, Turkey's and the UK's, the one in use lifted.
+  A tap changes the language there and then, keeps a name already typed, and is kept for
+  the device and for that round, so a reload stays in it.
+- **Choosing how to guess a friend's daily round no longer decides your own.** The choice
+  was written into the day as well, so guessing your own drawings afterwards began in that
+  mode without asking.
+- **`bağlama`, `börek`, `cezve`, `lahmacun`, `pide` and `zurna` are out of the pool**, so
+  every word in play has an English name and a round can be guessed in either language.
+  They are kept in `docs/categories.json` as the `turkish` category, marked `outOfPool`,
+  for a Turkish subject when categories become a choice. Days 26 to 30 went into
+  `DAILY_PLAYED` first; the schedule is the same as before for every day, since the day had
+  already stopped dealing them. `NO_ENGLISH` is gone with them. The pool is 704 words.
+
 ## 2026-10-02 — english
 
 The game can be played in English. `dil` sits under `tema` at the foot of the start screen,

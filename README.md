@@ -43,7 +43,7 @@ No account, no login, no tracking, no cookie banner, nothing loaded from anywher
 
 ## The words
 
-710 words in 15 **silhouette families** — the shape a thing draws as, not what it is, so
+704 words in 15 **silhouette families** — the shape a thing draws as, not what it is, so
 a lion and a sofa can share a round. A word does not come back for 14 days. The same
 words are also sorted by subject, 20 of them, in
 [docs/CATEGORIES.md](docs/CATEGORIES.md).

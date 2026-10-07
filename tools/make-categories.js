@@ -27,7 +27,8 @@ function wrap(words, nl) {
 }
 
 function render(nl) {
-  const total = data.categories.reduce((n, c) => n + c.words.length, 0);
+  // A category kept out of the pool (outOfPool) is listed, but its words are not the pool's.
+  const total = data.categories.reduce((n, c) => n + (c.outOfPool ? 0 : c.words.length), 0);
   const lines = [
     "# Words by subject",
     "",
@@ -46,6 +47,7 @@ function render(nl) {
   lines.push("");
   for (const c of data.categories) {
     lines.push("## " + c.en, "", "`" + c.tr + "` · " + c.words.length + " words", "");
+    if (c.outOfPool) lines.push("**Not in the pool, never dealt.** " + c.note, "");
     lines.push(c.words.length
       ? wrap(c.words.slice().sort(collator.compare), nl)
       : ["None, and there will be none. A round is twenty things to draw and then match back",

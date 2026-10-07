@@ -206,7 +206,6 @@
         "ayak izi",
         "ayakkabı",
         "bacak",
-        "bağlama",
         "beyin",
         "bıyık",
         "boynuz",
@@ -327,7 +326,6 @@
         "abajur",
         "ahır",
         "baklava",
-        "börek",
         "brokoli",
         "buzdağı",
         "çadır",
@@ -370,8 +368,7 @@
         "uçurtma",
         "üçgen",
         "volkan",
-        "yelkenli",
-        "zurna"
+        "yelkenli"
       ]
     },
     {
@@ -436,7 +433,6 @@
         "bardak",
         "bebek arabası",
         "büyüteç",
-        "cezve",
         "çapa",
         "çaydanlık",
         "çekiç",
@@ -690,7 +686,6 @@
         "krep",
         "kurabiye",
         "küre",
-        "lahmacun",
         "madalya",
         "mandalina",
         "marul",
@@ -741,7 +736,6 @@
         "parfüm",
         "patates",
         "patlıcan",
-        "pide",
         "sabun",
         "sarımsak",
         "şeker",
@@ -1318,7 +1312,8 @@
       "band-aid",
       "bandaid",
       "plaster",
-      "bandage"
+      "bandage",
+      "band aid"
     ],
     "yastık": [
       "pillow",
@@ -3559,13 +3554,5 @@
     "yusufçuk": [
       "dragonfly"
     ]
-  },
-  "noEnglish": [
-    "bağlama",
-    "börek",
-    "cezve",
-    "lahmacun",
-    "pide",
-    "zurna"
-  ]
+  }
 }

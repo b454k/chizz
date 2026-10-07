@@ -22,10 +22,16 @@ const fail = msg => { console.error("FAIL: " + msg); bad++; };
 const inPool = new Set();
 for (const f of pool.families) for (const w of f.words) inPool.add(w);
 
+// A category marked outOfPool holds words kept for later and never dealt -- the turkish
+// one, of Turkish things with no English name. Its words must stay out of the pool.
 const seen = new Map();
+let heldOut = 0;
 for (const c of data.categories) {
   for (const w of c.words) {
-    if (!inPool.has(w)) fail("in " + c.id + " but not in the pool — " + w);
+    if (c.outOfPool){
+      if (inPool.has(w)) fail("in " + c.id + ", which is kept out of the pool, but in the pool — " + w);
+      else heldOut++;
+    } else if (!inPool.has(w)) fail("in " + c.id + " but not in the pool — " + w);
     if (seen.has(w)) fail(w + " is in two categories — " + seen.get(w) + " and " + c.id);
     seen.set(w, c.id);
   }
@@ -40,7 +46,7 @@ if (require("./make-categories.js").render(nl) !== current) {
 }
 
 console.log("categories:                " + data.categories.length +
-            ", holding " + seen.size + " words");
+            ", holding " + (seen.size - heldOut) + " pool words and " + heldOut + " kept out of it");
 const widest = data.categories.reduce((a, b) => (a.words.length >= b.words.length ? a : b));
 console.log("largest:                   " + widest.id + " (" + widest.words.length + ")");
 if (bad) {

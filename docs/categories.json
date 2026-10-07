@@ -24,7 +24,6 @@
         "bıçak",
         "biberon",
         "buzdolabı",
-        "cezve",
         "cımbız",
         "çakmak",
         "çamaşır ipi",
@@ -275,7 +274,6 @@
         "bamya",
         "bezelye",
         "biber",
-        "börek",
         "brokoli",
         "ceviz",
         "çekirdek",
@@ -308,7 +306,6 @@
         "kruvasan",
         "kurabiye",
         "külah",
-        "lahmacun",
         "limon",
         "lolipop",
         "makarna",
@@ -327,7 +324,6 @@
         "patlıcan",
         "peynir",
         "pırasa",
-        "pide",
         "pizza",
         "portakal",
         "salatalık",
@@ -553,7 +549,6 @@
       "tr": "müzik ve hobi",
       "words": [
         "akordeon",
-        "bağlama",
         "darbuka",
         "davul",
         "domino",
@@ -577,8 +572,7 @@
         "tavla",
         "tef",
         "trompet",
-        "zar",
-        "zurna"
+        "zar"
       ]
     },
     {
@@ -849,6 +843,21 @@
         "ünlem işareti",
         "virgül",
         "yıldız"
+      ]
+    },
+    {
+      "id": "turkish",
+      "en": "Turkish",
+      "tr": "türkçe",
+      "outOfPool": true,
+      "note": "Turkish things with no English name of their own, taken out of the pool on 2026-10-07 so that every word in play has one. Kept for a Turkish subject when categories become a choice; they are in no silhouette family and are never dealt.",
+      "words": [
+        "bağlama",
+        "börek",
+        "cezve",
+        "lahmacun",
+        "pide",
+        "zurna"
       ]
     }
   ]

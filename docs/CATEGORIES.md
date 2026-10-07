@@ -1,6 +1,6 @@
 # Words by subject
 
-The same 710 words as [`words.json`](words.json), sorted by what they are rather
+The same 704 words as [`words.json`](words.json), sorted by what they are rather
 than by the shape they draw as. The game deals by silhouette family -- see
 [`WORDS.md`](WORDS.md) -- so this file is for reading, and for the day a player gets to
 pick a subject to draw from.
@@ -10,9 +10,9 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 
 | category | in Turkish | words |
 |---|---|---:|
-| Everyday Objects & Household Items | `ev eşyaları` | 144 |
+| Everyday Objects & Household Items | `ev eşyaları` | 143 |
 | Animals, Wildlife & Insects | `hayvanlar` | 102 |
-| Foods, Drinks & Ingredients | `yiyecek ve içecek` | 80 |
+| Foods, Drinks & Ingredients | `yiyecek ve içecek` | 77 |
 | Sports, Fitness & Outdoor Activities | `spor ve açık hava` | 26 |
 | Vehicles & Transportation | `araçlar` | 31 |
 | Places, Geography & Landmarks | `yerler ve coğrafya` | 21 |
@@ -20,7 +20,7 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 | Common Actions & Verbs | `eylemler` | 0 |
 | Weather & Natural Phenomena | `hava ve doğa olayları` | 19 |
 | Occupations, Professions & People | `meslekler ve insanlar` | 18 |
-| Hobby | `müzik ve hobi` | 27 |
+| Hobby | `müzik ve hobi` | 25 |
 | Parts of the Body | `vücut` | 21 |
 | Holidays & Seasonal Events | `kutlamalar` | 8 |
 | Myths, Fairy Tales & Fantasy | `masal ve fantastik` | 23 |
@@ -30,14 +30,15 @@ is in the pool and not here, is here twice, or is here and not in the pool.
 | Plants, Flowers & Trees | `bitkiler` | 22 |
 | Toys & Playground Equipment | `oyuncaklar ve oyun alanı` | 17 |
 | Shapes, Symbols & Geometry | `şekiller ve simgeler` | 18 |
+| Turkish | `türkçe` | 6 |
 
 ## Everyday Objects & Household Items
 
-`ev eşyaları` · 144 words
+`ev eşyaları` · 143 words
 
 abajur, akvaryum, ampul, anahtar, anahtarlık, anten, askılık, avize, ayna, bardak,
-baston, battaniye, bebek arabası, beşik, bıçak, biberon, buzdolabı, cezve, cımbız,
-çakmak, çamaşır ipi, çamaşır makinesi, çatal, çaydanlık, çekmece, çengelli iğne, çerçeve,
+baston, battaniye, bebek arabası, beşik, bıçak, biberon, buzdolabı, cımbız, çakmak,
+çamaşır ipi, çamaşır makinesi, çatal, çaydanlık, çekmece, çengelli iğne, çerçeve,
 çöp kutusu, demlik, diş fırçası, diş macunu, dolap, duş, emzik, fener, fırça, fırın,
 fincan, halı, hap, havlu, huni, ızgara, iğne, kadeh, kafes, kalorifer, kapı kolu, kasa,
 kase, kaşık, kavanoz, kepçe, kesme tahtası, kibrit, kilit, klima, klozet, koltuk, kova,
@@ -68,16 +69,16 @@ yusufçuk, zebra, zürafa
 
 ## Foods, Drinks & Ingredients
 
-`yiyecek ve içecek` · 80 words
+`yiyecek ve içecek` · 77 words
 
-ananas, armut, avokado, badem, baklava, bamya, bezelye, biber, börek, brokoli, ceviz,
-çekirdek, çikolata, çilek, domates, dondurma, donut, döner, dut, ekmek, elma, fasulye,
-fındık, fıstık, gofret, hamburger, havuç, hindistan cevizi, incir, kabak, karpuz, kavun,
-kayısı, kestane, kiraz, kivi, köfte, krep, kruvasan, kurabiye, külah, lahmacun, limon,
-lolipop, makarna, mandalina, mango, marul, mercimek, mısır, muz, nar, pamuk şeker,
-pancar, pasta, patates, patates kızartması, patlıcan, peynir, pırasa, pide, pizza,
-portakal, salatalık, sandviç, sarımsak, simit, soğan, sosis, sosisli, şeftali, şeker,
-şiş kebap, tost, turp, turta, üzüm, waffle, yumurta, zeytin
+ananas, armut, avokado, badem, baklava, bamya, bezelye, biber, brokoli, ceviz, çekirdek,
+çikolata, çilek, domates, dondurma, donut, döner, dut, ekmek, elma, fasulye, fındık,
+fıstık, gofret, hamburger, havuç, hindistan cevizi, incir, kabak, karpuz, kavun, kayısı,
+kestane, kiraz, kivi, köfte, krep, kruvasan, kurabiye, külah, limon, lolipop, makarna,
+mandalina, mango, marul, mercimek, mısır, muz, nar, pamuk şeker, pancar, pasta, patates,
+patates kızartması, patlıcan, peynir, pırasa, pizza, portakal, salatalık, sandviç,
+sarımsak, simit, soğan, sosis, sosisli, şeftali, şeker, şiş kebap, tost, turp, turta,
+üzüm, waffle, yumurta, zeytin
 
 ## Sports, Fitness & Outdoor Activities
 
@@ -137,11 +138,11 @@ itfaiyeci, kovboy, kral, madenci, palyaço, polis, steteskop
 
 ## Hobby
 
-`müzik ve hobi` · 27 words
+`müzik ve hobi` · 25 words
 
-akordeon, bağlama, darbuka, davul, domino, flüt, fotoğraf makinesi, gitar, gramofon,
-iskambil, kaset, keman, mızıka, mikrofon, ney, nota, örgü, palet, piyano, plak, saksafon,
-satranç tahtası, tavla, tef, trompet, zar, zurna
+akordeon, darbuka, davul, domino, flüt, fotoğraf makinesi, gitar, gramofon, iskambil,
+kaset, keman, mızıka, mikrofon, ney, nota, örgü, palet, piyano, plak, saksafon,
+satranç tahtası, tavla, tef, trompet, zar
 
 ## Parts of the Body
 
@@ -210,3 +211,11 @@ oyuncak bebek, robot, salıncak, su tabancası, tahterevalli, topaç, uçurtma, 
 
 atom, barkod, bayrak, daire, düğüm, elmas, halka, hilal, kare, nazar boncuğu, ok,
 soru işareti, spiral, tabela, üçgen, ünlem işareti, virgül, yıldız
+
+## Turkish
+
+`türkçe` · 6 words
+
+**Not in the pool, never dealt.** Turkish things with no English name of their own, taken out of the pool on 2026-10-07 so that every word in play has one. Kept for a Turkish subject when categories become a choice; they are in no silhouette family and are never dealt.
+
+bağlama, börek, cezve, lahmacun, pide, zurna
