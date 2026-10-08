@@ -3218,7 +3218,7 @@ function resumePending(rec){
   recallStart = 0; recallMs = 0;
   words = rec.words.slice();
   drawings = decodeDrawings(rec.drawings || []);
-  order = shuffle(words.map(function(_, i){ return i; }));
+  order = gridOrder(rec.drawings || []);
   picks = new Array(N).fill(null);
   selPos = -1;
   show("between");
@@ -3254,6 +3254,38 @@ function setUrlCode(code){
     const st = Object.assign({}, history.state || {}, { code: code });
     history.replaceState(st, "", location.pathname + "?o=" + encodeURIComponent(code));
   } catch(e){}
+}
+
+/* Where each drawing sits in the grid. Shuffled, so the order they were drawn in gives
+   nothing away -- but the same shuffle for everyone who plays the round, because the green
+   and red squares people send each other are read side by side, and a grid shuffled per
+   phone made them say nothing.
+
+   The shuffle is taken from the drawings themselves, in the exact form they are stored and
+   sent in, so the drawer works it out before the round has a code and every guesser works
+   out the same one without being told. Seeding it from the words instead would have been
+   simpler and wrong: a daily round is the same twenty words for everybody, so after
+   playing your own you would know every position in your friend's. Two rounds never hold
+   the same strokes. */
+function seedFrom(encoded){
+  const s = JSON.stringify(encoded || []);
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++){
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function gridOrder(encoded){
+  const rnd = dailyRandom(seedFrom(encoded));
+  const a = [];
+  for (let i = 0; i < N; i++) a.push(i);
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rnd() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
 }
 
 function shuffle(a){
@@ -4045,7 +4077,7 @@ function resumeDaily(rec){
   recallMs = done ? (rec.ms || round.ms || 0) : 0;
   words = rec.words.slice();
   drawings = decodeDrawings(rec.drawings || []);
-  order = kept ? kept.order.slice() : shuffle(words.map(function(_, i){ return i; }));
+  order = kept ? kept.order.slice() : gridOrder(rec.drawings || []);
   picks = kept && Array.isArray(kept.picks) && kept.picks.length === N
     ? kept.picks.slice() : new Array(N).fill(null);
   selPos = -1;
@@ -4176,7 +4208,7 @@ function startGame(){
   words    = shuffle(freshWords());
   rememberSeen(words);
   drawings = words.map(function(){ return []; });
-  order    = shuffle(words.map(function(_, i){ return i; }));
+  order    = words.map(function(_, i){ return i; });   // the real grid is worked out when the drawings are done
   picks    = new Array(N).fill(null);
   selPos   = -1;
   closeSheet(); closeModal();
@@ -4205,7 +4237,7 @@ function startDaily(){
   words    = dailyWords(dailyDay);
   rememberSeen(words, true);
   drawings = words.map(function(){ return []; });
-  order    = shuffle(words.map(function(_, i){ return i; }));
+  order    = words.map(function(_, i){ return i; });   // the real grid is worked out when the drawings are done
   picks    = new Array(N).fill(null);
   selPos   = -1;
   closeSheet(); closeModal();
@@ -4486,10 +4518,14 @@ function nextWord(){
   olcWordDrawn(idx, drawings[idx]);
   if (idx + 1 < N){ startWord(idx + 1); return; }
 
+  // The drawings are finished, so the grid they will be shown in can be worked out -- the
+  // same one everybody who plays this round will see.
+  const encoded = encodeDrawings(drawings);
+  order = gridOrder(encoded);
   if (isDaily){
     // Keep the drawings: the player may go and guess their friend's round first
     // and come back to their own, possibly after a reload.
-    rememberDay(dailyDay, { drawn: true, words: words, drawings: encodeDrawings(drawings) });
+    rememberDay(dailyDay, { drawn: true, words: words, drawings: encoded });
   } else {
     rememberPending();
   }
@@ -6197,9 +6233,10 @@ function loadGame(code, want, who){
     drawings = loadedDrawings;
     selPos   = -1;
 
-    // Has this device been here before? The grid order has to be restored with
-    // the answers: it is reshuffled on every visit, so putting old picks against
-    // a fresh order would pin every answer to the wrong drawing.
+    // Has this device been here before? The grid order has to be restored with the
+    // answers: a round played before this grid was shared out could have been shuffled
+    // any which way, and putting old picks against a fresh order would pin every answer
+    // to the wrong drawing.
     const rec = savedRound(code);
     if (rec && MODES.some(function(m){ return m.id === rec.modeId; })) modeId = rec.modeId;
     const resumable = !!(rec && Array.isArray(rec.order) && rec.order.length === N);
@@ -6213,8 +6250,7 @@ function loadGame(code, want, who){
       if (deviceLang()) useLang(l); else chooseLang(l);
     }
     scoreSent = !!(rec && rec.sent);
-    order     = resumable ? rec.order.slice()
-                          : shuffle(words.map(function(_, i){ return i; }));
+    order     = resumable ? rec.order.slice() : gridOrder(v.drawings);
     picks     = resumable && Array.isArray(rec.picks) && rec.picks.length === N
                   ? rec.picks.slice()
                   : new Array(N).fill(null);

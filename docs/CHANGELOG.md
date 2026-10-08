@@ -11,6 +11,26 @@ The first numbered release: the game as it stands, live with its privacy page. A
 the foot of the start screen, under the `gizlilik ve şartlar` link. No version is shown in
 the game; the changelog and the git tags hold it.
 
+## 2026-10-08 — one grid, the same for everyone
+
+The green and red squares people send each other said nothing: the grid was shuffled per
+device, so the same pattern described a different set of drawings on every phone.
+
+- The shuffle is seeded from the drawings themselves, in the exact form they are stored
+  and sent in, so the drawer works it out before the round has a code and every guesser
+  works out the same one without being told.
+- Seeding it from the words would have been simpler and wrong: a daily round is the same
+  twenty words for everybody, so after playing your own you would have known every
+  position in your friend's. Two rounds never hold the same strokes.
+- A round played before this keeps the order stored with its answers, which is what they
+  were given against.
+
+Checked on two devices against one round: the drawer and the guesser both get
+`15 0 14 18 12 11 7 10 19 17 2 4 5 16 1 9 3 8 6 13`, and answering the same five
+drawings gives both of them the same five green squares in the same places. The order is
+a real permutation, the same drawings always give the same one, different drawings do
+not, and over 300 rounds every grid position held all 20 drawings.
+
 ## 2026-10-08 — a privacy page
 
 `/privacy` (`public/privacy.html`) says what the game keeps and for how long, in Turkish and

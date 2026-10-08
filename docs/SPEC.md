@@ -328,6 +328,19 @@ The 20 drawings appear in a grid — 4 columns on narrow screens, 5 on wide — 
 order shuffled independently of the drawing order, with **no cell numbers**, so
 position gives nothing away. The result screen reuses the same order.
 
+**Everyone who plays a round sees the same grid.** It used to be shuffled per device,
+which made the green and red squares in a shared score meaningless: the same pattern
+described a different set of drawings on every phone. The shuffle is seeded from the
+drawings themselves (`gridOrder`), in the exact form they are stored and sent in, so the
+drawer works it out before the round has a code and every guesser works out the same one
+without being told.
+
+Seeding it from the *words* would have been simpler and wrong: a daily round is the same
+twenty words for everybody, so after playing your own you would know every position in a
+friend's. Two rounds never hold the same strokes, so a duel stays honest. A round started
+before this, whose grid was shuffled some other way, keeps the order stored with its
+answers.
+
 **Pool mode**: tapping a drawing opens a bottom sheet showing that drawing enlarged —
 a grid cell is around 76 px wide, far too small to recognise a scribble by — above
 the remaining words, sorted with Turkish collation. Choosing a word assigns it and
@@ -653,8 +666,10 @@ the share screen, since the link is then the only way back to the drawings.
 What this buys:
 
 - **A reload stays in the round.** Re-entering a code restores the grid order and the
-  answers. The order has to be restored *with* the answers — it is reshuffled on every
-  visit, so old picks against a fresh order would pin every answer to the wrong drawing.
+  answers. The order is worked out from the drawings now, so it comes back the same by
+  itself — but a round played before that still has its own, and the stored order is used
+  whenever there is one, since old picks against a different order would pin every answer
+  to the wrong drawing.
 - **A finished round reopens on its score table**, with the original time, instead of
   offering to play it again.
 - **The drawer comes back to their share screen** with the same code and link; a reload
