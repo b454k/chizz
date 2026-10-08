@@ -3,7 +3,7 @@
 // 404 when the code is unknown or has expired.
 
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
-const TTL = 30 * 24 * 60 * 60;   // matches the TTL save.js writes with
+
 
 // What the four fixed difficulties meant, for rounds saved before modes existed.
 const LEGACY_DIFFS = {
@@ -90,9 +90,7 @@ export async function onRequestPost({ params, request, env }) {
   if (current.name === name) return json({ name });
 
   current.name = name;
-  // Re-putting restarts the 30 days. The round is being actively played, so
-  // outliving its original expiry by a few minutes is the harmless direction.
-  await env.GAMES.put(code, JSON.stringify(current), { expirationTtl: TTL });
+  await env.GAMES.put(code, JSON.stringify(current));
   return json({ name });
 }
 

@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-10-08 — the drawings are kept
+
+A round was dropped 30 days after it was saved, along with its score board. That is about
+how long a link is worth sending, but the drawings turned out to be the part worth
+keeping, so nothing about a round expires any more.
+
+- **The server writes with no TTL**: the round, the board summaries, every score row, for
+  rounds and for the day. A `sorun bildir` report still goes after 180 days, being a
+  report and not a drawing.
+- **The device stops forgetting by age too.** Saved-round records were dropped after 30
+  days; now only space decides, and the cap is split — the newest 200 round records (a few
+  hundred bytes each) and the newest 40 unsaved drawings, which are the heavy ones. arşiv
+  therefore goes back as far as the device has played.
+
+**The 420 keys already written kept their old expiry**, so the code alone would have saved
+nothing already drawn — one round was due to go that same day. Every one of them was read,
+backed up (4.2 MB), and written back with no expiry: values byte for byte, metadata field
+for field. Checked afterwards: 420 keys before and after, none lost, none added, none
+still carrying an expiry, all 420 values identical to the backup, and the live site still
+serves the oldest of them — including the eleven first rounds, which are still in the
+original Turkish schema and open through the mapping in `game/[code].js`.
+
+Storage is not the constraint it sounds like: 147 rounds come to 4 MB, against a free
+gigabyte.
+
 ## 2026-10-07 — doodles on the phone too
 
 The six doodles behind the start screen were only drawn on a desk at least 980 × 620. A

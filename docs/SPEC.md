@@ -569,9 +569,15 @@ was?, token?}`. The mode defaults to `typed`, whose keys (`day:<n>:board`,
 `day:<n>:s:<name>`) are the ones written before the boards split; kolay lives under
 `day:<n>:pool:...`.
 
-Everything is written with a **30-day TTL** and expires by itself. Stored data is the
-set id, mode, seconds, an optional name, the 20 words and the 20 drawings. No email,
-no IP, no account.
+**Nothing expires.** A round and the boards that belong to it are written with no TTL and
+kept, so a link works for as long as the game does. They used to be dropped after 30 days,
+which is about how long a link is worth sending — but the drawings turned out to be the
+part worth keeping. The 420 keys written under the old rule had their expiry cleared on
+2026-10-08, byte for byte, metadata and all. Only a `sorun bildir` report still expires,
+after 180 days, being a report and not a drawing.
+
+Stored data is the set id, mode, seconds, an optional name, the 20 words and the 20
+drawings. No email, no IP, no account.
 
 ### Score board
 
@@ -623,13 +629,15 @@ holds:
 | `howSeen` | Set when nasıl oynanır is closed, so it opens unasked only once (section 4) |
 | `rounds[CODE]` | Per round: the grid order, the answers so far, whether it was finished, the score, the time, whether the score reached the board, whether this device drew it, the name the score went up under, the mode chosen for guessing a friend's round, and two tokens -- one that lets the round be renamed, one that lets its board row be moved |
 | `pending` | The drawn round on the between screen, not saved anywhere yet, with when it was drawn: it is what a reload there returns to |
-| `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. Same 30-day and 40-round limits as `rounds` |
+| `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. The newest 40 are kept, these being the ones that carry drawings |
 | `seen` | Word → the day it was last dealt to this device, in either game, kept for 14 days. What sınırsız deals from (section 7) |
 | `dailyPlayed` | The different days in the last 14 on which this device started the daily game. Read to tell a device that has played from one that never has (section 4). Replaces `dailyAt`, which is still read |
 | `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, the mode chosen for guessing it (which board its score joins), whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
-Nothing here is not already on screen during the round. Entries older than the
-server's 30-day TTL are dropped, and only the newest 40 rounds are kept.
+Nothing here is not already on screen during the round. **Nothing is dropped for being
+old** — the server keeps a saved round, so the device has no reason to forget its half of
+one. What is left is a limit on space: the newest 200 round records (a few hundred bytes
+each: order, answers, tokens) and the newest 40 unsaved drawings, which are the heavy ones.
 
 **A phone gives the page about 5 MB**, and one round of drawings measures 15 KB for a
 sparse hand and up to 130 KB for a busy one, so 40 unsaved rounds can fill it. A write
@@ -669,9 +677,8 @@ What this buys:
   once, when the record is created, and never again. Stamping it on every write -- an
   answer typed, a link opened a second time, a score posted -- put whatever had last been
   touched at the top of the list under today's date, which read as the order shuffling by
-  itself. It is also what the 30-day drop and the newest-40 limit are measured by, and the
-  server expires a round 30 days after it was saved, so the day it was made is the right
-  mark for those as well.
+  itself. It is also the order arşiv is read in, and what the newest-200 limit is measured
+  by.
 - **A daily duel survives a reload at every step.** Whose round you are dueling is read
   from `days[N]`, never from memory, and switching between your round and theirs always
   rewrites the address bar. A reload on the choice screen returns to it; a reload in
@@ -932,7 +939,7 @@ The v1.5 document is a design brief. These are the places the shipped code diffe
 
 Everything else in the v1.5 spec — the shuffled grid with no cell numbers, random set
 selection with no repeat, the normalisation and one-character
-typo tolerance, the code alphabet, the 30-day TTL, the 0–255 coordinate shrinking, the
+typo tolerance, the code alphabet, the 0–255 coordinate shrinking, the
 error behaviours — is implemented as written.
 
 The original brief (`chizz-original-spec.md`) additionally required the whole game to be a

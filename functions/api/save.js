@@ -16,7 +16,10 @@ const LEGACY_DIFFS = {
   impossible: { mode: "typed", seconds: 1.5 }
 };
 const MAX_BYTES = 200 * 1024;
-const TTL = 30 * 24 * 60 * 60;   // 30 days
+// A saved round is kept. It used to be dropped after 30 days, which is how long a link
+// was worth sending; the owner would rather the drawings stayed, so nothing here expires.
+// Storage is not the constraint it sounds like: a round of twenty drawings is tens of
+// kilobytes of stroke coordinates, and KV gives a gigabyte.
 const N = 20;
 
 function json(data, status) {
@@ -115,7 +118,7 @@ export async function onRequestPost({ request, env }) {
     // moment the day turned -- a group chat would open it the next morning and find
     // nothing. Guessing a round is never tied to the clock; only drawing the day's
     // words is, and that is decided on the client.
-    await env.GAMES.put(code, record, { expirationTtl: TTL });
+    await env.GAMES.put(code, record);
     return json({ code, owner });
   }
   return error("could not allocate a code, try again", 503);

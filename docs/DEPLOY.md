@@ -107,7 +107,8 @@ makes requests fail; it does not generate a bill. This is why the score board ne
 calls `list` on read: each player writes to their own key and readers fetch a single
 pre-computed summary.
 
-Everything is written with a 30-day TTL and expires on its own.
+Nothing expires: a round and its boards are written with no TTL and kept. A `sorun bildir`
+report is the exception, at 180 days.
 
 ## Stored data
 

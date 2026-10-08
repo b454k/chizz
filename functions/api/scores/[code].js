@@ -16,7 +16,7 @@
 // almost immediately. list runs only on write; reads are a single get.
 
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
-const TTL = 30 * 24 * 60 * 60;
+// The board outlives nothing: a round is kept, so the scores on it are kept too.
 const N = 20;
 const MAX_PLAYERS = 200;
 // Names used to be capped at 5, so every key already written is 5 or shorter and
@@ -100,11 +100,7 @@ function repairBoard(summary, scanned) {
 }
 
 function writeBoard(env, code, scores) {
-  return env.GAMES.put(
-    code + ":board",
-    JSON.stringify({ scores, scannedAt: Date.now() }),
-    { expirationTtl: TTL }
-  );
+  return env.GAMES.put(code + ":board", JSON.stringify({ scores, scannedAt: Date.now() }));
 }
 
 // Source of truth: the per-player keys.
@@ -237,8 +233,7 @@ export async function onRequestPost({ params, request, env }) {
     : null;
 
   await env.GAMES.put(code + ":s:" + key, answers ? JSON.stringify({ answers }) : "", {
-    metadata: { name, score: d.score, ms: keepMs, ts, token },
-    expirationTtl: TTL
+    metadata: { name, score: d.score, ms: keepMs, ts, token }
   });
 
   // The key just written may not be listable yet, so seat this row by hand.

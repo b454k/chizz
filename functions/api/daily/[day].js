@@ -16,7 +16,7 @@ import { dayNumber as today } from "../../../lib/day.js";
 // list, and a row carries a token so renaming yourself moves your row instead of
 // leaving the old name behind.
 
-const TTL = 30 * 24 * 60 * 60;
+// The day's board is kept, like the rounds and their boards.
 const N = 20;
 const MAX_ROWS = 200;          // the board is global, so it is a leaderboard, not a list
 const NAME_MAX = 10;
@@ -118,11 +118,7 @@ function repairBoard(summary, scanned) {
 }
 
 function writeBoard(env, day, mode, scores) {
-  return env.GAMES.put(
-    base(day, mode) + ":board",
-    JSON.stringify({ scores, scannedAt: Date.now() }),
-    { expirationTtl: TTL }
-  );
+  return env.GAMES.put(base(day, mode) + ":board", JSON.stringify({ scores, scannedAt: Date.now() }));
 }
 
 export async function onRequestGet({ params, request, env }) {
@@ -195,8 +191,7 @@ export async function onRequestPost({ params, request, env }) {
   if (!token) token = crypto.randomUUID().replace(/-/g, "");
 
   await env.GAMES.put(base(day, mode) + ":s:" + key, "", {
-    metadata: { name, score: d.score, ms: keepMs, ts, token },
-    expirationTtl: TTL
+    metadata: { name, score: d.score, ms: keepMs, ts, token }
   });
 
   known.set(key, { name, score: d.score, ms: keepMs, ts });

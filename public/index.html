@@ -2596,8 +2596,13 @@ try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", appl
    code the grid order, the answers and whether it was finished. Every access is
    wrapped: Safari in private mode throws on localStorage rather than no-opping. */
 const STORE_KEY   = "chizz.v1";
-const KEEP_ROUNDS = 40;
-const ROUND_TTL   = 30 * 24 * 60 * 60 * 1000;   // the server expires rounds on the same clock
+/* Nothing is forgotten here because it got old -- the server keeps a saved round now, so
+   the device has no reason to drop its half of one. What is left is a limit on space,
+   which is real: a phone gives the page about 5 MB. A round record is a few hundred bytes
+   of order, answers and tokens, so two hundred of them cost almost nothing; a drawing
+   kept here is tens of kilobytes, so those stay capped where they were. */
+const KEEP_ROUNDS = 200;        // records of saved rounds: small, so arşiv can go back far
+const KEEP_DRAFTS = 40;         // drawings never saved: these are the heavy ones
 
 function loadStore(){
   try {
@@ -2611,17 +2616,15 @@ function loadStore(){
 }
 
 function saveStore(store){
-  // Drop what the server has expired anyway, then keep the newest few.
-  const now = Date.now();
+  // The newest are kept and the oldest give way when there are too many; none of them is
+  // dropped for having been drawn a while ago.
   const kept = {};
   Object.keys(store.rounds)
-    .filter(function(c){ return now - (store.rounds[c].at || 0) < ROUND_TTL; })
     .sort(function(a, b){ return (store.rounds[b].at || 0) - (store.rounds[a].at || 0); })
     .slice(0, KEEP_ROUNDS)
     .forEach(function(c){ kept[c] = store.rounds[c]; });
   store.rounds = kept;
-  // Words stop mattering once fourteen days have passed; unsaved drawings keep to the
-  // same limits as rounds.
+  // Words stop mattering once fourteen days have passed.
   if (store.seen && typeof store.seen === "object"){
     const today = dailyDayNumber();
     Object.keys(store.seen).forEach(function(w){
@@ -2630,9 +2633,9 @@ function saveStore(store){
   }
   if (Array.isArray(store.drafts)){
     store.drafts = store.drafts
-      .filter(function(d){ return d && now - (d.at || 0) < ROUND_TTL; })
+      .filter(function(d){ return !!d; })
       .sort(function(a, b){ return (b.at || 0) - (a.at || 0); })
-      .slice(0, KEEP_ROUNDS);
+      .slice(0, KEEP_DRAFTS);
   }
   storageOk = writeStore(store);
   while (!storageOk && shedSome(store)) storageOk = writeStore(store);

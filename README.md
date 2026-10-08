@@ -73,7 +73,7 @@ Deploying needs a Cloudflare account and a KV namespace bound as `GAMES`:
   to bytes for transport, so they redraw cleanly at any size — a grid cell, a zoom, or
   a downloaded picture.
 - [Cloudflare Pages](https://pages.cloudflare.com/) for hosting, Pages Functions for the
-  API, Workers KV for storage. Rounds expire after 30 days.
+  API, Workers KV for storage. Rounds are kept, so a link keeps working.
 - Paste a link into a chat and the preview shows the drawings: the PNG is encoded by
   hand from the stored strokes, with no image library.
 - The server keeps the words, the drawings, the mode, the seconds and a name of up to
