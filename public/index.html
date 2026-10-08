@@ -1318,6 +1318,7 @@ try {
         <div class="seg" id="themes"></div>
         <span class="lbl" data-t="language"></span>
         <div class="seg" id="langs"></div>
+        <a class="linkish" id="privacyLink" href="/privacy" data-t="privacy"></a>
       </div>
     </div>
   </section>
@@ -2105,6 +2106,7 @@ function rememberSeen(list, daily){
 const TEXT_TR = {
   pageTitle:        "chizz · çizim hafıza oyunu",
   language:         "dil",
+  privacy:          "gizlilik",
   secUnit:          "sn",
   start:            "başla",
   join:             "katıl",
@@ -2282,6 +2284,7 @@ const TEXT_TR = {
 const TEXT_EN = {
   pageTitle:        "chizz · a drawing memory game",
   language:         "language",
+  privacy:          "privacy",
   secUnit:          "sec",
   start:            "start",
   join:             "join",
@@ -2485,6 +2488,7 @@ function applyLang(){
   TEXT = lang === "en" ? TEXT_EN : TEXT_TR;
   document.documentElement.lang = lang;
   document.title = TEXT.pageTitle;
+  $("privacyLink").href = "/privacy#" + lang;
   applyText();
 }
 

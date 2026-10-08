@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>chizz · gizlilik</title>
+<meta name="description" content="chizz neyi saklar, ne kadar saklar ve nasıl sildirirsin.">
+<meta name="theme-color" content="#F4EFE6">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- What the game keeps, in both languages. Keep it true: when an expiry in functions/api
+     changes, or the page starts sending something new, this page changes with it. -->
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#F4EFE6; --panel:#FFFCF5; --ink:#1D1B18; --muted:#6B6459; --line2:#CDBFA6;
+    --hi-soft:#FFE8A6; --focus:#2563EB;
+    --font:ui-rounded, "SF Pro Rounded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#151517; --panel:#1F1F23; --ink:#F5F0E6; --muted:#A7A197; --line2:#45454D;
+    --hi-soft:rgba(255,201,64,.17); --focus:#8AB0FF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]):not([data-theme="dark"]){
+      color-scheme:dark;
+      --bg:#151517; --panel:#1F1F23; --ink:#F5F0E6; --muted:#A7A197; --line2:#45454D;
+      --hi-soft:rgba(255,201,64,.17); --focus:#8AB0FF;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font:500 16px/1.6 var(--font);}
+  main{max-width:640px; margin:0 auto; padding:24px 16px 56px;}
+  nav{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:24px;}
+  a{color:var(--ink); text-decoration-thickness:1.5px; text-underline-offset:3px;}
+  a:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:4px;}
+  nav a{font-weight:750; font-size:15px;}
+  h1{font-size:30px; line-height:1.2; margin:0 0 4px;}
+  h2{font-size:18px; margin:28px 0 6px;}
+  p, ul{margin:0 0 10px;}
+  ul{padding-left:20px;}
+  li{margin-bottom:4px;}
+  .muted{color:var(--muted); font-size:14px;}
+  .box{background:var(--panel); border:2px dashed var(--line2); border-radius:14px; padding:12px 16px; margin:18px 0;}
+  mark{background:var(--hi-soft); color:inherit; padding:0 3px; border-radius:4px;}
+  [hidden]{display:none !important;}
+</style>
+<script>
+/* The device's own theme, as the game sets it, so the page does not flash the other one. */
+try {
+  const t = (JSON.parse(localStorage.getItem("chizz.v1") || "null") || {}).theme;
+  document.documentElement.dataset.theme = t === "light" || t === "dark" ? t : "auto";
+} catch (e) {}
+</script>
+
+<main>
+  <section id="tr" lang="tr">
+    <nav>
+      <a href="/">← chizz</a>
+      <a href="#en" data-to="en">english</a>
+    </nav>
+    <h1>gizlilik</h1>
+    <p class="muted">son güncelleme: 8 ekim 2026</p>
+
+    <div class="box">
+      <p><b>kısaca:</b> hesap yok, çerez yok, reklam yok, takip yok. oyun yalnızca oynamak için gerekeni saklar. <mark>çizimler ve skorlar kalıcıdır</mark>, silinmelerini istediğin zaman silinir. sayfa başka hiçbir siteden bir şey yüklemez.</p>
+    </div>
+
+    <h2>bir tur kaydettiğinde</h2>
+    <p>çizimlerin, kelimeler, ayarlar (süre, mod, dil) ve yazdıysan adın saklanır. turun kodunu ya da bağlantısını bilen herkes çizimleri görebilir. <b>süre sınırı yoktur</b>: sen silinmesini isteyene kadar saklanır.</p>
+
+    <h2>skorlar</h2>
+    <p>bir turu ya da günlük oyunu bitirdiğinde adın, puanın, süren ve cevapların saklanır, bir de adını değiştirirsen satırının yerinde kalması için rastgele bir kod. arkadaş turlarının ve günlük oyunun skor tabloları herkese açıktır. turun kendisi gibi <b>süre sınırı olmadan</b> saklanır.</p>
+    <p>tabloda görünen ad yazdığın addır. gerçek tam adını yazmak zorunda değilsin, bir takma ad yeter.</p>
+
+    <h2>sorun bildirdiğinde</h2>
+    <p>yazdığın mesaj, yazdıysan adın ve sorunu bulmaya yarayan bilgiler saklanır: hangi ekranda olduğun, turun kodu, tarayıcın ve cihazın, dilin, ekran boyutun ve son hatalar. form bunu gönderirken de söyler. <b>180 gün</b> sonra silinir. ip adresin saklanmaz.</p>
+
+    <h2>kendi cihazında</h2>
+    <p>oyun tarayıcının yerel depolamasına (localStorage) adını, tema ve dil seçimini, oynadığın turları ve henüz kaydedilmemiş çizimlerini yazar. bunlar cihazından çıkmaz. tarayıcının site verilerini silerek hepsini silebilirsin.</p>
+
+    <h2>barındırma</h2>
+    <p>chizz <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">cloudflare</a> üzerinde çalışır. sayfayı sana ulaştırmak ve saldırılara karşı korumak için cloudflare ip adresini ve isteğin teknik bilgilerini işler. chizz bunları kendisi saklamaz. veriler cloudflare'in türkiye dışındaki sunucularında tutulabilir.</p>
+
+    <h2>neler yok</h2>
+    <p>analiz aracı, reklam, çerez, sosyal medya eklentisi yok. hiçbir veri satılmaz ya da başkasıyla paylaşılmaz.</p>
+
+    <h2>silme ve sorular</h2>
+    <p>bir çizimin, skorun ya da mesajın silinmesini istersen ya da neyin saklandığını sormak istersen <a href="mailto:contact@chizz.party">contact@chizz.party</a> adresine yaz. turun kodunu ve kullandığın adı eklersen bulmak kolay olur. kvkk ve gdpr kapsamındaki haklarını bu adresten kullanabilirsin.</p>
+
+    <h2>değişiklikler</h2>
+    <p>oyun yeni bir şey saklamaya başlarsa bu sayfa güncellenir ve üstteki tarih değişir.</p>
+  </section>
+
+  <section id="en" lang="en" hidden>
+    <nav>
+      <a href="/">← chizz</a>
+      <a href="#tr" data-to="tr">türkçe</a>
+    </nav>
+    <h1>privacy</h1>
+    <p class="muted">last updated: 8 october 2026</p>
+
+    <div class="box">
+      <p><b>in short:</b> no accounts, no cookies, no ads, no tracking. the game keeps only what it needs to be played. <mark>drawings and scores are kept for good</mark>, and deleted whenever you ask. the page loads nothing from any other site.</p>
+    </div>
+
+    <h2>when you save a round</h2>
+    <p>your drawings, the words, the settings (time, mode, language) and your name, if you typed one, are kept. anyone with the round's code or link can see the drawings. <b>there is no time limit</b>: it is kept until you ask for it to be deleted.</p>
+
+    <h2>scores</h2>
+    <p>when you finish a round or the daily game, your name, score, time and answers are kept, along with a random code so your row stays put if you change your name. friend rounds' boards and the daily boards are public. like the round itself, they are kept <b>with no time limit</b>.</p>
+    <p>the name on a board is whatever you typed. you don't need your real full name; a nickname is fine.</p>
+
+    <h2>when you report a problem</h2>
+    <p>your message, your name if you gave one, and what helps find the problem are kept: the screen you were on, the round code, your browser and device, your language, your screen size and recent errors. the form says so when it sends. deleted after <b>180 days</b>. your ip address is not kept.</p>
+
+    <h2>on your own device</h2>
+    <p>the game writes your name, your theme and language, the rounds you played and drawings not yet saved to your browser's local storage (localStorage). these never leave your device. clearing the site's data in your browser removes them all.</p>
+
+    <h2>hosting</h2>
+    <p>chizz runs on <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">cloudflare</a>. to deliver the page and protect it from attacks, cloudflare processes your ip address and the technical details of each request. chizz does not keep them itself. data may be held on cloudflare servers outside turkey.</p>
+
+    <h2>what there isn't</h2>
+    <p>no analytics, no ads, no cookies, no social media plugins. no data is sold or shared with anyone.</p>
+
+    <h2>deletion and questions</h2>
+    <p>to have a drawing, score or message deleted, or to ask what is kept, write to <a href="mailto:contact@chizz.party">contact@chizz.party</a>. the round code and the name you used make it easy to find. you can use your rights under kvkk and the gdpr at this address.</p>
+
+    <h2>changes</h2>
+    <p>if the game starts keeping something new, this page is updated and the date at the top changes.</p>
+  </section>
+</main>
+
+<script>
+/* One language at a time: the one in the address (#en, #tr), else the one chosen in the
+   game, else turkish. */
+(function(){
+  function stored(){
+    try { return (JSON.parse(localStorage.getItem("chizz.v1") || "null") || {}).language; }
+    catch (e) { return ""; }
+  }
+  function show(l){
+    if (l !== "en") l = "tr";
+    document.getElementById("tr").hidden = l !== "tr";
+    document.getElementById("en").hidden = l !== "en";
+    document.documentElement.lang = l;
+    document.title = l === "en" ? "chizz · privacy" : "chizz · gizlilik";
+  }
+  const h = location.hash.slice(1);
+  show(h === "en" || h === "tr" ? h : stored());
+  window.addEventListener("hashchange", function(){ show(location.hash.slice(1)); });
+})();
+</script>

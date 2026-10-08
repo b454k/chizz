@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-08 — a privacy page
+
+`/privacy` (`public/privacy.html`) says what the game keeps and for how long, in Turkish and
+English, one at a time: the language chosen in the game, or the one in the address (`#tr`,
+`#en`). A small `gizlilik` / `privacy` link at the foot of the start screen, under the
+language picker, opens it in the game's language. Deletion requests go to
+`contact@chizz.party`, which Cloudflare Email Routing forwards; nothing expires now, so a
+request is carried out by hand in the KV dashboard. The page has to change whenever what the
+game keeps does.
+
 ## 2026-10-08 — the drawings are kept
 
 A round was dropped 30 days after it was saved, along with its score board. That is about
