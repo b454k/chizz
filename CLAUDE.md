@@ -31,6 +31,9 @@ replayed from day 1. First add every day through today to `DAILY_PLAYED` in
 
 ## Before deploying
 
+Give the release a version in `docs/CHANGELOG.md` (the rule is at its top), and after the
+deploy tag the commit `vX.Y.Z` and push the tag.
+
 ```bash
 node tools/check-day-epoch.js
 ```

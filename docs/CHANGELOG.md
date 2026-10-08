@@ -1,5 +1,16 @@
 # Changelog
 
+From v1.0.0 on, every deploy gets a version: the heading is `## vX.Y.Z — date — what`, and
+the commit it was deployed from is tagged `vX.Y.Z`. Raise Z for a fix, Y for something
+new, X for a change that breaks what players had. Entries before v1.0.0 carry only a date.
+
+## v1.0.0 — 2026-10-08 — a footer, and versions
+
+The first numbered release: the game as it stands, live with its privacy page. A small
+`© 2026 chizz · tüm hakları saklıdır` line (`all rights reserved` in English) now sits at
+the foot of the start screen, under the `gizlilik ve şartlar` link. No version is shown in
+the game; the changelog and the git tags hold it.
+
 ## 2026-10-08 — a privacy page
 
 `/privacy` (`public/privacy.html`) says what the game keeps and for how long, in Turkish and
