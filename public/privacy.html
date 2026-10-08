@@ -2,7 +2,7 @@
 <html lang="tr">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>chizz · gizlilik ve koşullar</title>
+<title>chizz · gizlilik ve şartlar</title>
 <meta name="description" content="chizz neyi saklar, ne kadar saklar ve nasıl sildirirsin.">
 <meta name="theme-color" content="#F4EFE6">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -60,7 +60,7 @@ try {
       <a href="/">← chizz</a>
       <a href="#en" data-to="en">english</a>
     </nav>
-    <h1>gizlilik ve koşullar</h1>
+    <h1>gizlilik ve şartlar</h1>
     <p class="muted">son güncelleme: 8 ekim 2026</p>
 
     <div class="box">
@@ -103,7 +103,7 @@ try {
     <h2>silme ve sorular</h2>
     <p>bir çizimin, skorun ya da mesajın silinmesini istersen ya da neyin saklandığını sormak istersen <!--email_off--><a href="mailto:contact@chizz.party">contact@chizz.party</a><!--/email_off--> adresine yaz. turun kodunu ve kullandığın adı eklersen bulmak kolay olur. isteğin <b>en geç 30 gün içinde</b> yanıtlanır ve yerine getirilir.</p>
 
-    <h2>kullanım koşulları</h2>
+    <h2>kullanım şartları</h2>
     <p>chizz'i oynayarak şunları kabul etmiş olursun:</p>
     <ul>
       <li><b>düzgün kullan.</b> başkalarını rahatsız eden, aşağılayan ya da yasa dışı ad ve çizimler kullanma. oyunu ya da sunucularını bozmaya, aşırı yüklemeye ya da skorları hileyle değiştirmeye çalışma.</li>
@@ -114,7 +114,7 @@ try {
     </ul>
 
     <h2>değişiklikler</h2>
-    <p>oyun yeni bir şey saklamaya başlarsa ya da koşullar değişirse bu sayfa güncellenir ve üstteki tarih değişir.</p>
+    <p>oyun yeni bir şey saklamaya başlarsa ya da şartlar değişirse bu sayfa güncellenir ve üstteki tarih değişir.</p>
   </section>
 
   <section id="en" lang="en" hidden>
@@ -193,7 +193,7 @@ try {
     document.getElementById("tr").hidden = l !== "tr";
     document.getElementById("en").hidden = l !== "en";
     document.documentElement.lang = l;
-    document.title = l === "en" ? "chizz · privacy and terms" : "chizz · gizlilik ve koşullar";
+    document.title = l === "en" ? "chizz · privacy and terms" : "chizz · gizlilik ve şartlar";
   }
   const h = location.hash.slice(1);
   show(h === "en" || h === "tr" ? h : stored());
