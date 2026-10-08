@@ -39,6 +39,18 @@ The daily clock exists twice — `lib/day.js` for the server, a copy inside
 `public/index.html` for the client — and if they drift, the two disagree about what day
 it is with nothing reporting the problem.
 
+## To-dos and bugs live in GitHub Issues
+
+At the start of a session, read what is open:
+
+```bash
+gh issue list -R b454k/chizz
+```
+
+Labels: `bug`, `idea`, `chore`. A commit that finishes one says `Fixes #N` in its message,
+so the push closes it. The repo is public: nothing private goes in an issue — no player's
+message, email address or deletion request.
+
 ## House rules
 
 - **Never commit the real KV namespace id.** `wrangler.jsonc` carries
