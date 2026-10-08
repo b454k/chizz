@@ -190,8 +190,11 @@ report is the exception, at 180 days.
 
 D1 allows 100,000 rows written and 5 million read per day, and 5 GB. A visit writes one row
 per batch of events (one every ten seconds at most, and on leaving), and a finished round
-about forty -- a few thousand rounds a day fit. Analytics rows are deleted after 400 days,
-by an occasional `/api/events` request, since Pages has no cron.
+about forty -- a few thousand rounds a day fit. Analytics rows are never deleted, so the 5 GB
+is what eventually runs out: a played visit is roughly 40 KB, most of it drawings, which is
+over a hundred thousand rounds. Hitting it makes `/api/events` fail (the game swallows that);
+it does not bill. D1 keeps only 7 days of point-in-time history on the free plan, so an
+export (`analysis/export_data.py --remote`) now and then is the real backup.
 
 ## Stored data
 

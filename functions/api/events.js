@@ -18,7 +18,6 @@ const MAX_BYTES = 300 * 1024;              // a round's twenty drawings with the
 const MAX_EVENTS = 100;
 const MAX_ROUNDS = 3;
 const N = 20;
-const KEEP_MS = 400 * 86400000;            // 13 months and a bit, then it goes
 const VISIT_ID = /^[0-9a-f]{16}$/;
 const CODE = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
 
@@ -138,7 +137,7 @@ function upsert(table, key, fixed, cols) {
     + cols.map(c => c + " = COALESCE(excluded." + c + ", " + table + "." + c + ")").join(", ");
 }
 
-export async function onRequestPost({ request, env, waitUntil }) {
+export async function onRequestPost({ request, env }) {
   if (!env.DB) return done();
 
   const body = await request.text();
@@ -205,18 +204,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }
   }
 
+  // Nothing here is ever deleted: the owner keeps it all, as saved rounds are kept.
   await env.DB.batch(stmts);
-
-  // No cron on Pages, so old rows are cleared by an occasional request instead.
-  if (Math.random() < 0.01) {
-    const cut = now - KEEP_MS;
-    waitUntil(env.DB.batch([
-      env.DB.prepare("DELETE FROM event_batches WHERE received_at < ?").bind(cut),
-      env.DB.prepare("DELETE FROM visits WHERE started_at < ?").bind(cut),
-      env.DB.prepare("DELETE FROM round_items WHERE round_id IN (SELECT id FROM rounds WHERE started_at < ?)").bind(cut),
-      env.DB.prepare("DELETE FROM rounds WHERE started_at < ?").bind(cut)
-    ]).catch(() => {}));
-  }
   return done();
 }
 
