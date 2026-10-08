@@ -133,12 +133,14 @@ is not, is set out in `public/privacy.html` -- keep that page true when this cha
 
 ### Deploying
 
-Both ids go in for the deploy and both come out straight after, in the same command, so a
-failed deploy cannot leave either behind:
-
-```bash
-sed -i "s/PUT_YOUR_KV_NAMESPACE_ID_HERE/$KV_ID/; s/PUT_YOUR_D1_DATABASE_ID_HERE/$D1_ID/" wrangler.jsonc && npx wrangler pages deploy --branch production --commit-dirty=true; git checkout wrangler.jsonc
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\deploy.ps1
 ```
+
+It runs the day-epoch check, looks both ids up on the account by name (the `GAMES`
+namespace and the `chizz-analytics` database), puts them in for the deploy and takes them
+out straight after, also when the deploy fails. `-DryRun` stops after the lookup. To see
+the ids yourself: `npx wrangler kv namespace list` and `npx wrangler d1 list`.
 
 ### Locally
 
