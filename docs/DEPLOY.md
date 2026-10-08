@@ -193,8 +193,11 @@ per batch of events (one every ten seconds at most, and on leaving), and a finis
 about forty -- a few thousand rounds a day fit. Analytics rows are never deleted, so the 5 GB
 is what eventually runs out: a played visit is roughly 40 KB, most of it drawings, which is
 over a hundred thousand rounds. Hitting it makes `/api/events` fail (the game swallows that);
-it does not bill. D1 keeps only 7 days of point-in-time history on the free plan, so an
-export (`analysis/export_data.py --remote`) now and then is the real backup.
+it does not bill. D1 keeps only 7 days of point-in-time history on the free plan, so the
+real backup is `tools/backup-analytics.ps1`: a full SQL export into `Documents\chizz-backups`,
+the last twelve kept. A Windows scheduled task, "chizz analytics backup", runs it on the 1st
+of every month (or at the next start-up, if the computer was off). To restore one, apply the
+file to an empty database: `npx wrangler d1 execute <db> --remote --file <backup>.sql`.
 
 ## Stored data
 
