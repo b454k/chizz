@@ -5,7 +5,11 @@ public/index.html                 the whole game, no dependencies
 functions/api/save.js             POST /api/save          -> { code }
 functions/api/game/[code].js      GET  /api/game/A7K2
 functions/api/scores/[code].js    GET+POST /api/scores/A7K2
-wrangler.jsonc                    project config and the KV binding
+functions/api/events.js           POST /api/events        analytics, into D1
+functions/api/admin/*             GET  /api/admin/...     the owner's data, behind Access
+public/admin.html                 /admin                  reports, visits, taps
+migrations/                       the D1 schema
+wrangler.jsonc                    project config, the KV and D1 bindings
 start.cmd                         starts the local server (Windows)
 ```
 
@@ -76,6 +80,80 @@ After deploying, check **Workers & Pages → chizz → Settings → Bindings** i
 dashboard and confirm `GAMES` is listed. If it is missing the duel will not work and
 the API answers `500 storage not bound`; add the binding there and deploy again.
 
+## Analytics and /admin
+
+The game reports what each visit does to `/api/events`, which writes it to a D1 database;
+`/admin` reads it back, together with the bug reports in KV. What is recorded, and what
+is not, is set out in `public/privacy.html` -- keep that page true when this changes.
+
+### Once
+
+1. Create the database and copy the `database_id` it prints:
+
+   ```bash
+   npx wrangler d1 create chizz-analytics
+   ```
+
+   Like the KV id, the real id is **never committed**: `wrangler.jsonc` carries
+   `PUT_YOUR_D1_DATABASE_ID_HERE`, and the id goes in only for a deploy.
+
+2. Create the tables, with the real id in place:
+
+   ```bash
+   npx wrangler d1 migrations apply chizz-analytics --remote
+   ```
+
+   A later file in `migrations/` is applied the same way.
+
+3. Lock `/admin` with Cloudflare Access (free for up to 50 people). Dashboard →
+   **Zero Trust** → **Access → Applications → Add an application → Self-hosted**:
+   - application domain `chizz.party`, path `admin`, and a second destination,
+     `chizz.party`, path `api/admin`
+   - one policy, action **Allow**, include **Emails** → your own address only. Not
+     "everyone", and not an email *domain*.
+   - login method: one-time PIN is enough.
+
+   Then copy the application's **Application Audience (AUD) tag**, and your team domain
+   from **Settings → Custom pages** (it looks like `yourteam.cloudflareaccess.com`).
+
+4. Dashboard → **Workers & Pages → chizz → Settings → Variables and Secrets**, for
+   Production, add:
+
+   | name | value |
+   |---|---|
+   | `ACCESS_TEAM_DOMAIN` | `yourteam.cloudflareaccess.com` |
+   | `ACCESS_AUD` | the AUD tag |
+   | `ADMIN_EMAILS` | your address; several are comma separated |
+
+   `functions/api/admin/_middleware.js` checks Access's signed token against these on
+   every request, so the data stays shut even on `chizz.pages.dev`, which Access does
+   not cover. With any of them missing, nobody gets in.
+
+5. Deploy as usual, then open https://chizz.party/admin.
+
+### Deploying
+
+Both ids go in for the deploy and both come out straight after, in the same command, so a
+failed deploy cannot leave either behind:
+
+```bash
+sed -i "s/PUT_YOUR_KV_NAMESPACE_ID_HERE/$KV_ID/; s/PUT_YOUR_D1_DATABASE_ID_HERE/$D1_ID/" wrangler.jsonc && npx wrangler pages deploy --branch production --commit-dirty=true; git checkout wrangler.jsonc
+```
+
+### Locally
+
+```bash
+npx wrangler d1 migrations apply chizz-analytics --local --persist-to C:/wr
+npx wrangler pages dev --persist-to C:/wr
+```
+
+`/admin` on localhost needs `ADMIN_LOCAL=1` in `.dev.vars` (ignored by git); it is
+honoured on localhost only.
+
+### Data for analysis
+
+`analysis/` reads an export of the database; see `analysis/README.md`.
+
 ## Custom domain
 
 `pages.dev` is filtered on some networks and mobile operators, which makes the site
@@ -109,6 +187,11 @@ pre-computed summary.
 
 Nothing expires: a round and its boards are written with no TTL and kept. A `sorun bildir`
 report is the exception, at 180 days.
+
+D1 allows 100,000 rows written and 5 million read per day, and 5 GB. A visit writes one row
+per batch of events (one every ten seconds at most, and on leaving), and a finished round
+about forty -- a few thousand rounds a day fit. Analytics rows are deleted after 400 days,
+by an occasional `/api/events` request, since Pages has no cron.
 
 ## Stored data
 

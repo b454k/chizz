@@ -39,7 +39,9 @@ Nothing is asked before you start. A name is wanted only to share a round or joi
 board, so it is asked then and never again. Typed answers forgive one typo: `koltok`
 still counts for `koltuk`.
 
-No account, no login, no tracking, no cookie banner, nothing loaded from anywhere else.
+No account, no login, no cookie banner, nothing loaded from anywhere else. How the game is
+played — screens, taps, drawings, answers — is recorded anonymously on chizz's own server,
+for fixing it and for [analysis](analysis/README.md); see [privacy](public/privacy.html).
 
 ## The words
 

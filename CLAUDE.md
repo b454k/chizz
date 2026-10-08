@@ -56,9 +56,12 @@ message, email address or deletion request.
 
 ## House rules
 
-- **Never commit the real KV namespace id.** `wrangler.jsonc` carries
-  `PUT_YOUR_KV_NAMESPACE_ID_HERE`; the real id goes in only for a deploy and comes out
-  immediately after.
+- **Never commit the real KV namespace id or D1 database id.** `wrangler.jsonc` carries
+  `PUT_YOUR_KV_NAMESPACE_ID_HERE` and `PUT_YOUR_D1_DATABASE_ID_HERE`; the real ids go in
+  only for a deploy and come out immediately after.
+- **Keep `public/privacy.html` true.** The game reports visits, taps and rounds to
+  `/api/events` (the `ölçüm` section of `public/index.html`); anything new it sends or
+  keeps goes on that page in both languages.
 - **Never add a licence file.**
 - **Scan for secrets before every commit** — tokens, keys, account ids, the owner's
   email or personal details. Stop and report if anything turns up.

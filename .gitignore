@@ -20,3 +20,13 @@ desktop.ini
 
 # editor/tooling config written by tools, not part of the game
 .claude/
+
+# wrangler pages dev settings (ADMIN_LOCAL=1 opens /admin on localhost)
+.dev.vars
+
+# analysis: exported data holds every drawing; never commit it
+analysis/data/
+analysis/data-fake/
+analysis/.venv/
+.ipynb_checkpoints/
+__pycache__/

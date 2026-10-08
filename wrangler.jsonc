@@ -13,5 +13,17 @@
       // Replace with the id printed by: wrangler kv namespace create GAMES
       "id": "PUT_YOUR_KV_NAMESPACE_ID_HERE"
     }
+  ],
+
+  // Analytics: visits, taps and rounds, read by /admin. Same rule as the KV id: the real
+  // id goes in only for a deploy. Replace with the id printed by:
+  //   wrangler d1 create chizz-analytics
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chizz-analytics",
+      "database_id": "PUT_YOUR_D1_DATABASE_ID_HERE",
+      "migrations_dir": "migrations"
+    }
   ]
 }

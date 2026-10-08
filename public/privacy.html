@@ -64,7 +64,7 @@ try {
     <p class="muted">son güncelleme: 8 ekim 2026</p>
 
     <div class="box">
-      <p><b>kısaca:</b> hesap yok, çerez yok, reklam yok, takip yok. oyun yalnızca oynamak için gerekeni saklar. <mark>çizimler ve skorlar kalıcıdır</mark>, silinmelerini istediğin zaman silinir. sayfa başka hiçbir siteden bir şey yüklemez.</p>
+      <p><b>kısaca:</b> hesap yok, çerez yok, reklam yok. oyunu düzeltmek ve geliştirmek için nasıl oynandığı <b>adsız</b> olarak kaydedilir: hangi ekranlar, nereye dokunulduğu, çizimler ve cevaplar. kim olduğunu bilen hiçbir şey yoktur. <mark>çizimler ve skorlar kalıcıdır</mark>, silinmelerini istediğin zaman silinir. sayfa başka hiçbir siteden bir şey yüklemez.</p>
     </div>
 
     <h2>bir tur kaydettiğinde</h2>
@@ -75,16 +75,27 @@ try {
     <p>tabloda görünen ad yazdığın addır. gerçek tam adını yazmak zorunda değilsin, bir takma ad yeter.</p>
 
     <h2>sorun bildirdiğinde</h2>
-    <p>yazdığın mesaj, yazdıysan adın ve sorunu bulmaya yarayan bilgiler saklanır: hangi ekranda olduğun, turun kodu, tarayıcın ve cihazın, dilin, ekran boyutun ve son hatalar. form bunu gönderirken de söyler. <b>180 gün</b> sonra silinir. ip adresin saklanmaz.</p>
+    <p>yazdığın mesaj, yazdıysan adın ve sorunu bulmaya yarayan bilgiler saklanır: hangi ekranda olduğun, turun kodu, tarayıcın ve cihazın, dilin, ekran boyutun ve son hatalar, bir de sorunu aşağıdaki ölçüm kaydında izleyebilmek için o ziyaretin numarası. form bunu gönderirken de söyler. <b>180 gün</b> sonra silinir. ip adresin saklanmaz.</p>
 
+    <h2>oyunun nasıl oynandığı (ölçüm)</h2>
+    <p>sayfa her açıldığında rastgele bir ziyaret numarası alır. bu numara yalnızca sekme açıkken bellekte durur, hiçbir yere yazılmaz ve sekme kapanınca biter; bir sonraki ziyaretin başka bir numaradır. bu ziyaretle birlikte şunlar kaydedilir:</p>
+    <ul>
+      <li>hangi ekranlara gidildiği, ekranda nereye ve hangi düğmeye dokunulduğu, sayfadan ne zaman çıkıldığı ya da başka bir uygulamaya geçildiği,</li>
+      <li>oynanan her tur için kelimeler, <b>çizimler</b> (çizgilerin ne zaman çizildiğiyle birlikte), verilen cevaplar, puan ve süre. bu, turu kaydetmesen ya da paylaşmasan da olur; bu çizimleri yalnızca chizz görür, kod ya da bağlantıyla açılmazlar,</li>
+      <li>cihaz hakkında kaba bilgiler: işletim sistemi türü, dokunmatik mi fare mi, ekran boyutu, dil, kendi saatine göre saat ve cloudflare'in isteğe eklediği ülke,</li>
+      <li>bu cihazın daha önce oynayıp oynamadığı, ilk hangi gün oynadığı ve son 14 günde kaç günlük oyun oynadığı. bunlar cihazındaki kayıtlardan hesaplanır, yalnızca bu sayılar gönderilir,</li>
+      <li>sayfadaki hatalar.</li>
+    </ul>
+    <p>adın, yazdığın mesajlar ve ip adresin bunlarla birlikte <b>saklanmaz</b>; tahmin ederken yazdığın cevaplar dışında yazdığın hiçbir şey gönderilmez. amaç hataları bulmak, oyunu geliştirmek ve insanların nasıl çizip hatırladığını istatistikle incelemek; buna çizimleri tanıyan bir model eğitmek de dahil. bu kayıtlar <b>400 gün</b> sonra silinir.</p>
+    <p>kayıtlar seninle eşleştirilemediği için istek üzerine bulunup silinemezler. hiç gönderilmemelerini istersen tarayıcında <b>"izleme" (do not track)</b> ya da <b>global privacy control</b> ayarını aç: o zaman sayfa hiçbir şey göndermez.</p>
     <h2>kendi cihazında</h2>
-    <p>oyun tarayıcının yerel depolamasına (localStorage) adını, tema ve dil seçimini, oynadığın turları ve henüz kaydedilmemiş çizimlerini yazar. bunlar cihazından çıkmaz. tarayıcının site verilerini silerek hepsini silebilirsin.</p>
+    <p>oyun tarayıcının yerel depolamasına (localStorage) adını, tema ve dil seçimini, oynadığın turları ve henüz kaydedilmemiş çizimlerini yazar. bunlar cihazından çıkmaz; ölçüm yalnızca yukarıdaki birkaç sayıyı gönderir. tarayıcının site verilerini silerek hepsini silebilirsin.</p>
 
     <h2>barındırma</h2>
     <p>chizz <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">cloudflare</a> üzerinde çalışır. sayfayı sana ulaştırmak ve saldırılara karşı korumak için cloudflare ip adresini ve isteğin teknik bilgilerini işler. chizz bunları kendisi saklamaz. veriler cloudflare'in türkiye dışındaki sunucularında tutulabilir.</p>
 
     <h2>neler yok</h2>
-    <p>analiz aracı, reklam, çerez, sosyal medya eklentisi yok. hiçbir veri satılmaz ya da başkasıyla paylaşılmaz.</p>
+    <p>dışarıdan bir analiz aracı (google analytics gibi), reklam, çerez, sosyal medya eklentisi yok. ölçüm chizz'in kendi sunucusunda yapılır. hiçbir veri satılmaz ya da başkasıyla paylaşılmaz.</p>
 
     <h2>verilerinden kim sorumlu</h2>
     <p>verilerinden chizz sorumludur. chizz ücretsiz, bağımsız bir oyundur ve <!--email_off--><a href="mailto:contact@chizz.party">contact@chizz.party</a><!--/email_off--> adresinden ulaşılır.</p>
@@ -126,7 +137,7 @@ try {
     <p class="muted">last updated: 8 october 2026</p>
 
     <div class="box">
-      <p><b>in short:</b> no accounts, no cookies, no ads, no tracking. the game keeps only what it needs to be played. <mark>drawings and scores are kept for good</mark>, and deleted whenever you ask. the page loads nothing from any other site.</p>
+      <p><b>in short:</b> no accounts, no cookies, no ads. to fix and improve the game, how it is played is recorded <b>anonymously</b>: which screens, where people tap, the drawings and the answers. nothing in it knows who you are. <mark>drawings and scores are kept for good</mark>, and deleted whenever you ask. the page loads nothing from any other site.</p>
     </div>
 
     <h2>when you save a round</h2>
@@ -137,16 +148,27 @@ try {
     <p>the name on a board is whatever you typed. you don't need your real full name; a nickname is fine.</p>
 
     <h2>when you report a problem</h2>
-    <p>your message, your name if you gave one, and what helps find the problem are kept: the screen you were on, the round code, your browser and device, your language, your screen size and recent errors. the form says so when it sends. deleted after <b>180 days</b>. your ip address is not kept.</p>
+    <p>your message, your name if you gave one, and what helps find the problem are kept: the screen you were on, the round code, your browser and device, your language, your screen size and recent errors, and the number of that visit, so the problem can be followed in the record below. the form says so when it sends. deleted after <b>180 days</b>. your ip address is not kept.</p>
 
+    <h2>how the game is played (measurement)</h2>
+    <p>each time the page opens it gets a random visit number. it lives only in memory while the tab is open, is never written anywhere, and ends when the tab closes; your next visit gets a different one. with that visit the following is recorded:</p>
+    <ul>
+      <li>which screens were opened, where on the screen and which button was tapped, and when the page was closed or left for another app,</li>
+      <li>for every round played, the words, the <b>drawings</b> (with when each line was drawn), the answers given, the score and the time. this happens whether or not you save or share the round; only chizz sees these drawings, and no code or link opens them,</li>
+      <li>rough facts about the device: the kind of operating system, touch or mouse, screen size, language, the hour on your own clock, and the country cloudflare adds to the request,</li>
+      <li>whether this device has played before, the first day it played, and how many daily games it played in the last 14 days. these are worked out from the records on your device, and only the numbers are sent,</li>
+      <li>errors on the page.</li>
+    </ul>
+    <p>your name, your messages and your ip address are <b>not</b> kept with any of this; nothing you type is sent apart from the answers you give while guessing. the purpose is finding bugs, improving the game, and studying with statistics how people draw and remember, which includes training a model that recognises drawings. these records are deleted after <b>400 days</b>.</p>
+    <p>since the records cannot be matched to you, they cannot be found and deleted on request. if you want none of it sent, turn on <b>do not track</b> or <b>global privacy control</b> in your browser: the page then sends nothing.</p>
     <h2>on your own device</h2>
-    <p>the game writes your name, your theme and language, the rounds you played and drawings not yet saved to your browser's local storage (localStorage). these never leave your device. clearing the site's data in your browser removes them all.</p>
+    <p>the game writes your name, your theme and language, the rounds you played and drawings not yet saved to your browser's local storage (localStorage). these never leave your device; measurement sends only the few numbers above. clearing the site's data in your browser removes them all.</p>
 
     <h2>hosting</h2>
     <p>chizz runs on <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">cloudflare</a>. to deliver the page and protect it from attacks, cloudflare processes your ip address and the technical details of each request. chizz does not keep them itself. data may be held on cloudflare servers outside turkey.</p>
 
     <h2>what there isn't</h2>
-    <p>no analytics, no ads, no cookies, no social media plugins. no data is sold or shared with anyone.</p>
+    <p>no outside analytics tool (such as google analytics), no ads, no cookies, no social media plugins. measurement is done on chizz's own server. no data is sold or shared with anyone.</p>
 
     <h2>who is responsible for your data</h2>
     <p>chizz is responsible for your data. chizz is a free, independent game, reachable at <!--email_off--><a href="mailto:contact@chizz.party">contact@chizz.party</a><!--/email_off-->.</p>

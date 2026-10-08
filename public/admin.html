@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>chizz · admin</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<!-- The owner's view of the game: bug reports, visits and where people tap. The page itself
+     holds nothing; everything comes from /api/admin/*, which answers only through
+     Cloudflare Access (see functions/api/admin/_middleware.js and docs/DEPLOY.md). Like the
+     game, it loads nothing from anywhere else, and its text is lowercase. -->
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#F4EFE6; --panel:#FFFCF5; --panel2:#EFE8DA; --ink:#1D1B18; --muted:#6B6459;
+    --line:#E3D9C6; --line2:#CDBFA6; --hi:#FFC53D; --hi-soft:#FFE8A6;
+    --ok:#1C7D45; --ok-soft:#DCEFE0; --no:#C8322A; --no-soft:#F9DDD7;
+    --paper:#FFFFFF; --pen:#17181c; --focus:#2563EB;
+    --font:ui-rounded, "SF Pro Rounded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme:dark;
+      --bg:#151517; --panel:#1F1F23; --panel2:#2A2A30; --ink:#F5F0E6; --muted:#A7A197;
+      --line:#34343B; --line2:#45454D; --hi:#FFC940; --hi-soft:rgba(255,201,64,.17);
+      --ok:#4CC27E; --ok-soft:rgba(76,194,126,.16); --no:#FF6B5E; --no-soft:rgba(255,107,94,.16);
+      --paper:#F5F0E6; --pen:#17181c; --focus:#8AB0FF;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font:500 15px/1.5 var(--font);}
+  a{color:inherit; text-underline-offset:3px;}
+  button, select{font:inherit; color:inherit;}
+  :focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+  [hidden]{display:none !important;}
+
+  header{position:sticky; top:0; z-index:5; background:var(--bg); border-bottom:2px solid var(--line);}
+  .bar{max-width:1100px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .mark{font-weight:900; font-size:20px; letter-spacing:-.02em; margin-right:auto;}
+  .mark span{color:var(--muted); font-weight:700;}
+  nav{display:flex; gap:4px;}
+  nav a{padding:6px 12px; border-radius:99px; text-decoration:none; font-weight:750;}
+  nav a.on{background:var(--ink); color:var(--bg);}
+  main{max-width:1100px; margin:0 auto; padding:16px 16px 64px;}
+
+  .tools{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:4px 0 16px;}
+  .tools .grow{flex:1;}
+  .pill{border:2px solid var(--line2); background:var(--panel); border-radius:99px; padding:4px 12px; cursor:pointer; font-weight:700;}
+  .pill.on{border-color:var(--ink); background:var(--hi-soft);}
+  select.pill{padding:4px 8px;}
+  .more{display:block; margin:16px auto 0;}
+  .muted{color:var(--muted);}
+  .small{font-size:13px;}
+  .mono{font-family:var(--mono); font-size:12.5px;}
+  .msg{padding:32px 16px; text-align:center; color:var(--muted);}
+
+  .card{background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px;}
+  .card h3{margin:0 0 8px; font-size:16px;}
+  .row{display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;}
+  .badge{display:inline-block; font-size:12px; font-weight:800; padding:1px 8px; border-radius:99px; background:var(--panel2);}
+  .badge.hata, .badge.error{background:var(--no-soft); color:var(--no);}
+  .badge.oneri{background:var(--hi-soft);}
+  .badge.ok{background:var(--ok-soft); color:var(--ok);}
+  .text{white-space:pre-wrap; overflow-wrap:anywhere; margin:8px 0; font-size:16px;}
+  .facts{display:flex; flex-wrap:wrap; gap:4px 14px; font-size:13px; color:var(--muted);}
+  .facts b{color:var(--ink); font-weight:700;}
+  .errs{margin:8px 0 0; padding:8px 10px; background:var(--no-soft); border-radius:8px; overflow-x:auto;}
+  details{margin-top:8px;}
+  summary{cursor:pointer; color:var(--muted); font-size:13px;}
+  pre{margin:6px 0 0; padding:10px; background:var(--panel2); border-radius:8px; overflow-x:auto;}
+
+  .stats{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:12px;}
+  .stat{background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:12px 14px;}
+  .stat b{display:block; font-size:28px; font-weight:900; letter-spacing:-.02em; line-height:1.1;}
+  .stat span{color:var(--muted); font-size:13px;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;}
+  @media (max-width:760px){ .two{grid-template-columns:1fr;} }
+  .days{display:flex; align-items:flex-end; gap:3px; height:110px; padding-top:8px;}
+  .days div{flex:1; background:var(--hi); border-radius:4px 4px 0 0; min-height:2px; position:relative;}
+  .days div i{position:absolute; bottom:0; left:0; right:0; background:var(--ink); opacity:.25; border-radius:4px 4px 0 0;}
+  .hbar{display:grid; grid-template-columns:110px 1fr 44px; gap:8px; align-items:center; font-size:13px; margin:3px 0;}
+  .hbar .track{height:12px; background:var(--panel2); border-radius:99px; overflow:hidden;}
+  .hbar .track i{display:block; height:100%; background:var(--hi);}
+  .hbar span:last-child{text-align:right; color:var(--muted);}
+  .hbar span:first-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+  .table{width:100%; border-collapse:collapse; background:var(--panel); border-radius:14px; overflow:hidden; font-size:14px;}
+  .scroll{overflow-x:auto; border:2px solid var(--line); border-radius:14px;}
+  .table th{text-align:left; font-size:12px; color:var(--muted); font-weight:700; padding:8px 10px; border-bottom:2px solid var(--line); white-space:nowrap;}
+  .table td{padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap;}
+  .table tr.go{cursor:pointer;}
+  .table tr.go:hover td{background:var(--hi-soft);}
+
+  .meta{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:6px 16px; font-size:14px;}
+  .meta div span{display:block; color:var(--muted); font-size:12px;}
+  .tl{list-style:none; margin:0; padding:0; font-size:13.5px;}
+  .tl li{display:grid; grid-template-columns:52px 62px 1fr; gap:8px; padding:4px 0; border-bottom:1px dashed var(--line);}
+  .tl li .t{font-family:var(--mono); font-size:12px; color:var(--muted); padding-top:2px;}
+  .tl li.screen{font-weight:750;}
+  .tl li.hide, .tl li.leave{color:var(--no);}
+  .tl .what{overflow-wrap:anywhere;}
+
+  .cells{display:grid; grid-template-columns:repeat(auto-fill, minmax(118px, 1fr)); gap:10px;}
+  .cell{background:var(--panel2); border-radius:10px; padding:6px; border:2px solid transparent;}
+  .cell.right{border-color:var(--ok);}
+  .cell.wrong{border-color:var(--no);}
+  .cell canvas{display:block; width:100%; aspect-ratio:1; background:var(--paper); border-radius:6px; cursor:pointer;}
+  .cell .w{font-weight:800; font-size:13px; margin-top:4px; display:flex; justify-content:space-between; gap:4px;}
+  .cell .a{font-size:12px; color:var(--muted); overflow-wrap:anywhere;}
+  .cell.wrong .a{color:var(--no); text-decoration:line-through;}
+  .cell .s{font-size:11px; color:var(--muted);}
+
+  .heat{display:grid; grid-template-columns:minmax(0, 420px) 1fr; gap:16px; align-items:start;}
+  @media (max-width:760px){ .heat{grid-template-columns:1fr;} }
+  .heat canvas{width:100%; background:var(--panel); border:2px solid var(--line); border-radius:14px; display:block;}
+  .hbar.t{grid-template-columns:minmax(0, 1fr) 120px 44px;}
+</style>
+
+<header>
+  <div class="bar">
+    <div class="mark">chizz <span>admin</span></div>
+    <nav>
+      <a href="#reports" data-tab="reports">reports</a>
+      <a href="#visits" data-tab="visits">visits</a>
+      <a href="#taps" data-tab="taps">taps</a>
+    </nav>
+  </div>
+</header>
+<main id="view"></main>
+
+<script>
+(function(){
+"use strict";
+
+const $view = document.getElementById("view");
+const SCREEN_NAMES = {
+  home: "start", countdown: "countdown", draw: "drawing", between: "after drawing",
+  choose: "kolay / zor", recall: "guessing", result: "result", send: "share",
+  scores: "board", review: "review", answers: "answers", gate: "draw first",
+  pick: "which round", loading: "loading", archiveScreen: "arşiv", dayPick: "day board pick"
+};
+
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+function clear(){ $view.innerHTML = ""; }
+function say(text){ clear(); $view.appendChild(el("div", "msg", text)); }
+function screenName(s){ return SCREEN_NAMES[s] || s || "–"; }
+
+function get(url){
+  return fetch(url, { credentials: "same-origin" }).then(function(r){
+    if (r.status === 403) throw new Error("locked: open this page through cloudflare access with an allowed email.");
+    return r.json().then(function(j){
+      if (!r.ok) throw new Error(j && j.error ? j.error : "error " + r.status);
+      return j;
+    });
+  });
+}
+
+function when(ms){
+  const d = new Date(ms);
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toLowerCase()
+    + " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+function ago(ms){
+  const s = Math.round((Date.now() - ms) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.round(s / 60) + " min ago";
+  if (s < 86400) return Math.round(s / 3600) + " h ago";
+  return Math.round(s / 86400) + " d ago";
+}
+function clock(ms){
+  if (ms === null || ms === undefined) return "–";
+  const s = Math.round(ms / 1000);
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+function fact(box, label, value){
+  if (value === undefined || value === null || value === "") return;
+  const s = el("span");
+  s.appendChild(document.createTextNode(label + " "));
+  s.appendChild(el("b", null, String(value)));
+  box.appendChild(s);
+}
+function hbar(box, label, n, max, cls){
+  const r = el("div", "hbar" + (cls ? " " + cls : ""));
+  r.appendChild(el("span", null, label)).title = label;
+  const tr = el("div", "track");
+  const i = el("i");
+  i.style.width = (max ? 100 * n / max : 0) + "%";
+  tr.appendChild(i);
+  r.appendChild(tr);
+  r.appendChild(el("span", null, String(n)));
+  box.appendChild(r);
+}
+
+/* ------------------------------------------------------------- reports --- */
+
+const reports = { kind: "", items: [], total: 0 };
+
+function showReports(){
+  clear();
+  const tools = el("div", "tools");
+  [["", "all"], ["hata", "bugs"], ["oneri", "suggestions"]].forEach(function(k){
+    const b = el("button", "pill" + (reports.kind === k[0] ? " on" : ""), k[1]);
+    b.onclick = function(){ reports.kind = k[0]; reports.items = []; showReports(); };
+    tools.appendChild(b);
+  });
+  const count = el("span", "muted small");
+  tools.appendChild(count);
+  $view.appendChild(tools);
+  const list = el("div");
+  $view.appendChild(list);
+  const more = el("button", "pill more", "more");
+  more.hidden = true;
+  $view.appendChild(more);
+
+  function page(){
+    more.disabled = true;
+    return get("/api/admin/reports?kind=" + reports.kind + "&offset=" + reports.items.length).then(function(j){
+      reports.total = j.total;
+      j.items.forEach(function(it){ reports.items.push(it); list.appendChild(reportCard(it)); });
+      count.textContent = reports.total + (reports.total === 1 ? " report" : " reports");
+      more.hidden = reports.items.length >= reports.total;
+      more.disabled = false;
+      if (!reports.total) list.appendChild(el("div", "msg", "nothing reported yet."));
+    });
+  }
+  more.onclick = page;
+  if (reports.items.length){
+    reports.items.forEach(function(it){ list.appendChild(reportCard(it)); });
+    count.textContent = reports.total + " reports";
+    more.hidden = reports.items.length >= reports.total;
+  } else {
+    page().catch(function(e){ say(e.message); });
+  }
+}
+
+function reportCard(r){
+  const c = el("div", "card");
+  const head = el("div", "row");
+  head.appendChild(el("span", "badge " + r.kind, r.kind === "hata" ? "bug" : "suggestion"));
+  if (r.at) head.appendChild(el("span", "small muted", when(Date.parse(r.at)) + " · " + ago(Date.parse(r.at))));
+  if (r.name) head.appendChild(el("span", "small", "from " + r.name));
+  c.appendChild(head);
+  c.appendChild(el("div", "text", r.text || ""));
+
+  const x = r.context || {};
+  const facts = el("div", "facts");
+  fact(facts, "screen", screenName(x.screen));
+  if (x.from && x.from !== x.screen) fact(facts, "opened on", screenName(x.from));
+  fact(facts, "round", x.code);
+  if (x.daily) fact(facts, "daily", "day " + x.day);
+  fact(facts, "role", x.role);
+  fact(facts, "mode", x.mode);
+  fact(facts, "secs", x.secs);
+  fact(facts, "window", x.viewport);
+  fact(facts, "language", x.language);
+  if (x.online === false) fact(facts, "online", "no");
+  fact(facts, "device", shortDevice(x.device));
+  c.appendChild(facts);
+
+  if (Array.isArray(x.errors) && x.errors.length){
+    const box = el("div", "errs mono");
+    x.errors.forEach(function(e){
+      box.appendChild(el("div", null, (e.where ? e.where + " · " : "") + e.message));
+    });
+    c.appendChild(box);
+  }
+  const links = el("div", "row small");
+  links.style.marginTop = "8px";
+  if (x.visit){
+    const a = el("a", null, "open this visit →");
+    a.href = "#visit/" + x.visit;
+    links.appendChild(a);
+  }
+  if (x.code){
+    const a = el("a", null, "open round " + x.code + " ↗");
+    a.href = "/?o=" + encodeURIComponent(x.code);
+    a.target = "_blank";
+    a.rel = "noopener";
+    links.appendChild(a);
+  }
+  if (links.childNodes.length) c.appendChild(links);
+  const d = el("details");
+  d.appendChild(el("summary", null, "everything sent"));
+  d.appendChild(el("pre", "mono", JSON.stringify(x, null, 2)));
+  c.appendChild(d);
+  return c;
+}
+
+function shortDevice(ua){
+  if (!ua) return "";
+  const os = /iPhone|iPad|iPod/.test(ua) ? "ios" : /Android/.test(ua) ? "android"
+           : /Windows/.test(ua) ? "windows" : /Mac OS X/.test(ua) ? "mac" : /Linux/.test(ua) ? "linux" : "";
+  const br = /Edg\//.test(ua) ? "edge" : /SamsungBrowser/.test(ua) ? "samsung" : /CriOS|Chrome\//.test(ua) ? "chrome"
+           : /FxiOS|Firefox\//.test(ua) ? "firefox" : /Safari\//.test(ua) ? "safari" : "";
+  return [br, os].filter(Boolean).join(" on ") || ua.slice(0, 40);
+}
+
+/* -------------------------------------------------------------- visits --- */
+
+const visitsState = { days: 7 };
+
+function showVisits(){
+  clear();
+  const tools = el("div", "tools");
+  [1, 7, 30, 90].forEach(function(n){
+    const b = el("button", "pill" + (visitsState.days === n ? " on" : ""), n === 1 ? "today" : n + " days");
+    b.onclick = function(){ visitsState.days = n; showVisits(); };
+    tools.appendChild(b);
+  });
+  $view.appendChild(tools);
+  const body = el("div");
+  body.appendChild(el("div", "msg", "loading…"));
+  $view.appendChild(body);
+
+  get("/api/admin/visits?days=" + visitsState.days).then(function(j){
+    body.innerHTML = "";
+    const total = j.perDay.reduce(function(a, d){ return a + d.visits; }, 0);
+    const back = j.perDay.reduce(function(a, d){ return a + (d.back || 0); }, 0);
+    const link = j.perDay.reduce(function(a, d){ return a + (d.by_link || 0); }, 0);
+    const rounds = j.visits.reduce(function(a, v){ return a + (v.finished || 0); }, 0);
+    const stats = el("div", "stats");
+    [[total, "visits"], [total ? Math.round(100 * back / total) + "%" : "–", "had played before"],
+     [total ? Math.round(100 * link / total) + "%" : "–", "came by a friend's link"],
+     [rounds, "rounds finished" + (j.visits.length >= 100 ? " (last 100 visits)" : "")]].forEach(function(s){
+      const d = el("div", "stat");
+      d.appendChild(el("b", null, String(s[0])));
+      d.appendChild(el("span", null, s[1]));
+      stats.appendChild(d);
+    });
+    body.appendChild(stats);
+
+    const two = el("div", "two");
+    const perDay = el("div", "card");
+    perDay.appendChild(el("h3", null, "visits per day"));
+    const bars = el("div", "days");
+    const top = Math.max(1, Math.max.apply(null, j.perDay.map(function(d){ return d.visits; })));
+    j.perDay.forEach(function(d){
+      const b = el("div");
+      b.style.height = (100 * d.visits / top) + "%";
+      b.title = "day " + d.day + ": " + d.visits + " visits, " + (d.back || 0) + " returning";
+      const i = el("i");
+      i.style.height = (d.visits ? 100 * (d.back || 0) / d.visits : 0) + "%";
+      b.appendChild(i);
+      bars.appendChild(b);
+    });
+    perDay.appendChild(bars);
+    perDay.appendChild(el("div", "small muted", "dark part: devices that had played before. hover a bar for numbers."));
+    two.appendChild(perDay);
+
+    const ends = el("div", "card");
+    ends.appendChild(el("h3", null, "where visits ended"));
+    const max = j.lastScreens.length ? j.lastScreens[0].visits : 0;
+    j.lastScreens.forEach(function(s){ hbar(ends, screenName(s.screen), s.visits, max); });
+    two.appendChild(ends);
+    body.appendChild(two);
+
+    const wrap = el("div", "scroll");
+    const t = el("table", "table");
+    const head = el("tr");
+    ["started", "length", "from", "came by", "rounds", "best", "ended on", ""].forEach(function(h){ head.appendChild(el("th", null, h)); });
+    t.appendChild(head);
+    j.visits.forEach(function(v){
+      const tr = el("tr", "go");
+      tr.onclick = function(){ location.hash = "visit/" + v.id; };
+      tr.appendChild(el("td", null, when(v.started_at)));
+      tr.appendChild(el("td", null, clock(v.last_at - v.started_at)));
+      tr.appendChild(el("td", null, [v.country, v.os, v.input].filter(Boolean).join(" · ")));
+      tr.appendChild(el("td", null, v.entry === "link" ? "link " + (v.via_code || "") : (v.played_before ? "back again" : "new")));
+      tr.appendChild(el("td", null, String(v.rounds || 0)));
+      tr.appendChild(el("td", null, v.best === null || v.best === undefined ? "–" : v.best + "/20"));
+      tr.appendChild(el("td", null, screenName(v.last_screen)));
+      tr.appendChild(el("td", "small muted", v.left_at ? "left" : (Date.now() - v.last_at < 60000 ? "here now" : "")));
+      t.appendChild(tr);
+    });
+    wrap.appendChild(t);
+    body.appendChild(wrap);
+    if (!j.visits.length) body.appendChild(el("div", "msg", "no visits in this span."));
+  }).catch(function(e){ say(e.message); });
+}
+
+/* --------------------------------------------------------------- visit --- */
+
+function showVisit(id){
+  say("loading…");
+  get("/api/admin/visit/" + encodeURIComponent(id)).then(function(j){
+    clear();
+    const v = j.visit;
+    const back = el("a", "small", "← visits");
+    back.href = "#visits";
+    $view.appendChild(back);
+
+    const c = el("div", "card");
+    c.style.marginTop = "10px";
+    c.appendChild(el("h3", null, "visit " + v.id));
+    const meta = el("div", "meta");
+    [["started", when(v.started_at)], ["length", clock(v.last_at - v.started_at)],
+     ["ended on", screenName(v.last_screen) + (v.left_at ? " (left)" : "")],
+     ["country", v.country], ["device", [v.os, v.input].filter(Boolean).join(", ")],
+     ["window", v.width && v.width + " × " + v.height], ["language", v.lang],
+     ["came by", v.entry === "link" ? "link " + (v.via_code || "") : "start page"],
+     ["played before", v.played_before === 1 ? "yes, since day " + (v.first_day || "?") : v.played_before === 0 ? "no" : "–"],
+     ["dailies, last 14 days", v.days_played], ["local hour", v.local_hour]].forEach(function(m){
+      if (m[1] === undefined || m[1] === null || m[1] === "") return;
+      const d = el("div");
+      d.appendChild(el("span", null, m[0]));
+      d.appendChild(document.createTextNode(String(m[1])));
+      meta.appendChild(d);
+    });
+    c.appendChild(meta);
+    $view.appendChild(c);
+
+    j.rounds.forEach(function(r){ $view.appendChild(roundCard(r)); });
+
+    const tl = el("div", "card");
+    tl.appendChild(el("h3", null, "timeline · " + j.events.length + " events"));
+    const ul = el("ul", "tl");
+    j.events.forEach(function(e){
+      const li = el("li", e.type);
+      li.appendChild(el("span", "t", clock(e.t)));
+      li.appendChild(el("span", null, e.type === "tap" ? "tap" : e.type));
+      li.appendChild(el("span", "what", describe(e)));
+      ul.appendChild(li);
+    });
+    tl.appendChild(ul);
+    $view.appendChild(tl);
+  }).catch(function(e){ say(e.message); });
+}
+
+function describe(e){
+  switch (e.type){
+    case "screen": return screenName(e.screen);
+    case "tap": return e.target + (e.screen ? "  ·  " + screenName(e.screen) : "");
+    case "hide": return "switched away on " + screenName(e.screen);
+    case "show": return "came back to " + screenName(e.screen);
+    case "leave": return "closed the page on " + screenName(e.screen);
+    case "error": return (e.where ? e.where + " · " : "") + (e.message || "");
+    case "share": return (e.how || "") + (e.code ? " · round " + e.code : "");
+    case "report": return e.kind === "hata" ? "sent a bug report" : "sent a suggestion";
+    default: return "";
+  }
+}
+
+function roundCard(r){
+  const c = el("div", "card");
+  const head = el("div", "row");
+  head.appendChild(el("h3", null, (r.kind || "round") + (r.day ? " · day " + r.day : "")));
+  if (r.score !== null && r.score !== undefined) head.appendChild(el("span", "badge ok", r.score + "/20"));
+  c.appendChild(head);
+  const facts = el("div", "facts");
+  fact(facts, "role", r.role);
+  fact(facts, "secs", r.secs);
+  fact(facts, "mode", r.mode === "typed" ? "zor (typed)" : r.mode === "pool" ? "kolay (picked)" : r.mode);
+  fact(facts, "drawn with", r.input);
+  fact(facts, "language", r.lang);
+  fact(facts, "guessing took", r.recall_ms ? clock(r.recall_ms) : null);
+  if (!r.finished_at) fact(facts, "status", "not finished");
+  if (r.code){
+    const a = el("a", null, "round " + r.code + " ↗");
+    a.href = "/?o=" + encodeURIComponent(r.code);
+    a.target = "_blank";
+    a.rel = "noopener";
+    facts.appendChild(a);
+  }
+  c.appendChild(facts);
+
+  const byIdx = {};
+  r.items.forEach(function(it){ byIdx[it.idx] = it; });
+  const cells = el("div", "cells");
+  cells.style.marginTop = "12px";
+  r.words.forEach(function(w, i){
+    const it = byIdx[i] || {};
+    const cell = el("div", "cell" + (it.correct === 1 ? " right" : it.correct === 0 ? " wrong" : ""));
+    const cv = el("canvas");
+    cv.width = cv.height = 220;
+    cell.appendChild(cv);
+    paintDrawing(cv, it.drawing, 1e9);
+    if (it.drawing) cv.onclick = function(){ replay(cv, it.drawing); };
+    cv.title = it.drawing ? "tap to replay" : "drawn on another device";
+    const wl = el("div", "w");
+    wl.appendChild(el("span", null, w));
+    wl.appendChild(el("span", "muted", "#" + (i + 1)));
+    cell.appendChild(wl);
+    if (it.correct === 0) cell.appendChild(el("div", "a", it.answer || "(blank)"));
+    const s = [];
+    if (it.strokes !== null && it.strokes !== undefined) s.push(it.strokes + " strokes");
+    if (it.first_ms !== null && it.first_ms !== undefined) s.push("pen at " + (it.first_ms / 1000).toFixed(1) + "s");
+    if (it.answer_ms !== null && it.answer_ms !== undefined) s.push("answered " + clock(it.answer_ms));
+    if (it.tries > 1) s.push(it.tries + " tries");
+    if (s.length) cell.appendChild(el("div", "s", s.join(" · ")));
+    cells.appendChild(cell);
+  });
+  c.appendChild(cells);
+  return c;
+}
+
+// A drawing as stored: per stroke [xs, ys, ts] on 0-255. Points after "upto" ms are left out.
+function paintDrawing(cv, drawing, upto){
+  const ctx = cv.getContext("2d");
+  const k = cv.width / 255;
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  if (!drawing) return;
+  ctx.strokeStyle = "#17181c";
+  ctx.lineWidth = Math.max(2, cv.width * 0.011);
+  ctx.lineCap = ctx.lineJoin = "round";
+  drawing.forEach(function(st){
+    const xs = st[0], ys = st[1], ts = st[2];
+    if (!xs.length || ts[0] > upto) return;
+    ctx.beginPath();
+    ctx.moveTo(xs[0] * k, ys[0] * k);
+    for (let i = 1; i < xs.length && ts[i] <= upto; i++) ctx.lineTo(xs[i] * k, ys[i] * k);
+    if (xs.length === 1) ctx.lineTo(xs[0] * k + 0.1, ys[0] * k);
+    ctx.stroke();
+  });
+}
+
+// The drawing again at the speed it was drawn, from the moment the word went up.
+function replay(cv, drawing){
+  let end = 0;
+  drawing.forEach(function(st){ end = Math.max(end, st[2][st[2].length - 1] || 0); });
+  const start = performance.now();
+  (function frame(){
+    const t = performance.now() - start;
+    paintDrawing(cv, drawing, t);
+    if (t < end) requestAnimationFrame(frame);
+  })();
+}
+
+/* ---------------------------------------------------------------- taps --- */
+
+const tapsState = { days: 7, size: "narrow", screen: "home" };
+
+function showTaps(){
+  clear();
+  const tools = el("div", "tools");
+  const sel = el("select", "pill");
+  sel.setAttribute("aria-label", "screen");
+  tools.appendChild(sel);
+  [["narrow", "phones"], ["wide", "wide screens"]].forEach(function(s){
+    const b = el("button", "pill" + (tapsState.size === s[0] ? " on" : ""), s[1]);
+    b.onclick = function(){ tapsState.size = s[0]; showTaps(); };
+    tools.appendChild(b);
+  });
+  [7, 30, 90].forEach(function(n){
+    const b = el("button", "pill" + (tapsState.days === n ? " on" : ""), n + " days");
+    b.onclick = function(){ tapsState.days = n; showTaps(); };
+    tools.appendChild(b);
+  });
+  $view.appendChild(tools);
+  const body = el("div", "heat");
+  $view.appendChild(body);
+
+  get("/api/admin/taps?days=" + tapsState.days + "&size=" + tapsState.size + "&screen=" + encodeURIComponent(tapsState.screen)).then(function(j){
+    if (!j.screens.some(function(s){ return s.name === tapsState.screen; }) && j.screens.length){
+      tapsState.screen = j.screens[0].name;
+      return showTaps();
+    }
+    j.screens.forEach(function(s){
+      const o = el("option", null, screenName(s.name) + " (" + s.n + ")");
+      o.value = s.name;
+      o.selected = s.name === tapsState.screen;
+      sel.appendChild(o);
+    });
+    sel.onchange = function(){ tapsState.screen = sel.value; showTaps(); };
+
+    const left = el("div");
+    const cv = el("canvas");
+    cv.width = 420;
+    cv.height = Math.round(420 * Math.min(2.4, Math.max(0.45, j.aspect)));
+    left.appendChild(cv);
+    left.appendChild(el("div", "small muted", j.points.length + " taps placed in the window they were made in. the screen itself is not drawn behind them."));
+    body.appendChild(left);
+    paintHeat(cv, j.points);
+
+    const right = el("div", "card");
+    right.appendChild(el("h3", null, "what was tapped"));
+    const max = j.targets.length ? j.targets[0].n : 0;
+    j.targets.forEach(function(t){ hbar(right, t.name, t.n, max, "t"); });
+    if (!j.targets.length) right.appendChild(el("div", "muted", "no taps here yet."));
+    body.appendChild(right);
+  }).catch(function(e){ say(e.message); });
+}
+
+// Each tap is a soft spot of darkness; where they pile up the colour runs from yellow to red.
+function paintHeat(cv, points){
+  const w = cv.width, h = cv.height;
+  const ink = document.createElement("canvas");
+  ink.width = w; ink.height = h;
+  const ic = ink.getContext("2d");
+  const r = 22;
+  points.forEach(function(p){
+    const x = p[0] * w, y = p[1] * h;
+    const g = ic.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, "rgba(0,0,0,0.22)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ic.fillStyle = g;
+    ic.fillRect(x - r, y - r, r * 2, r * 2);
+  });
+  const img = ic.getImageData(0, 0, w, h);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4){
+    const a = d[i + 3] / 255;
+    if (!a){ continue; }
+    // yellow (255,197,61) -> orange -> red (200,50,42)
+    d[i] = 255 - 55 * a;
+    d[i + 1] = 197 - 147 * a;
+    d[i + 2] = 61 - 19 * a;
+    d[i + 3] = Math.min(255, 60 + 195 * a);
+  }
+  const ctx = cv.getContext("2d");
+  ctx.clearRect(0, 0, w, h);
+  ctx.putImageData(img, 0, 0);
+}
+
+/* -------------------------------------------------------------- routing --- */
+
+function route(){
+  const h = location.hash.slice(1) || "reports";
+  const tab = h.split("/")[0] === "visit" ? "visits" : h;
+  document.querySelectorAll("nav a").forEach(function(a){ a.classList.toggle("on", a.dataset.tab === tab); });
+  if (h.indexOf("visit/") === 0) showVisit(h.slice(6));
+  else if (h === "visits") showVisits();
+  else if (h === "taps") showTaps();
+  else showReports();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+route();
+})();
+</script>

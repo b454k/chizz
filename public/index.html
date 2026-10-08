@@ -1764,11 +1764,248 @@ try {
 (function(){
 "use strict";
 
+/* -------------------------------------------------------------- ölçüm --- */
+/* What this visit does -- the screens it goes through, where it taps, when it leaves, and
+   the rounds it draws and guesses -- sent to /api/events for the owner's /admin page and
+   for analysis. Nothing in it names anyone: the visit id is random, kept only in memory
+   and gone with the tab; no name and no typed text other than a guess is sent; the server
+   keeps no address. A browser that asks not to be tracked (Global Privacy Control, Do Not
+   Track) sends nothing. /privacy says all of this; keep the two in step. */
+const OLC_OFF = navigator.globalPrivacyControl === true || navigator.doNotTrack === "1"
+             || location.protocol === "file:";
+const OLC_FLUSH_MS = 10000;
+const OLC_BATCH = 40;
+const OLC_ENTRY = location.search || "";     // before the page rewrites its own address
+
+function olcRandomId(){
+  const b = new Uint8Array(8);
+  crypto.getRandomValues(b);
+  return Array.from(b, function(x){ return x.toString(16).padStart(2, "0"); }).join("");
+}
+
+const visitId = olcRandomId();
+const visitStart = Date.now();
+let olcQueue = [];
+let olcRounds = {};          // round id -> the report waiting to go with the next batch
+let olcSeq = 0;
+let olcMetaSent = false;
+let olcTimer = 0;
+let olcInput = "";           // what the first pointer was: touch, mouse or pen
+
+function track(type, data){
+  if (OLC_OFF) return;
+  const e = { t: Math.max(0, Date.now() - visitStart), type: type };
+  for (const k in data) if (data[k] !== undefined && data[k] !== null && data[k] !== "") e[k] = data[k];
+  olcQueue.push(e);
+  if (olcQueue.length >= OLC_BATCH) olcFlush(false);
+  else if (!olcTimer) olcTimer = setTimeout(function(){ olcFlush(false); }, OLC_FLUSH_MS);
+}
+
+// The device in the broadest strokes: what it runs, how big the screen is, whether it came
+// by a link, and whether and since when it has played -- read from what the game already
+// keeps for itself, and sent as a day number and counts, never the records themselves.
+function olcMeta(){
+  const store = loadStore();
+  const ua = navigator.userAgent;
+  const os = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "ios"
+           : /Android/.test(ua) ? "android" : /Windows/.test(ua) ? "windows"
+           : /Macintosh/.test(ua) ? "mac" : /Linux/.test(ua) ? "linux" : "other";
+  const via = /[?&]o=([^&]+)/.exec(OLC_ENTRY);
+  const today = dailyDayNumber();
+  let first = 0;
+  const note = function(n){ n = Number(n); if (n > 0 && n <= today && (!first || n < first)) first = n; };
+  (Array.isArray(store.dailyPlayed) ? store.dailyPlayed : []).forEach(note);
+  Object.keys(store.days || {}).forEach(note);
+  Object.keys(store.rounds || {}).forEach(function(k){
+    const r = store.rounds[k] || {};
+    const at = r.at || r.startedAt;
+    if (typeof at === "number" && at > 0) note(dailyDayNumber(at));
+  });
+  return {
+    hour: new Date().getHours(), lang: lang, input: olcInput || undefined, os: os,
+    w: window.innerWidth, h: window.innerHeight,
+    entry: via ? "link" : "home",
+    via: via ? decodeURIComponent(via[1]).toUpperCase() : undefined,
+    returning: !newHere,
+    firstDay: first || undefined,
+    daysPlayed: dailyDaysPlayed(store, today).length
+  };
+}
+
+function olcFlush(leaving){
+  clearTimeout(olcTimer);
+  olcTimer = 0;
+  if (OLC_OFF) return;
+  const rounds = Object.keys(olcRounds).map(function(k){ return olcRounds[k]; });
+  if (!olcQueue.length && !rounds.length) return;
+  const body = { v: visitId, seq: olcSeq++, events: olcQueue.splice(0, 100) };
+  if (rounds.length){ body.rounds = rounds; olcRounds = {}; }
+  if (!olcMetaSent){
+    olcMetaSent = true;
+    try { body.meta = olcMeta(); } catch (e) {}
+  }
+  if (olcQueue.length) olcTimer = setTimeout(function(){ olcFlush(false); }, 1000);
+  const text = JSON.stringify(body);
+  try {
+    // A page on its way out gets one last request, and only a beacon is sure to go.
+    if (leaving && navigator.sendBeacon && text.length < 60000 &&
+        navigator.sendBeacon("/api/events", new Blob([text], { type: "application/json" }))) return;
+    fetch("/api/events", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: text, keepalive: text.length < 60000
+    }).catch(function(){});
+  } catch (e) {}
+}
+
+document.addEventListener("pointerdown", function(e){
+  if (!olcInput && e.pointerType) olcInput = e.pointerType;
+}, true);
+
+// What was tapped, as the page names it: its id, or the nearest id above it and what it is.
+function olcDescribe(el){
+  const tag = el.tagName.toLowerCase();
+  let s = el.id ? "#" + el.id
+        : tag + (el.dataset.t ? "[" + el.dataset.t + "]" : el.dataset.kind ? "[" + el.dataset.kind + "]"
+                 : el.classList[0] ? "." + el.classList[0] : "");
+  if (!el.id){
+    const host = el.parentElement && el.parentElement.closest("[id]");
+    if (host) s = "#" + host.id + " " + s;
+  }
+  return s.slice(0, 80);
+}
+// A keyboard press on a button is a click with no place on the screen, so it gets none.
+document.addEventListener("click", function(e){
+  const el = e.target && e.target.closest ? e.target.closest("button, a, input, textarea, label, canvas, [id]") : null;
+  if (!el || el.id === "pad") return;
+  const placed = e.detail > 0 && window.innerWidth && window.innerHeight;
+  track("tap", {
+    screen: screenNow(), target: olcDescribe(el),
+    x: placed ? Math.min(1, Math.max(0, e.clientX / window.innerWidth)) : undefined,
+    y: placed ? Math.min(1, Math.max(0, e.clientY / window.innerHeight)) : undefined
+  });
+}, true);
+
+document.addEventListener("visibilitychange", function(){
+  if (document.hidden){ track("hide", { screen: screenNow() }); olcFlush(true); }
+  else track("show", { screen: screenNow() });
+});
+window.addEventListener("pagehide", function(){
+  track("leave", { screen: screenNow() });
+  olcFlush(true);
+});
+
+/* Rounds. One report per round, sent in two halves that the server joins on the id: the
+   drawing when the twentieth word is done, the guesses when the round is finished. A
+   round is known by its words, so drawing the day, guessing a friend's round and coming
+   back to the day's own grid still lands its guesses on the round that was drawn. */
+let olcRound = null;
+const olcKnown = {};          // words joined -> the round they belong to
+let olcClears = 0;            // times the pad was wiped during the current word
+let olcWordAt = 0;            // when the current word went up
+
+// fresh: a new drawing is starting, so it is a new round even with words seen before.
+function olcRoundFor(fresh){
+  const key = words.join("|");
+  if (fresh || !olcKnown[key]){
+    olcKnown[key] = {
+      id: olcRandomId(),
+      kind: isDaily ? "daily" : role === "guesser" ? "friend" : "unlimited",
+      role: role, day: isDaily ? dailyDay : undefined, secs: secs, lang: lang,
+      words: words.slice(), input: undefined, seen: null, tries: null, answerMs: null, finished: false
+    };
+  }
+  olcRound = olcKnown[key];
+  return olcRound;
+}
+
+function olcSend(r, extra){
+  const out = { id: r.id, kind: r.kind, role: r.role, day: r.day, secs: r.secs, lang: r.lang,
+                input: r.input, words: r.words, code: lastCode || undefined };
+  for (const k in extra) out[k] = extra[k];
+  olcRounds[r.id] = out;
+  olcFlush(false);
+}
+
+// A drawing as Quick, Draw! keeps one: per stroke [xs, ys, ts] on a 0-255 grid, ts in ms
+// since the word went up, thinned the way encodeDrawings thins a saved round.
+function olcDrawing(list){
+  let points = 0, ink = 0, first = -1, last = -1;
+  const out = list.map(function(st){
+    const xs = [], ys = [], ts = [];
+    for (let i = 0; i < st.length; i++){
+      if (i) ink += Math.hypot(st[i].x - st[i - 1].x, st[i].y - st[i - 1].y);
+      const t = Math.max(0, Math.round(st[i].t || 0));
+      if (first < 0 || t < first) first = t;
+      if (t > last) last = t;
+      const x = Math.round(Math.min(1, Math.max(0, st[i].x)) * 255);
+      const y = Math.round(Math.min(1, Math.max(0, st[i].y)) * 255);
+      const n = xs.length;
+      if (n && i < st.length - 1){
+        const dx = x - xs[n - 1], dy = y - ys[n - 1];
+        if (dx * dx + dy * dy < 4) continue;
+      }
+      xs.push(x); ys.push(y); ts.push(t);
+    }
+    points += xs.length;
+    return [xs, ys, ts];
+  });
+  return { drawing: out, points: points, ink: ink,
+           firstMs: first < 0 ? undefined : first, lastMs: last < 0 ? undefined : last };
+}
+
+function olcWordDrawn(i, list){
+  const r = olcRound;
+  if (!r) return;
+  const d = olcDrawing(list);
+  (r.items || (r.items = []))[i] = {
+    idx: i, strokes: list.length, points: d.points, ink: d.ink,
+    firstMs: d.firstMs, lastMs: d.lastMs, clears: olcClears, drawing: d.drawing
+  };
+  olcClears = 0;
+  if (i === N - 1){
+    olcSend(r, { drawn: true, items: r.items.filter(Boolean) });
+    r.items = null;                     // sent; the guesses go without them
+  }
+}
+
+// Every change to an answer, from refreshRecall: which drawing, when, and how many times.
+function olcPicks(){
+  const r = olcRound;
+  if (!r || !recallStart) return;
+  if (!r.seen){                         // the grid as it came up, restored answers included
+    r.seen = picks.slice();
+    r.tries = new Array(N).fill(0);
+    r.answerMs = new Array(N).fill(undefined);
+    return;
+  }
+  picks.forEach(function(p, pos){
+    if ((p || "") === (r.seen[pos] || "")) return;
+    r.tries[pos]++;
+    r.answerMs[pos] = Math.max(0, Date.now() - recallStart);
+  });
+  r.seen = picks.slice();
+}
+
+function olcFinished(){
+  const r = olcRound;
+  if (!r || r.finished) return;
+  r.finished = true;
+  const items = order.map(function(di, pos){
+    const a = picks[pos] ? String(picks[pos]).trim() : "";
+    const right = isCorrect(picks[pos], words[di]);
+    const match = right ? words[di] : a ? words.find(function(w){ return isCorrect(a, w); }) : undefined;
+    return { idx: di, gridPos: pos, answer: a, answerWord: match, correct: right,
+             answerMs: r.answerMs ? r.answerMs[pos] : undefined, tries: r.tries ? r.tries[pos] : undefined };
+  });
+  olcSend(r, { mode: modeId, finished: true, score: score, recallMs: recallMs, items: items });
+}
+
 // The last few script errors, sent along with a bug report. Kept from the start so an
 // error on the way to the problem is not missed.
 const recentErrors = [];
 function noteError(message, where){
   recentErrors.push({ message: String(message || "").slice(0, 200), where: String(where || "").slice(0, 120), at: Date.now() });
+  track("error", { message: String(message || "").slice(0, 200), where: String(where || "").slice(0, 120) });
   if (recentErrors.length > 5) recentErrors.shift();
 }
 window.addEventListener("error", function(e){
@@ -3053,6 +3290,7 @@ function show(id, as){
   // "as" is for a screen that borrows another's section: the drawings-with-board screen
   // is the result's section, but it is not the result.
   if (typeof recordArrival === "function") recordArrival(as || id);
+  track("screen", { screen: as || id });
   // The code can arrive from a save, a reload, or a link, so the chip is refreshed
   // on every screen change rather than at any one of those points.
   if (typeof updateCodeChip === "function") updateCodeChip();
@@ -3901,6 +4139,7 @@ function updateCodeChip(){
 
 function copyInvite(el){
   if (!lastCode) return;
+  track("share", { how: "chip", code: lastCode });
   const label = el.querySelector(".cl");
   copyText(inviteMessage()).then(function(ok){
     if (!ok){
@@ -4057,13 +4296,14 @@ function padPoint(e){
   const r = pad.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width;
   const y = (e.clientY - r.top)  / r.height;
-  return { x: Math.min(1, Math.max(0, x)), y: Math.min(1, Math.max(0, y)) };
+  return { x: Math.min(1, Math.max(0, x)), y: Math.min(1, Math.max(0, y)), t: performance.now() - olcWordAt };
 }
 
 pad.addEventListener("pointerdown", function(e){
   if (!$("draw").classList.contains("on")) return;
   e.preventDefault();
   try { pad.setPointerCapture(e.pointerId); } catch(err){}
+  if (olcRound && !olcRound.input) olcRound.input = e.pointerType;
   const stroke = [padPoint(e)];
   live.set(e.pointerId, stroke);
   strokes.push(stroke);
@@ -4099,6 +4339,7 @@ function endStroke(e){
 }
 // Start this drawing again. The word and its clock carry on: the time lost is the point.
 $("clearPad").onclick = function(){
+  olcClears++;
   endStroke();                  // a finger still down is not left drawing on a clean page
   strokes = [];
   paintPad();
@@ -4112,6 +4353,7 @@ function startDrawPhase(){
   show("draw");
   padSize = 0;
   sizePad();            // layout is ready after show(), so measure synchronously
+  olcRoundFor(true);
   startWord(0);
 }
 
@@ -4224,6 +4466,8 @@ function startWord(i){
   $("word").textContent = say(words[i]);
   $("counter").textContent = (i + 1) + " / " + N;
   $("bar").style.transform = "scaleX(1)";
+  olcWordAt = performance.now();
+  olcClears = 0;
   revealThenDraw(i);
 }
 
@@ -4239,6 +4483,7 @@ function nextWord(){
   cancelAnimationFrame(raf);
   live.clear();
   drawings[idx] = strokes.filter(function(s){ return s && s.length; });   // empty drawing = []
+  olcWordDrawn(idx, drawings[idx]);
   if (idx + 1 < N){ startWord(idx + 1); return; }
 
   if (isDaily){
@@ -4410,6 +4655,7 @@ function buildRecall(){
     if (lastCode) rememberRound(lastCode, { startedAt: recallStart });
   }
   ensureCode();
+  olcRoundFor(false);
   refreshRecall();
   show("recall");
   paintAll("recallGrid");
@@ -4469,6 +4715,7 @@ function refreshRecall(){
   // Keep the answers on the device: a reload should come back to this grid with
   // the work still in it. The order goes with them -- see loadGame.
   if (lastCode) rememberRound(lastCode, { order: order, picks: picks });
+  olcPicks();
 }
 
 /* kelime havuzu */
@@ -4994,6 +5241,7 @@ function saveFrom(btn, make, name){
 }
 
 $("saveShot").onclick = function(){
+  track("share", { how: "image", code: lastCode });
   saveFrom(this, shotBoard, shotName(""));
 };
 $("zoomSave").onclick = function(){
@@ -5503,7 +5751,8 @@ function feedbackContext(){
     language: navigator.language || "",
     viewport: window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
     online: navigator.onLine,
-    errors: recentErrors.slice()
+    errors: recentErrors.slice(),
+    visit: OLC_OFF ? "" : visitId       // opens this visit's timeline in /admin
   };
 }
 
@@ -5568,6 +5817,7 @@ $("fbSend").onclick = function(){
     saveStore(s);
     fbSending = false;
     fbSay(TEXT.fbThanks, "ok");
+    track("report", { kind: fbKind });
     $("fbText").value = "";
     refreshFeedback();
     setTimeout(closeFeedback, 1600);
@@ -5814,6 +6064,7 @@ function postRound(name){
   }).then(function(r){
     if (!r.ok || !r.data || !r.data.code) throw new Error("save failed");
     lastCode = r.data.code;
+    if (olcRound) olcSend(olcRound, {});      // the drawn round now has a code to join on
     if (name) drawerName = name;
     // Guessing may have started before this save returned, when there was no code to
     // stamp the start time on, so it travels with the save.
@@ -5908,6 +6159,7 @@ function gameLink(code){
 }
 
 $("linkCopy").onclick = function(){
+  track("share", { how: "link", code: lastCode });
   // The message, not the bare address: a lone URL arrives as a preview card with no
   // words beside it.
   copyText(inviteMessage()).then(function(ok){
@@ -6198,9 +6450,11 @@ $("finishAsk").onclick = function(e){ if (e.target === $("finishAsk")) $("finish
 $("finishYes").onclick = function(){
   $("finishAsk").classList.remove("on");
   closeSheet(); closeModal(); buildResult();
+  olcFinished();
 };
 
 $("share").onclick = function(){
+  track("share", { how: "copy", code: lastCode });
   const t = viewOnly ? inviteMessage() : shareText();
   copyText(t).then(function(ok){
     if (ok){
@@ -6312,6 +6566,7 @@ buildHome();
   }
 
   try { history.replaceState({ screen: "home", code: "", depth: 0 }, "", location.pathname); } catch (e) {}
+  track("screen", { screen: "home" });
   maybeHowTo();             // the start screen is up without show() on a fresh visit
 })();
 
