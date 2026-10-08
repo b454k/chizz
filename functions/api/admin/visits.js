@@ -3,6 +3,10 @@
 // The newest visits, a page at a time, each with how many rounds it played and its best
 // score; and over the same span, visits per day and the screen each visit was last on --
 // where people stop.
+//
+// There is no device id, so visits are not people. Two counts come close: daily_players, the
+// daily rounds drawn that day -- the daily can be drawn once per device per day, so each is a
+// different device -- and fresh, visits from a device that had never played before.
 
 const PAGE = 100;
 
@@ -20,7 +24,7 @@ export async function onRequestGet({ request, env }) {
   const since = Date.now() - days * 86400000;
   const before = parseInt(q.get("before"), 10) || Date.now() + 1;
 
-  const [visits, perDay, lastScreens] = await env.DB.batch([
+  const [visits, perDay, lastScreens, dailies] = await env.DB.batch([
     env.DB.prepare(
       "SELECT v.*, COUNT(r.id) AS rounds, MAX(r.score) AS best,"
       + " SUM(r.finished_at IS NOT NULL) AS finished"
@@ -29,13 +33,21 @@ export async function onRequestGet({ request, env }) {
       + " GROUP BY v.id ORDER BY v.started_at DESC LIMIT ?"
     ).bind(since, before, PAGE),
     env.DB.prepare(
-      "SELECT day, COUNT(*) AS visits, SUM(played_before = 1) AS back, SUM(entry = 'link') AS by_link"
+      "SELECT day, COUNT(*) AS visits, SUM(played_before = 1) AS back, SUM(played_before = 0) AS fresh,"
+      + " SUM(entry = 'link') AS by_link"
       + " FROM visits WHERE started_at >= ? GROUP BY day ORDER BY day"
     ).bind(since),
     env.DB.prepare(
       "SELECT COALESCE(last_screen, '') AS screen, COUNT(*) AS visits"
       + " FROM visits WHERE started_at >= ? GROUP BY screen ORDER BY visits DESC"
+    ).bind(since),
+    env.DB.prepare(
+      "SELECT day, COUNT(*) AS players FROM rounds"
+      + " WHERE kind = 'daily' AND drawn_at IS NOT NULL AND started_at >= ? GROUP BY day"
     ).bind(since)
   ]);
+  const players = {};
+  for (const d of dailies.results) players[d.day] = d.players;
+  for (const d of perDay.results) d.daily_players = players[d.day] || 0;
   return json({ visits: visits.results, perDay: perDay.results, lastScreens: lastScreens.results });
 }

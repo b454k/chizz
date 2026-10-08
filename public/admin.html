@@ -75,8 +75,7 @@
   .stat{background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:12px 14px;}
   .stat b{display:block; font-size:28px; font-weight:900; letter-spacing:-.02em; line-height:1.1;}
   .stat span{color:var(--muted); font-size:13px;}
-  .two{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;}
-  @media (max-width:760px){ .two{grid-template-columns:1fr;} }
+  .two{display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; margin-bottom:12px;}
   .days{display:flex; align-items:flex-end; gap:3px; height:110px; padding-top:8px;}
   .days div{flex:1; background:var(--hi); border-radius:4px 4px 0 0; min-height:2px; position:relative;}
   .days div i{position:absolute; bottom:0; left:0; right:0; background:var(--ink); opacity:.25; border-radius:4px 4px 0 0;}
@@ -325,8 +324,13 @@ function showVisits(){
     const back = j.perDay.reduce(function(a, d){ return a + (d.back || 0); }, 0);
     const link = j.perDay.reduce(function(a, d){ return a + (d.by_link || 0); }, 0);
     const rounds = j.visits.reduce(function(a, v){ return a + (v.finished || 0); }, 0);
+    const fresh = j.perDay.reduce(function(a, d){ return a + (d.fresh || 0); }, 0);
+    const players = j.perDay.reduce(function(a, d){ return a + (d.daily_players || 0); }, 0);
     const stats = el("div", "stats");
-    [[total, "visits"], [total ? Math.round(100 * back / total) + "%" : "–", "had played before"],
+    [[total, "visits"],
+     [j.perDay.length ? Math.round(players / j.perDay.length) : "–", "daily players a day, on average"],
+     [fresh, "new devices"],
+     [total ? Math.round(100 * back / total) + "%" : "–", "had played before"],
      [total ? Math.round(100 * link / total) + "%" : "–", "came by a friend's link"],
      [rounds, "rounds finished" + (j.visits.length >= 100 ? " (last 100 visits)" : "")]].forEach(function(s){
       const d = el("div", "stat");
@@ -353,6 +357,20 @@ function showVisits(){
     perDay.appendChild(bars);
     perDay.appendChild(el("div", "small muted", "dark part: devices that had played before. hover a bar for numbers."));
     two.appendChild(perDay);
+
+    const who = el("div", "card");
+    who.appendChild(el("h3", null, "daily players per day"));
+    const pbars = el("div", "days");
+    const ptop = Math.max(1, Math.max.apply(null, j.perDay.map(function(d){ return d.daily_players || 0; })));
+    j.perDay.forEach(function(d){
+      const b = el("div");
+      b.style.height = (100 * (d.daily_players || 0) / ptop) + "%";
+      b.title = "day " + d.day + ": " + (d.daily_players || 0) + " daily players, " + (d.fresh || 0) + " new devices";
+      pbars.appendChild(b);
+    });
+    who.appendChild(pbars);
+    who.appendChild(el("div", "small muted", "the daily can be drawn once per device per day, so this counts different people. hover a bar for new devices."));
+    two.appendChild(who);
 
     const ends = el("div", "card");
     ends.appendChild(el("h3", null, "where visits ended"));
