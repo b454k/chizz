@@ -4,6 +4,25 @@ From v1.0.0 on, every deploy gets a version: the heading is `## vX.Y.Z — date 
 the commit it was deployed from is tagged `vX.Y.Z`. Raise Z for a fix, Y for something
 new, X for a change that breaks what players had. Entries before v1.0.0 carry only a date.
 
+## v1.0.1 — 2026-10-13 — the link preview shows the grid everyone plays
+
+The preview a chat app shows for a shared round was drawn in the order the words came up,
+not in the shuffled grid the players get. So the picture in the chat matched nobody's
+screen, and the green and red squares beside it pointed at the wrong drawings.
+
+- Worse for the day: everyone draws the same twenty words in the same order, so the
+  public preview was a key to the whole round.
+- The order now lives in `lib/grid.js`, which the preview is drawn with, beside the copy
+  inside the page that the game runs on.
+- `node tools/check-grid.js` runs both copies on 200 rounds and fails if they ever
+  disagree, since a preview laid out one way beside a score written another way is
+  exactly this bug.
+
+Checked end to end against a local round of twenty tellable-apart drawings: the rendered
+PNG, read back pixel by pixel, holds them in `2 10 11 16 3 19 9 14 13 1 5 12 7 15 17 0 4
+6 18 8` — the same order the drawer works out before saving and the same one the guesser's
+page lays out from what the API sends.
+
 ## v1.0.0 — 2026-10-08 — a footer, and versions
 
 The first numbered release: the game as it stands, live with its privacy page. A small

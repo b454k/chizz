@@ -42,6 +42,14 @@ The daily clock exists twice — `lib/day.js` for the server, a copy inside
 `public/index.html` for the client — and if they drift, the two disagree about what day
 it is with nothing reporting the problem.
 
+```bash
+node tools/check-grid.js
+```
+
+So does the grid order — `lib/grid.js` for the link preview, a copy inside
+`public/index.html` for the game — and if they drift, the preview shows one arrangement
+of the drawings and the players see another.
+
 ## To-dos and bugs live in GitHub Issues
 
 At the start of a session, read what is open:

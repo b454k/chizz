@@ -341,6 +341,12 @@ friend's. Two rounds never hold the same strokes, so a duel stays honest. A roun
 before this, whose grid was shuffled some other way, keeps the order stored with its
 answers.
 
+The grid order exists twice and cannot be reduced further: `lib/grid.js` for the server,
+which the link preview is drawn with, and a copy inside `public/index.html`, because that
+file is a single self-contained page with no imports and no build step. `node
+tools/check-grid.js` runs both on 200 rounds and fails if they disagree, the way
+`check-day-epoch` guards the daily clock.
+
 **Pool mode**: tapping a drawing opens a bottom sheet showing that drawing enlarged —
 a grid cell is around 76 px wide, far too small to recognise a scribble by — above
 the remaining words, sorted with Turkish collation. Choosing a word assigns it and
@@ -800,6 +806,12 @@ Pasting a round into a chat shows its drawings. Two pieces:
 5 down, boxes flush with a hairline between them. It is rendered from the strokes
 already in KV, so it costs no extra storage and works for rounds shared before it
 existed.
+
+**It is laid out in the same shuffled grid the players see**, from `lib/grid.js`. Drawn in
+the order the words came up -- which is what it did at first -- the picture matched nobody's
+screen, so the green and red squares in a shared score pointed at the wrong drawings. Worse
+for the day, where everyone draws the same twenty words in the same order: the preview was
+then a key to the whole round, which is the one thing it must not be.
 
 It is drawn at twice the obvious size on purpose. A chat app shows the preview around
 350 css px wide, which on a 3x phone is over a thousand device pixels, so the first

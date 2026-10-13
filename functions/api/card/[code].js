@@ -7,11 +7,19 @@
 // The words are deliberately NOT written on it. A preview that labelled each drawing
 // would hand the recipient every answer before they opened the game.
 //
+// It is laid out in the same shuffled grid the players see, from lib/grid.js. Drawn in
+// the order the words came up -- which is what this did at first -- the picture matched
+// nobody's screen, so the squares in a shared score pointed at the wrong drawings. Worse
+// for the day, where everyone draws the same twenty words in the same order: the preview
+// was then a key to the whole round, which is the one thing it must not be.
+//
 // No image library: a PNG is a handful of chunks around a deflate stream, and line
 // art at one bit per pixel is nearly all long runs of identical bytes, which a match
 // at distance 1 collapses to a few bits each. That is the whole compressor below --
 // enough to make a 1600x2000 sheet cost tens of kilobytes instead of four hundred,
 // which is what lets the picture be drawn at a size a phone will not have to enlarge.
+
+import { gridOrder } from "../../../lib/grid.js";
 
 const CODE_PATTERN = /^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/;
 
@@ -245,7 +253,7 @@ function drawCell(rows, strokes, ox, oy) {
   }
 }
 
-function render(drawings) {
+function render(drawings, order) {
   const rows = new Uint8Array((ROW_BYTES + 1) * H);
 
   // Boxes sit flush against each other, so a hairline is what separates them.
@@ -258,7 +266,8 @@ function render(drawings) {
   }
 
   for (let i = 0; i < COLS * ROWS; i++) {
-    const strokes = Array.isArray(drawings[i]) ? drawings[i] : [];
+    const at = order[i];
+    const strokes = Array.isArray(drawings[at]) ? drawings[at] : [];
     drawCell(rows, strokes, (i % COLS) * CELL, Math.floor(i / COLS) * CELL);
   }
   return buildPng(rows);
@@ -278,7 +287,7 @@ export async function onRequestGet({ params, env }) {
   const drawings = Array.isArray(data.drawings) ? data.drawings
                  : Array.isArray(data.cizimler) ? data.cizimler : [];
 
-  const png = render(drawings);
+  const png = render(drawings, gridOrder(drawings));
   return new Response(png, {
     headers: {
       "content-type": "image/png",
