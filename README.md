@@ -35,9 +35,10 @@ round — every drawing, every answer, every right word — as one picture to ke
 4. Choose **kolay** (match the words to the drawings) or **zor** (type them yourself),
    then finish
 
-Nothing is asked before you start. A name is wanted only to share a round or join a
-board, so it is asked then and never again. Typed answers forgive one typo: `koltok`
-still counts for `koltuk`.
+A name is wanted only to share a round or join a board, so it is asked then and never
+again. The day asks before it starts, since everyone who plays it is ranked together —
+and you can say no and play anyway. Typed answers forgive one typo: `koltok` still
+counts for `koltuk`.
 
 No account, no login, no cookie banner, nothing loaded from anywhere else. How the game is
 played — screens, taps, drawings, answers — is recorded anonymously on chizz's own server,

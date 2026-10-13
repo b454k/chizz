@@ -83,10 +83,10 @@ by itself on a device that has never played and from `nasıl oynanır?` on the s
 6. `recall` — assign a word to each drawing
 6. `result` — score, per-cell correction, share text
 
-Nothing is asked before the round starts. A device with no name yet is asked for one
-as soon as its first round is drawn, over the screen that follows, and cannot go on
-without giving one. After that it is never asked again, only offered for changing on
-the result screen.
+Nothing is asked before a sınırsız round starts. The day asks a device with no name for
+one on the way in, and a friend's round asks on the kolay/zor screen; both are described
+in section 16. A name is asked once and then kept, and after that it is only offered for
+changing on the result screen.
 
 ### A new device
 
@@ -753,9 +753,19 @@ where previously only an explicit share did. The free tier allows 1,000 writes a
 
 ## 16. Where the name is asked
 
-Where it is used, and nowhere else: the share screen, and the score board. Somebody who
-only ever plays alone is never asked and never has one; their rounds are saved with an
-empty name and their share text says `chizz 🎨` with nobody's name on it.
+Where it is used, and nowhere else: the share screen, the score board, and the day, whose
+board is the one a player can land on without having been asked anything. Somebody who
+only ever plays sınırsız alone is never asked and never has one; their rounds are saved
+with an empty name and their share text says `chizz 🎨` with nobody's name on it.
+
+**The day asks on the way in** (`askDayName`), from a device with no name, in a card
+between çiz and the countdown: "adın ne?" over "günün skorlarında yer alabilmen için adın
+gerekli", a field, çiz, and `adsız oyna` under it. Everyone plays the same twenty words
+and they are ranked together, so the board is where the day ends up, and asking after
+twenty drawings asks too late. It is **declinable**: the day plays without a name, and the
+result screen still offers the board to anyone who changes their mind -- the card says
+what declining costs rather than the button refusing to work. A device that already has a
+name goes straight to the countdown, and resuming a day drawn earlier never asks.
 
 On the result screen it sits under the grid, headed "adını değiştirmek ister misin?" when
 a name exists and "adın" when it does not. The field is prefilled; the button reads katıl
@@ -972,7 +982,7 @@ The v1.5 document is a design brief. These are the places the shipped code diffe
 | Difficulty | Four fixed levels | **Replaced by two independent settings**: a mode (`pool` / `typed`) and a 1–10 s slider. Old rounds are mapped on read |
 | Set label | Neutral `Set 7` shown on the result screen and in the share text so friends could compare | **Removed entirely.** The set is named nowhere. The share text carries only the mode and the duration |
 | Typed answers | Text box opens at the bottom | **Card near the top of the screen** with a preview of the drawing, so the phone keyboard cannot cover it |
-| Player name | Optional nickname, one field, may be left blank | Up to 10 characters, never asked before a round. Asked only when sharing a round or joining a board, and remembered afterwards |
+| Player name | Optional nickname, one field, may be left blank | Up to 10 characters, never asked before a sınırsız round. Asked on the way into the day (declinable), on the way into a friend's round, when sharing one and when joining a board, and remembered afterwards |
 | Language | Turkish strings inline throughout | Interface strings live in one `TEXT` table; identifiers, comments and docs are English |
 | Score board | Listed under "not in this version" | **Implemented** — per-code board ranked by score, ties broken by time, polled live |
 | Storage | "Do not use localStorage" | **Used deliberately** for the name, the settings and in-progress rounds, so a reload does not lose the game. See Section 14 |

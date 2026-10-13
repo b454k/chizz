@@ -4,6 +4,25 @@ From v1.0.0 on, every deploy gets a version: the heading is `## vX.Y.Z — date 
 the commit it was deployed from is tagged `vX.Y.Z`. Raise Z for a fix, Y for something
 new, X for a change that breaks what players had. Entries before v1.0.0 carry only a date.
 
+## v1.2.0 — 2026-10-13 — the day asks your name before it starts
+
+Everyone who plays the day is ranked on one board, so the day is the one game whose board
+a player could land on without ever having been asked anything — and then be asked for a
+name after twenty drawings, which is too late to be the reason for anything.
+
+- Pressing çiz on a device with no name opens a card between the button and the countdown:
+  **adın ne?** over *günün skorlarında yer alabilmen için adın gerekli*, a field, and çiz.
+- **adsız oyna** under it plays the day without one. The card says what declining costs
+  instead of the button refusing to work, and the result screen still offers the board to
+  anyone who changes their mind.
+- Only from a device that has no name: a name is asked once and kept, so anyone who has
+  one goes straight to the countdown, and resuming a day drawn earlier never asks.
+
+Checked on a device with its storage cleared: çiz opens the card, çiz with the field empty
+says *önce adını yaz* and stays, a name typed is kept on the device and the countdown
+starts, adsız oyna starts it with no name, and a device that already has one never sees
+the card. Both languages, both themes.
+
 ## v1.1.0 — 2026-10-13 — a friend's daily link opens straight away, and the board says so
 
 `önce sen çiz` is gone. A daily link from a friend was held shut until the reader had drawn
