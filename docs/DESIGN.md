@@ -155,9 +155,10 @@ out a child element.
 **Illustrations.** Small inline SVG drawings in the same stroke, one per moment that needed
 a face: a fanned stack of pages with a yellow tick that draws itself (twenty drawings
 done), a paper plane on a
-looping pencil trail (send), a closed eye with a pencil beside it (`önce sen çiz` — no
-peeking, draw first), a scribble drawing itself (loading), a pencil snapped in two (a code
-that is gone).
+looping pencil trail (send), a scribble drawing itself (loading), a pencil snapped in two
+(a code that is gone). A closed eye with a pencil beside it went with `önce sen çiz`, the
+screen that held a friend's daily link shut until you had drawn; the eye lives on, small,
+beside a name on the day's board that came to it already knowing the words.
 
 **nasıl oynanır.** The 430KB recorded GIF is replaced by a nine-second loop drawn in the
 page with CSS and SVG, and every drawing in it is a real one, from round 6G75: `buzdolabı`

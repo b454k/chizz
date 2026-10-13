@@ -4,6 +4,35 @@ From v1.0.0 on, every deploy gets a version: the heading is `## vX.Y.Z — date 
 the commit it was deployed from is tagged `vX.Y.Z`. Raise Z for a fix, Y for something
 new, X for a change that breaks what players had. Entries before v1.0.0 carry only a date.
 
+## v1.1.0 — 2026-10-13 — a friend's daily link opens straight away, and the board says so
+
+`önce sen çiz` is gone. A daily link from a friend was held shut until the reader had drawn
+that day: the day's twenty words are the same for everyone, so looking at her grid first
+shows you the words. The link now opens where every other link opens, on the kolay/zor
+question, and the day's board carries the fact instead of the game refusing the link.
+
+- A player who read the day's drawings off a friend's round before drawing their own gets a
+  small **eye beside their name** on günün skorları. Pressing it says what it means, in a
+  bubble beside the row — worded for the reader when the row is their own.
+- The look is noted when the drawings are actually put on screen, not when the link is
+  opened: opening a friend's round and leaving without guessing marks nobody.
+- It travels with the score and is kept with the row, and once set it stays — a later post,
+  or a rename, cannot unsee the words.
+- Only the day's board has it. Guessing a friend's round is nobody's second look at their
+  own drawings, so that board is unchanged.
+- A board's rows are now only rebuilt when something about them changes. The poll runs
+  every second, and redrawing the rows on every tick closed the bubble about a second
+  after it was opened.
+
+Checked against a local server, as a device that had never played: the link opened on the
+question instead of the gate, nothing was noted until the grid was shown, and the eye then
+appeared on that device's own row — and on another player's, with the other wording — in
+both languages and both themes, surviving a rename and a second score. A friend's round
+board carries no eye even when a post tries to set one. The screen the gate used to show
+is out of the page, the history and the strings, and `afterDraw`, which only it set, with
+it; the screen that asks which round to guess first now checks that the day was drawn,
+which the gate used to guarantee.
+
 ## v1.0.1 — 2026-10-13 — the link preview shows the grid everyone plays
 
 The preview a chat app shows for a shared round was drawn in the order the words came up,

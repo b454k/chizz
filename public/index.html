@@ -1027,7 +1027,7 @@
     content:""; flex:none; width:16px; height:16px; margin-right:-4px; background:var(--muted);
     -webkit-mask:var(--i-chev) center/contain no-repeat; mask:var(--i-chev) center/contain no-repeat;
   }
-  .brow.opens .nm{text-decoration:underline; text-decoration-color:var(--line2); text-decoration-thickness:2px; text-underline-offset:4px;}
+  .brow.opens .nm .nmt{text-decoration:underline; text-decoration-color:var(--line2); text-decoration-thickness:2px; text-underline-offset:4px;}
   .bhint{color:var(--muted); font:650 13px/1.35 var(--font); margin:0; padding:9px 16px; border-bottom:1.5px solid var(--line); text-align:center;}
   .bhead .rk, .brow .rk{width:30px; flex:none; color:var(--muted); font-weight:800; font-variant-numeric:tabular-nums; font-size:14px;}
   .brow .rk{
@@ -1039,10 +1039,35 @@
   .brow:nth-child(2) .rk{background:#DADDE3; color:#1D1B18; box-shadow:inset 0 0 0 2px #1D1B18;}
   .brow:nth-child(3) .rk{background:#E7A56B; color:#1D1B18; box-shadow:inset 0 0 0 2px #1D1B18;}
   .bhead .nm, .brow .nm{flex:1; min-width:0; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .brow .nm{font-size:16px;}
+  .brow .nm{display:flex; align-items:center; gap:7px; font-size:16px; overflow:visible;}
+  .brow .nm .nmt{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .bhead .tm, .brow .tm{width:62px; flex:none; text-align:right; color:var(--muted); font-size:13.5px; font-variant-numeric:tabular-nums;}
   .bhead .sc, .brow .sc{width:54px; flex:none; text-align:right; font-weight:900; font-variant-numeric:tabular-nums;}
   .brow .sc{font-size:16.5px;}
+  /* A player who read the day's drawings off a friend's link before drawing them. The
+     row says so, and the eye says what it means when it is pressed. */
+  .brow .peek{
+    flex:none; display:flex; align-items:center; justify-content:center;
+    width:27px; height:27px; padding:0; margin:0 -1px;
+    color:var(--muted); background:var(--panel2);
+    border:1.5px solid var(--line2); border-radius:9px; cursor:pointer;
+  }
+  .brow .peek.ic::before{width:15px; height:15px;}
+  .brow .peek:active{background:var(--hi-soft); color:var(--ink);}
+  #peekTip{
+    display:none; position:fixed; z-index:45; box-sizing:border-box; max-width:252px;
+    padding:11px 13px; color:var(--ink); font:700 13.5px/1.4 var(--font); text-align:left;
+    background:var(--panel); border:2.5px solid var(--edge); border-radius:16px;
+    box-shadow:0 5px 0 var(--shadow);
+  }
+  #peekTip.on{display:block; animation:dlg .2s var(--spring);}
+  /* the tail, pointing at the eye it belongs to */
+  #peekTip::after{
+    content:""; position:absolute; left:var(--tail, 50%); bottom:-8px; width:12px; height:12px;
+    margin-left:-6px; background:var(--panel); transform:rotate(45deg);
+    border-right:2.5px solid var(--edge); border-bottom:2.5px solid var(--edge);
+  }
+  #peekTip.below::after{bottom:auto; top:-8px; border:none; border-left:2.5px solid var(--edge); border-top:2.5px solid var(--edge);}
   .bhead .nm, .bhead .tm, .bhead .sc{font-weight:800; font-size:12px;}
   #boardEmpty, #scoresEmpty{color:var(--muted); font-size:15px; padding:18px 16px; margin:0; text-align:center;}
   /* It is live: the dot says so. */
@@ -1322,26 +1347,6 @@ try {
         <a class="linkish" id="privacyLink" href="/privacy" data-t="privacy"></a>
         <p class="foot" data-t="copyright"></p>
       </div>
-    </div>
-  </section>
-
-  <!-- Shown when a daily link arrives before the reader has drawn that day. -->
-  <section class="screen mid" id="gate">
-    <svg class="art" viewBox="0 0 200 120" aria-hidden="true">
-      <path class="k" d="M30 52 C62 88 138 88 170 52"/>
-      <path class="k" d="M52 72 L42 90 M78 82 L73 102 M100 85 V106 M122 82 L127 102 M148 72 L158 90"/>
-      <!-- and the pencil that goes first -->
-      <g transform="rotate(-38 160 26)">
-        <path class="y" d="M140 18 H176 V34 H140 Z"/>
-        <path class="p" d="M140 18 L126 26 L140 34 Z"/>
-        <path class="k" d="M126 26 L131 23.2 L131 28.8 Z" style="fill:var(--ink); stroke-width:2"/>
-      </g>
-    </svg>
-    <div class="stack">
-      <h2 data-t="gateTitle"></h2>
-      <p data-t="gateBody"></p>
-      <button class="primary ic i-pencil" id="gateDraw" data-t="draw"></button>
-      <button class="linkbtn ic i-home" id="gateHome" data-t="home"></button>
     </div>
   </section>
 
@@ -1735,6 +1740,9 @@ try {
 </div>
 
 <div id="reveal"><span id="revealWord"></span></div>
+
+<!-- What the eye beside a name on the day's board means, beside the eye that was pressed -->
+<div id="peekTip" role="status" aria-live="polite"></div>
 
 <div id="modal">
   <div id="modalCard" role="dialog" aria-modal="true">
@@ -2509,8 +2517,9 @@ const TEXT_TR = {
   dailyScores:      "günün skorları",
   dailyBoardTitle:  "günün skorları · {date}",
   dailyTime:        "3 sn",
-  gateTitle:        "önce sen çiz",
-  gateBody:         "bugün herkes aynı kelimeleri çiziyor. arkadaşının çizimlerine şimdi bakarsan bugünün kelimelerini çizmeden önce görürsün. önce sen çiz, sonra tahmin et.",
+  peekTag:          "çizmeden önce gördü",
+  peekTip:          "bu oyuncu, kendisi çizmeden önce bugünün çizimlerine bakmış — kelimeleri önceden görmüş.",
+  peekTipMine:      "kendin çizmeden önce bugünün çizimlerine baktın — kelimeleri önceden gördün.",
   pickTitle:        "şimdi ne olsun?",
   guessMineFirst:   "önce kendi çizimlerimi tahmin edeyim",
   guessTheirsFirst: "önce {name} ne çizmiş bakayım",
@@ -2686,8 +2695,9 @@ const TEXT_EN = {
   dailyScores:      "today's scores",
   dailyBoardTitle:  "daily scores · {date}",
   dailyTime:        "3 sec",
-  gateTitle:        "draw first",
-  gateBody:         "everyone draws the same words today. look at your friend's drawings now and you'll see today's words before you draw them. draw first, then guess.",
+  peekTag:          "saw the drawings first",
+  peekTip:          "this player looked at today's drawings before drawing them, so they knew the words.",
+  peekTipMine:      "you looked at today's drawings before drawing them, so you knew the words.",
   pickTitle:        "what now?",
   guessMineFirst:   "guess my own drawings first",
   guessTheirsFirst: "see what {name} drew first",
@@ -2805,7 +2815,6 @@ let scores  = [];        // [{name, score}] — sunucudan gelen tablo
 let scoreSent = false;   // has this round's score been posted yet
 let isDaily  = false;    // this round is the day's puzzle, at fixed settings
 let dailyDay = 0;
-let afterDraw = "";     // where the drawing phase should hand off to
 let viewOnly = false;   // reading a board without having finished the round below it
 let recallStart = 0;     // when the grid first went up; the board ranks ties by this
 let recallMs  = 0;       // how long the round took, frozen once it is finished
@@ -2892,8 +2901,8 @@ function saveStore(store){
    floor, which cost far more than the drawings: the device also forgot which rounds were
    its own, whether the day had been drawn, and the token that moves its row on a board
    when the name changes. The work was safe on the server and nothing on the phone could
-   claim it any more -- the player's own link opened as a stranger's round and sat behind
-   "önce sen çiz", and a new name wrote a second row on the board beside the old one.
+   claim it any more -- the player's own link opened as a stranger's round, and a new name
+   wrote a second row on the board beside the old one.
 
    So a write that does not fit sheds the heavy things and tries again. What is left is a
    few hundred bytes, and it is the part that matters. Nothing shed is lost to the game:
@@ -3004,7 +3013,7 @@ function rememberDay(day, patch){
 
    A drawing round owns a single entry from its countdown on, so the back button can be
    caught there and asked about instead of silently throwing the drawings away. */
-const ROUND_SCREENS = { send: 1, review: 1, result: 1, recall: 1, gate: 1, pick: 1, choose: 1, answers: 1 };
+const ROUND_SCREENS = { send: 1, review: 1, result: 1, recall: 1, pick: 1, choose: 1, answers: 1 };
 
 let historyQuiet = false;    // the next arrival replaces the entry rather than adding one
 let leavingRound = false;    // a deliberate exit from a round, not a back press to catch
@@ -3055,6 +3064,7 @@ function closeOverlays(){
   if (typeof closeSheet === "function") closeSheet();
   if (typeof closeModal === "function") closeModal();
   if (typeof closeZoom === "function") closeZoom();
+  if (typeof hidePeekTip === "function") hidePeekTip();
 }
 
 function restoreEntry(st){
@@ -3084,7 +3094,6 @@ function restoreEntry(st){
       if (s === "recall"){ buildRecall(); return; }
       if (s === "send"){ openShareScreen("home"); return; }
       if (s === "pick"){ showPick(); return; }
-      if (s === "gate"){ show("gate"); return; }
       // Once guessing has begun the mode is settled: going back to the question would let
       // a round begun in kolay, with the words in front of you, be begun again in zor.
       if (s === "choose"){ if (recallStart) buildRecall(); else showChoose(); return; }
@@ -3209,7 +3218,7 @@ function reopenDraft(p){
 }
 
 function resumePending(rec){
-  isDaily = false; dailyDay = 0; afterDraw = "";
+  isDaily = false; dailyDay = 0;
   setId = typeof rec.setId === "string" ? rec.setId : "mix";
   modeId = MODES.some(function(m){ return m.id === rec.modeId; }) ? rec.modeId : modeId;
   secs = clampSecs(rec.secs);
@@ -3227,6 +3236,15 @@ function resumePending(rec){
 function drewToday(){
   const rec = savedDay(dailyDayNumber());
   return !!(rec && rec.drawn);
+}
+
+/* Did this device read today's drawings off a friend's link before drawing them? Today is
+   the same twenty words for everyone, so a friend's grid hands over the day's words. The
+   link used to be held shut until the reader had drawn ("önce sen çiz"). It is open now,
+   and the day's board says who came to it already knowing the words. */
+function sawToday(day){
+  const rec = savedDay(day || dailyDayNumber());
+  return !!(rec && rec.saw);
 }
 
 function rememberRound(code, patch){
@@ -3313,10 +3331,10 @@ function show(id, as){
     // A device that has never played is shown how, once.
     if (typeof maybeHowTo === "function") maybeHowTo();
   }
-  // A friend's link is where most people meet the game, so it is shown there as well: over
-  // the question about how to guess, and over "önce sen çiz". Both are screens a link
-  // lands on, and both are read before anything is played.
-  if (id === "choose" || id === "gate"){
+  // A friend's link is where most people meet the game, so it is shown there as well, over
+  // the question about how to guess: the screen a link lands on, read before anything is
+  // played.
+  if (id === "choose"){
     if (typeof maybeHowTo === "function") maybeHowTo();
   }
   // "as" is for a screen that borrows another's section: the drawings-with-board screen
@@ -4196,7 +4214,7 @@ let cdTimer = null;
 function startGame(){
   shelvePending();
   setId = "mix";
-  isDaily = false; dailyDay = 0; afterDraw = "";
+  isDaily = false; dailyDay = 0;
 
   role      = "solo";
   drawerName  = "";
@@ -4529,8 +4547,7 @@ function nextWord(){
   } else {
     rememberPending();
   }
-  if (afterDraw === "pick"){ afterDraw = ""; showPick(); }
-  else show("between");
+  show("between");
 }
 
 // rAF stops while the tab is in the background. Push wordStart forward by the
@@ -4670,6 +4687,12 @@ function makeCell(pos, di){
 
 function buildRecall(){
   viewOnly = false;
+  // The drawings are about to be on screen. For today's puzzle, in somebody else's round,
+  // before this device has drawn it, that is the day's words given away -- noted against
+  // the day, so the row this device later writes on the day's board carries the eye.
+  if (isDaily && dailyDay === dailyDayNumber() && role === "guesser" && !drewToday()){
+    rememberDay(dailyDay, { saw: true });
+  }
   const g = $("recallGrid");
   resetGridObserver();
   g.innerHTML = "";
@@ -4939,8 +4962,6 @@ function showPick(){
   show("pick");
 }
 
-$("gateDraw").onclick = function(){ wakeAudio(); afterDraw = "pick"; startDaily(); };
-$("gateHome").onclick = function(){ show("home"); };
 $("pickMine").onclick = function(){ resumeDaily(savedDay(dailyDayNumber())); };
 $("pickTheirs").onclick = function(){
   const day = savedDay(dailyDayNumber()) || {};
@@ -5557,12 +5578,36 @@ function rankScores(list){
 }
 
 function fillBoard(box, list, opens){
+  // The board polls every second and almost every tick draws the same rows again. Doing
+  // that costs nothing to look at but throws the rows away and builds them anew, which
+  // closed the bubble beside an eye about a second after it was opened. So the rows are
+  // only rebuilt when there is something different to say. The name and the language are
+  // in the signature too: one marks a row as yours, the other writes the eye's label.
+  const sig = JSON.stringify([list.map(function(s){ return [s.name, s.score, s.ms, !!s.saw]; }),
+                              !!opens, myName, lang]);
+  if (box.dataset.sig === sig) return;
+  box.dataset.sig = sig;
   box.innerHTML = "";
   list.forEach(function(s, i){
     const row = document.createElement("div");
     row.className = "brow" + (myName && sameName(s.name, myName) ? " me" : "");
     const rk = document.createElement("span"); rk.className = "rk"; rk.textContent = String(i + 1);
-    const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = s.name;
+    const nm = document.createElement("span"); nm.className = "nm";
+    const nmt = document.createElement("span"); nmt.className = "nmt"; nmt.textContent = s.name;
+    nm.appendChild(nmt);
+    // Only the day's board carries this: it is the one score an early look could flatter.
+    if (s.saw){
+      const mine = !!(myName && sameName(s.name, myName));
+      const eye = document.createElement("button");
+      eye.type = "button";
+      eye.className = "peek ic i-eye";
+      eye.setAttribute("aria-label", TEXT.peekTag);
+      eye.onclick = function(e){
+        e.stopPropagation();            // not a tap on the row, which may open the answers
+        showPeekTip(eye, mine ? TEXT.peekTipMine : TEXT.peekTip);
+      };
+      nm.appendChild(eye);
+    }
     const tm = document.createElement("span"); tm.className = "tm"; tm.textContent = s.ms > 0 ? timeLabel(s.ms) : "";
     const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = s.score + "/" + N;
     row.appendChild(rk); row.appendChild(nm); row.appendChild(tm); row.appendChild(sc);
@@ -5573,6 +5618,44 @@ function fillBoard(box, list, opens){
     box.appendChild(row);
   });
 }
+
+/* What the eye on a row means, said beside the eye that was pressed rather than in a
+   dialog over the board: it is an aside about one row, and the board is what is being
+   read. Pressing the same eye again puts it away, as does a tap anywhere else, a scroll,
+   or leaving the screen. */
+let tipFor = null;
+
+function showPeekTip(eye, text){
+  const tip = $("peekTip");
+  if (!tip) return;
+  if (tipFor === eye){ hidePeekTip(); return; }
+  tipFor = eye;
+  tip.textContent = text;
+  tip.classList.add("on");
+  tip.classList.remove("below");
+  // Measured with it on screen: a hidden element has no size to place.
+  const r = eye.getBoundingClientRect();
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  const mid = r.left + r.width / 2;
+  const left = Math.round(Math.max(10, Math.min(window.innerWidth - w - 10, mid - w / 2)));
+  // Above the eye, unless the row is too near the top of the window for it to fit.
+  const above = r.top > h + 16;
+  if (!above) tip.classList.add("below");
+  tip.style.left = left + "px";
+  tip.style.top = Math.round(above ? r.top - h - 10 : r.bottom + 10) + "px";
+  tip.style.setProperty("--tail", Math.round(Math.max(14, Math.min(w - 14, mid - left))) + "px");
+}
+
+function hidePeekTip(){
+  tipFor = null;
+  const tip = $("peekTip");
+  if (tip) tip.classList.remove("on");
+}
+
+document.addEventListener("click", hidePeekTip);
+// true: a scroll inside the board's own scroller never reaches the window otherwise.
+window.addEventListener("scroll", hidePeekTip, true);
+window.addEventListener("resize", hidePeekTip);
 
 /* The board under a round's drawings. */
 /* The name this device's row was written under before it was changed, while a board may
@@ -5600,7 +5683,7 @@ function renderScores(){
   // Always show your own row: KV listing is eventually consistent, so a score
   // just written may not be in the list yet.
   if (myName && !viewOnly && !liste.some(function(s){ return sameName(s.name, myName); })){
-    liste.push({ name: myName, score: score, ms: elapsedMs() });
+    liste.push({ name: myName, score: score, ms: elapsedMs(), saw: onDayBoard() && sawToday(dailyDay) });
   }
   const sirali = rankScores(liste);
   fillBoard($("boardList"), sirali, boardOpens());
@@ -5704,7 +5787,7 @@ function renderDayBoard(){
   // Your own row before the listing catches up -- on the board you actually played.
   const mine = rec.done && (rec.modeId || "typed") === dayBoard.mode;
   if (mine && myName && !list.some(function(s){ return sameName(s.name, myName); })){
-    list.push({ name: myName, score: rec.score || 0, ms: rec.ms || 0 });
+    list.push({ name: myName, score: rec.score || 0, ms: rec.ms || 0, saw: !!rec.saw });
   }
   const sirali = rankScores(list);
   fillBoard($("scoresList"), sirali, false);
@@ -5743,6 +5826,8 @@ function sendScore(){
       ms: elapsedMs(),
       // So friends can tap this row and see them. The day's board has no use for them.
       answers: onDayBoard() ? undefined : answersByDrawing(),
+      // Only the day's board: a round of a friend's is nobody's second look.
+      saw: onDayBoard() && sawToday(dailyDay) ? true : undefined,
       // What this round was last posted under, and the proof it was us, so a
       // rename moves the row rather than adding a second one.
       was: rec.postedAs || "",
@@ -6264,13 +6349,6 @@ function loadGame(code, want, who){
     const todaysDuel = isDaily && dailyDay === dailyDayNumber() && role === "guesser";
     if (todaysDuel) rememberDay(dailyDay, { duelCode: code, duelName: drawerName });
 
-    // Today's puzzle is the same twenty words for everyone, so looking at a
-    // friend's grid before drawing would show the reader the words. Hold it.
-    if (todaysDuel && !drewToday()){
-      show("gate");
-      return;
-    }
-
     if (rec && rec.done && want === "answers" && who){ openAnswers(who); return; }
     if (rec && rec.done){             // already played on this device: straight to the scores
       buildResult();
@@ -6283,7 +6361,7 @@ function loadGame(code, want, who){
     if (rec && rec.mine && want === "send"){ openShareScreen("home"); return; }
     // Drawn today but neither round started: a reload on the choice screen returns to it.
     const day = todaysDuel ? (savedDay(dailyDay) || {}) : null;
-    if (day && !day.code && !day.done && !recallStart){
+    if (day && day.drawn && !day.code && !day.done && !recallStart){
       showPick();
       return;
     }

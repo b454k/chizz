@@ -101,8 +101,8 @@ struck through for rakam yazmak yok; and that round's four tall boxes (`kapı`, 
 sharp at any size and costs about 11 KB, 3 KB compressed. Its captions and words are in
 `TEXT`.
 
-Three places, all of them read before anything is played: the start screen, the kolay/zor
-question a friend's link lands on, and `önce sen çiz` for a friend's daily round. **A link
+Two places, both read before anything is played: the start screen and the kolay/zor
+question a friend's link lands on. **A link
 is where most people meet the game**, and it used to be the one way in that never showed
 this -- opening a link writes the round down before any of it runs, and that alone made the
 device look like a player. Whether it had played is therefore decided once, as the page
@@ -611,6 +611,22 @@ them against each other. Every score written before the split was played typed, 
 keeps the original keys. `günün skorları` asks which table to open (`dayPick`); the mode
 travels in the history entry, so a reload comes back to the same table.
 
+**A friend's daily round can be opened before you have drawn the day**, and the row that
+player later writes on the day's board carries an eye. Today is the same twenty words for
+everyone, so a friend's grid hands them over; the link used to be held shut until the
+reader had drawn (`önce sen çiz`). The device
+notes the look the moment the drawings are actually put on screen -- `buildRecall` on
+somebody else's round of today, before this device has drawn it -- as `days[N].saw`, which
+travels with the score (`saw` in the POST) and is kept with the row. On the board the name
+carries a small eye; pressing it says what it means, in a bubble beside the row rather
+than a dialog over it, worded for the reader when the row is theirs. Once set it stays:
+a later post, or a rename, cannot unsee the words. Only the day's board has it -- guessing
+a friend's round is nobody's second look at their own.
+
+A board's rows are only rebuilt when something about them changes (name, score, time, eye,
+whose row is whose, the language). The poll runs every second, and redrawing the rows on
+every tick closed that bubble about a second after it was opened.
+
 **The day's board takes only the day's own round.** `onDayBoard()` requires the round in
 memory to be a daily one, not guessed for somebody else, *and* the day to be on record as
 drawn on this device. Opening the day's board used to set `isDaily`, and a step back onto
@@ -651,7 +667,7 @@ holds:
 | `drafts` | Older unsaved rounds. Starting a new round, or leaving one, moves `pending` here instead of deleting it, if anything was drawn in it. Listed in arşiv; opening one makes it `pending` again. The newest 40 are kept, these being the ones that carry drawings |
 | `seen` | Word → the day it was last dealt to this device, in either game, kept for 14 days. What sınırsız deals from (section 7) |
 | `dailyPlayed` | The different days in the last 14 on which this device started the daily game. Read to tell a device that has played from one that never has (section 4). Replaces `dailyAt`, which is still read |
-| `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, the mode chosen for guessing it (which board its score joins), whether it was finished and with what score and time, and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
+| `days[N]` | Per daily puzzle, today and yesterday only: whether it was drawn, its words and drawings, the code it was saved under, the mode chosen for guessing it (which board its score joins), whether it was finished and with what score and time, whether the day's drawings were seen in a friend's round before this device drew them (`saw`, section 12), and the code and name of a friend's daily round opened that day, so the duel between the two can be resumed |
 
 Nothing here is not already on screen during the round. **Nothing is dropped for being
 old** — the server keeps a saved round, so the device has no reason to forget its half of

@@ -10,6 +10,11 @@ import { dayNumber as today } from "../../../lib/day.js";
 // single table would rank them against each other. typed keeps the original keys, every
 // score written before the split having been played that way.
 //
+// A row may carry saw: the player had already seen the day's drawings in a friend's round
+// when they drew their own, so they knew the words. The board shows an eye for it rather
+// than keeping those players off it. Once true it stays true -- a later post, or a rename,
+// cannot unsee them.
+//
 // Same shape as the per-round board in ../scores/[code].js, and for the same reasons:
 // each player writes their own key so two people finishing at once cannot overwrite
 // each other, a summary is kept for readers so a poll costs one get rather than a
@@ -92,12 +97,14 @@ async function scanBoard(env, day, mode) {
   for (const k of r.keys) {
     const m = k.metadata;
     if (!m || typeof m.name !== "string" || typeof m.score !== "number") continue;
-    scores.push({
+    const row = {
       name: m.name,
       score: m.score,
       ms: typeof m.ms === "number" ? m.ms : 0,
       ts: typeof m.ts === "number" ? m.ts : 0
-    });
+    };
+    if (m.saw === true) row.saw = true;
+    scores.push(row);
   }
   return rank(scores);
 }
@@ -175,6 +182,9 @@ export async function onRequestPost({ params, request, env }) {
   const existing = await env.GAMES.getWithMetadata(base(day, mode) + ":s:" + key);
   let token = existing && existing.metadata && typeof existing.metadata.token === "string"
     ? existing.metadata.token : "";
+  let saw = d.saw === true ||
+            !!(previous && previous.saw) ||
+            !!(existing && existing.metadata && existing.metadata.saw === true);
 
   const wasKey = typeof d.was === "string" && d.was.trim() ? nameKey(d.was.trim()) : "";
   if (wasKey && wasKey !== key) {
@@ -184,17 +194,20 @@ export async function onRequestPost({ params, request, env }) {
     if (om && typeof om.token === "string" && om.token && given && om.token === given) {
       if (!token) token = om.token;
       if (om.ts) ts = om.ts;
+      if (om.saw === true) saw = true;
       await env.GAMES.delete(base(day, mode) + ":s:" + wasKey);
       known.delete(wasKey);
     }
   }
   if (!token) token = crypto.randomUUID().replace(/-/g, "");
 
-  await env.GAMES.put(base(day, mode) + ":s:" + key, "", {
-    metadata: { name, score: d.score, ms: keepMs, ts, token }
-  });
+  const meta = { name, score: d.score, ms: keepMs, ts, token };
+  if (saw) meta.saw = true;
+  await env.GAMES.put(base(day, mode) + ":s:" + key, "", { metadata: meta });
 
-  known.set(key, { name, score: d.score, ms: keepMs, ts });
+  const row = { name, score: d.score, ms: keepMs, ts };
+  if (saw) row.saw = true;
+  known.set(key, row);
   const scores = rank(Array.from(known.values())).slice(0, MAX_ROWS);
   await writeBoard(env, day, mode, scores);
 
